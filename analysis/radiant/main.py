@@ -67,7 +67,7 @@ def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_met
     out.drop(columns = ['Point'], inplace = True)
     
     if measured_value.lower() == 'charge':
-        out['MeasuredPolarization'] = out['MeasuredPolarization']*float(meta_data['SampleArea(cm2)'])
+        out['MeasuredPolarization'] = out['MeasuredPolarization']*float(meta_data['SampleArea(cm2)'])*1e6 #to convert from uC to pC
         out.rename(columns = {'MeasuredPolarization':'MeasuredCharge(pC)'}, inplace = True)
     elif measured_value.lower() == 'polarization':
         out.rename(columns = {'MeasuredPolarization':'MeasuredPolarization(uC/cm2)'}, inplace = True)
