@@ -60,8 +60,12 @@ def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_met
             pointer_dict.update({a:spl[a] for a in range(len(spl))})
             i+=1
             continue
-        for ijk, a in enumerate(spl):
-            out[pointer_dict[ijk]].append(float(a))
+
+        try:
+            for ijk, a in enumerate(spl):
+                out[pointer_dict[ijk]].append(float(a))
+        except ValueError: #could not convert to float (i.e. nonnumeric data)
+            continue
 
     out = pd.DataFrame(out)
     out.drop(columns = ['Point'], inplace = True)
