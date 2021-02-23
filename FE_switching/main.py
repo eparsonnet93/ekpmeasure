@@ -173,9 +173,9 @@ def trial(run_function, run_function_args, base_name, path):
 	"""
 	A trial  for FE switching experiment. This will save to path with a unique name
 	currently supported run_functions are (run_preset_then_2pusle_TDS620B,) more to come
+
+	you may use any function which returns a dataframe in practice, though only those indicated above have been tested. 
 	----
-	pg: (pyvisa.resources.gpib.GPIBInstrument) bn765
-	scope: (pyvisa.resources.gpib.GPIBInstrument) oscope
 	run_function: (function) which function you wish to run i.e. run_preset_then_2pusle_TDS620B - must return a pandas dataframe
 	run_function_args: (dict) arguments for run_function
 	base_name: (str) string of base name
@@ -183,5 +183,8 @@ def trial(run_function, run_function_args, base_name, path):
 	"""
 	save_name = get_save_name(base_name, path)
 	df = run_function(**run_function_args)
+
+	assert type(df) == type(pd.DataFrame()), 'run_function {} does not return a pandas.DataFrame, it must'.format(run_function.__name__)
+
 	df.to_csv(path+save_name, index=False)
 	return
