@@ -9,7 +9,7 @@ except ModuleNotFoundError:
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-__all__ = ('dataset', 'common_name_mapper', 'grouped_dataset')
+__all__ = ('dataset', 'common_name_mapper')
 
 
 
@@ -40,6 +40,9 @@ class dataset(pd.DataFrame):
 			return True
 		else:
 			return False
+
+	def dataset_query(self, query_str):
+		return dataset(path = self.path, meta_data = self.query(query_str))
 		
 	def generate_meta_data(self, mapper):
 		"""
@@ -79,14 +82,15 @@ class dataset(pd.DataFrame):
 	
 	def get_grouped_data(self, by):
 		"""need docstring"""
+		groups = self.groupby(by=by).groups
 		out = {}
 
 		for k, key in enumerate(groups):
 			group_defn = {b:key[i] for i, b in enumerate(by)}
 			indices = groups[key]
-			filenames = [dset.at[ind, 'filename'] for ind in indices]
+			filenames = [self.at[ind, 'filename'] for ind in indices]
 			for l, filename in enumerate(filenames):
-				tdf = pd.read_csv(dset.path + filename)
+				tdf = pd.read_csv(self.path + filename)
 				if l + k == 0:
 					columns_set = set(tdf.columns) #to check if all have the same columns; agnostic to what's in the data, but must be consistent
 				
