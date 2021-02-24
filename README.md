@@ -13,7 +13,7 @@ dset = dataset(path)
 dset.query("high_voltage_v == .5")
 ```
 
-![alt text](https://github.com/eparsonnet93/ekpmeasure/tree/main/src/dataset.PNG?raw=true)
+![alt text](./src/dataset.PNG?raw=true)
 
 ```python
 meta_data = dset.query("high_voltage_v == .5 and delay_ns < 25").meta_data
