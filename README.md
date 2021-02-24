@@ -19,6 +19,10 @@ meta_data = dset.query("high_voltage_v == .5 and delay_ns < 25").meta_data
 data = grouped_dataset(path, meta_data = meta_data)
 data
 ```
+
+<p align="center">
+  <img src="./src/grouped_dataset.PNG?raw=true" width="350" title="grouped_dataset">
+</p>
 ![alt text](./src/grouped_dataset.PNG?raw=true)
 
 ```python
