@@ -13,187 +13,116 @@ __all__ = ('dataset', 'common_name_mapper', 'grouped_dataset')
 
 
 
-class dataset():
-	"""use this class to quickly access data in a dataset"""
+class dataset(pd.DataFrame):
 	
-	def __init__(self, path, meta_data=None):
-		self.path = path
+	def __init__(self, path, meta_data = None):
+		tmp_df = self._build_df(path, meta_data)
+		super().__init__(tmp_df)
+		self._path = path
+		
+	@property
+	def path(self):
+		return self._path
+	
+	def _build_df(self, path, meta_data):
 		if type(meta_data) == type(None):
 			try:
-				self.meta_data = pd.read_pickle(path+'meta_data')
+				return pd.read_pickle(path + 'meta_data')
 			except FileNotFoundError:
-				print('no meta_data exists in path {}. you may wish to generate it using the function .generate_meta_data'.format(path))
-		else: 
-			assert type(meta_data) == type(pd.DataFrame()), "provided meta_data is not of type pandas.dataframe but rather type: {}".format(type(meta_data))
-			self.meta_data = meta_data
-
-			
-	def __repr__(self):
-		if hasattr(self, 'meta_data'):
-			try:
-				display(self.meta_data)
-				return ''
-			except NameError:
-				return self.meta_data.__repr__()
+				print('meta_data does not exist in path {} you may want to create it with .generate_meta_data()'.format(path))
+				return pd.DataFrame()
 		else:
-			return pd.DataFrame().__repr__()
+			return meta_data
 	
-	def __str__(self):
-		try:
-			return self.meta_data.__str__()
-		except AttributeError:
-			return pd.DataFrame().__str__()
+	@property  
+	def _is_empty(self):
+		if len(self) == 0 and len(self.columns) == 0:
+			return True
+		else:
+			return False
 		
-	def query(self, query_str):
-		"""pandas query operation"""
-		return dataset(self.path, meta_data = self.meta_data.query(query_str))
-			
 	def generate_meta_data(self, mapper):
 		"""
 		generate meta_data from a dataset
-		returns meta_data (pd.dataframe)
 		----
-		
+
 		mapper: (function: filename (str) -> dict) operates on a single file name in order to get the columns (dict key) and values (dict value) for meta_data of that file 
 		"""
-		if hasattr(self, 'meta_data'):
+		if not self._is_empty:
 			yn = input('this dataset already has meta_data, do you wish to recreate it? (y/n)')
 			if yn.lower() == 'n':
 				return
+			
 		for file in os.listdir(self.path):
 			try:
 				meta_data = pd.DataFrame(mapper(file), index = [0])
 			except Exception as e:
-				print('unable to process file: {} \n Error: {}'.format(file, e))
+				print('unable to process file: {} \nError: {}'.format(file, e))
 				continue
 			try:
 				existing_meta_data = pd.concat([existing_meta_data, meta_data], ignore_index = True)
 			except NameError:
 				existing_meta_data = meta_data.copy()
-		
-		existing_meta_data.to_pickle(self.path+'meta_data')
-		self.meta_data = existing_meta_data
-		return
 
+		existing_meta_data.to_pickle(self.path+'meta_data')
+		self.__init__(path = self.path, meta_data = existing_meta_data)
+		return
+	
 	def summarize(self):
 		"""return a brief summary of the data in your dataset"""
 		summary = dict()
-		for column in self.meta_data.columns:
+		for column in self.columns:
 			if column == 'filename':
 				continue
-			summary.update({column: set(self.meta_data[column].values)})
-		print(summary)
-		return
-
-	def sort_values(self, **kwargs):
-		"""uses pandas sort_values function"""
-		return dataset(self.path, meta_data = self.meta_data.sort_values(**kwargs))
-
-	def plot_vs_time(self, plot_type, filename_column = 'filename', **kwargs):
-		"""plot_type must be p1, p2, dp
-
-		only basic plotting is supported. more complex functions should be implemented elsewhere
-		"""
-
-		if plot_type.lower() not in set({'p1', 'p2', 'dp'}):
-			raise ValueError('only plot_types of p1, p2, or dp are supported. attempting to use {}'.format(plot_type))
-
-		data_type = lambda x, df: (df.p1 - df.p2).values if x == 'dp' else df[x].values 
-
-		fig, ax = plt.subplots(**kwargs)
-		colors = [cm.magma(x) for x in np.linspace(0,1,len(self.meta_data))]
-		for color, file in zip(colors, self.meta_data[filename_column].values):
-			tdf = pd.read_csv(self.path + file)
-			tdata = data_type(plot_type, tdf)
-			ax.plot(tdf.time, tdata, color = color)
-			
-		return fig, ax
-
-
-class grouped_dataset(dataset):
+			summary.update({column: set(self[column].values)})
+		return summary
 	
-	def __init__(self, path, meta_data = None):
-		"""groups without reference to filename or trial, i.e. you are able to get groups with common everything else except trial and filename"""
-		super().__init__(path, meta_data)
-		self.by = list(set(self.meta_data.columns) - set({'trial', 'filename'}))
-		self.run_grouping()
-		
-	def run_grouping(self):
-		groups = self.meta_data.groupby(by=self.by).groups #dict where key is the set of columns which were grouped on and value is list of indices of meta_data
-
-		#the index of groupdf holds the index for which group to calculate the average on
-		groupdf = pd.DataFrame({col:np.array(list(groups.keys()))[:,ijk] for ijk, col in enumerate(self.by)})
-		groupdf['group_index'] = [i for i in range(len(groupdf))]
-		self.groupdf = groupdf
-		self.groups = groups
-		
-	def __repr__(self):
-		if hasattr(self, 'groupdf'):
-			try:
-				display(self.groupdf)
-				return ''
-			except NameError:
-				return self.groupdf.__repr__()
-		else:
-			return pd.DataFrame().__repr__()
-
-	def __str__(self):
-		try:
-			return self.groupdf.__str__()
-		except AttributeError:
-			return pd.DataFrame().__str__()
-		
-	def get_data_for_group_index(self, index):
-		"""returns a dict
-		----
-		index: (iter) some indices to return data for
-		"""
+	def get_grouped_data(self, by):
+		"""need docstring"""
 		out = {}
-		group_indices = list(index)
-		groups = self.groups
-		
-		group_keys = list(groups.keys())
-		group_keys_tmp = []
-		for x in group_indices:
-			group_keys_tmp.append(group_keys[x])
+
+		for k, key in enumerate(groups):
+			group_defn = {b:key[i] for i, b in enumerate(by)}
+			indices = groups[key]
+			filenames = [dset.at[ind, 'filename'] for ind in indices]
+			for l, filename in enumerate(filenames):
+				tdf = pd.read_csv(dset.path + filename)
+				if l + k == 0:
+					columns_set = set(tdf.columns) #to check if all have the same columns; agnostic to what's in the data, but must be consistent
+				
+				if set(tdf.columns) != columns_set:
+					raise ValueError('not all data in this dataset has the same columns!')
+
+				if l == 0:
+					internal_out = {col:tdf[col].values for col in columns_set}
+				else:
+					internal_out = {col: np.vstack((internal_out[col], tdf[col].values)) for col in columns_set}
+			out.update({k:{'data':internal_out, 'defn':group_defn}})
 			
-		group_keys = group_keys_tmp
-		
-		mdat = self.meta_data
-		for ind, key in zip(group_indices, group_keys):
-			#import pdb; pdb.set_trace()
-			n = len(groups[key])
-			out.update({
-				ind:{'time':np.vstack([pd.read_csv(self.path + mdat.at[groups[key][i], 'filename']).time.values for i in range(n)]),
-					 'p1':np.vstack([pd.read_csv(self.path + mdat.at[groups[key][i], 'filename']).p1.values for i in range(n)]),
-					 'p2':np.vstack([pd.read_csv(self.path + mdat.at[groups[key][i], 'filename']).p2.values for i in range(n)]),
-					 'group_key':key
-					}
-			})
-		return self.grouped_data(out)
+		return grouped_data(out)
 	
-	class grouped_data(dict):
+
+class grouped_data(dict):
+	
+	def __init__(self, initializer):
+		super().__init__(initializer)
 		
-		def __init__(self, data_dict):
-			super().__init__(data_dict)
-			self.data_dict = data_dict
-		
-		def mean(self):
-			"""takes the mean on time, p1, and p2 for each key in self.data_dict
+	def mean(self, inplace = False):
+		if not inplace:
+			tmp_out = {}
+			for key in self:
+				tmp_out.update({key:self[key].copy()})
+				data = self[key]['data']
+				mean_data = {k:np.mean(data[k], axis = 0) for k in data}
+				tmp_out[key].update({'data':mean_data})
+			return grouped_data(tmp_out)
 			
-			returns dict
-			"""
-			out = dict()
-			for key in self.data_dict:
-				out.update({
-					key:{
-						'time':np.mean(self.data_dict[key]['time'], axis = 0),
-						'p1':np.mean(self.data_dict[key]['p1'], axis = 0),
-						'p2':np.mean(self.data_dict[key]['p2'], axis = 0),
-						'group_key':self.data_dict[key]['group_key']
-					}
-				})
-			return out
+		else:
+			for key in self:
+				data = self[key]['data']
+				mean_data = {k:np.mean(data[k], axis = 0) for k in data}
+				self[key].update({'data':mean_data})
+			return grouped_data(self)
 
 
 def common_name_mapper(fname):
