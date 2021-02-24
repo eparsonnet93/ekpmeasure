@@ -33,7 +33,7 @@ samples[desired_index]
 ```
 
 <p align="center">
-  <img src="![alt text](./src/samples.PNG?raw=true)" width="500" title="samples">
+  <img src="./src/samples.PNG?raw=true" width="500" title="samples">
 </p>
 
 
@@ -55,7 +55,7 @@ ax.set_ylabel('Voltage (V)', size = 20)
 
 
 <p align="center">
-  <img src="![alt text](./src/p1curve.PNG?raw=true)" width="600" title="p1curve">
+  <img src="./src/p1curve.PNG?raw=true" width="600" title="p1curve">
 </p>
 
 
