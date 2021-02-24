@@ -1,13 +1,6 @@
 import os 
 import pandas as pd
 import numpy as np
-try:
-	from IPython.display import display
-except ModuleNotFoundError:
-	pass
-
-import matplotlib.pyplot as plt
-from matplotlib import cm
 
 __all__ = ('dataset', 'common_name_mapper')
 
