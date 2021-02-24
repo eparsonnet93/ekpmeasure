@@ -33,7 +33,7 @@ samples[desired_index]
 ```
 
 <p align="center">
-  <img src="./src/samples.PNG?raw=true" width="300" title="samples">
+  <img src="./src/samples.PNG?raw=true" width="450" title="samples">
 </p>
 
 
