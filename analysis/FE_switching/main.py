@@ -7,6 +7,13 @@ __all__ = ('dataset', 'common_name_mapper')
 
 
 class dataset(pd.DataFrame):
+	"""
+	dataset class for analysis. subclass of pandas.DataFrame. Used to manipulate meta data with reference to the real files that can be retrieved when necessary.
+	----
+
+	path: (str) a path to where the real data lives. dataset will search for a file in path called 'meta_data', if such a file does not exist you will be prompted to create it. You can also provide meta_data directly
+	meta_data: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
+	"""
 	
 	def __init__(self, path, meta_data = None):
 		tmp_df = self._build_df(path, meta_data)
@@ -35,6 +42,11 @@ class dataset(pd.DataFrame):
 			return False
 
 	def dataset_query(self, query_str):
+		"""extension of pandas.DataFrame.query. dataset_query returns a dataset
+		----
+		query_str: (str) string of query. Example 'preset_voltage_v == 1'
+
+		"""
 		return dataset(path = self.path, meta_data = self.query(query_str))
 		
 	def generate_meta_data(self, mapper):
@@ -65,7 +77,7 @@ class dataset(pd.DataFrame):
 		return
 	
 	def summarize(self):
-		"""return a brief summary of the data in your dataset"""
+		"""return a brief summary of the data in your dataset. Returns Dict"""
 		summary = dict()
 		for column in self.columns:
 			if column == 'filename':
@@ -74,7 +86,10 @@ class dataset(pd.DataFrame):
 		return summary
 	
 	def get_grouped_data(self, by):
-		"""need docstring"""
+		"""returns a Dict of the real data grouped by argument by. Makes use of pandas.DataFrame.groupby
+		----
+		by: (array-like) which columns to group by. Example - to group across trial by should be all columns names excluding trial and filename (or more explicitly the pointer to real data column)
+		"""
 		groups = self.groupby(by=by).groups
 		out = {}
 
@@ -97,9 +112,30 @@ class dataset(pd.DataFrame):
 			out.update({k:{'data':internal_out, 'defn':group_defn}})
 			
 		return grouped_data(out)
+
+	def save(self):
+		"""used to save current meta_data to file. This can be used, for example if you wish to delete some specific outlier data, by deleting references to such data in the dataset and the saving the dataset's meta_data using this function"""
+		yn = input('you are about to replace whatever existing meta_data exists in path: {} with this dataset. do you wish to proceed? (y/n)'.format(self.path))
+		if yn.lower() == 'n':
+			print('save aborted.')
+			return
+		else:
+			print('saved.')
+			self.to_pickle(self.path + 'meta_data')
+
 	
 
 class grouped_data(dict):
+	"""subclass of dict
+	
+	used for grouped real data. dict structure is as follows: 
+	{index:
+		{
+		'data':np.array(the real data), 
+		'defn':dict(describing which data is contained)
+		}
+	}
+	"""
 	
 	def __init__(self, initializer):
 		super().__init__(initializer)
