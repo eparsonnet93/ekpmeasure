@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import numpy as np
 
+import warnings
+
 __all__ = ('dataset', 'common_name_mapper')
 
 
@@ -71,6 +73,9 @@ class dataset(pd.DataFrame):
 				existing_meta_data = pd.concat([existing_meta_data, meta_data], ignore_index = True)
 			except NameError:
 				existing_meta_data = meta_data.copy()
+
+		if 'filename' not in set(existing_meta_data.columns): 
+			warnings.showwarning('there is no map to key "filename" in mapping function "{}" provided\n This is not suggested and may cause other functions in the dataset to error'.format(mapper.__name__), SyntaxWarning, '', 0,)
 
 		existing_meta_data.to_pickle(self.path+'meta_data')
 		self.__init__(path = self.path, meta_data = existing_meta_data)
