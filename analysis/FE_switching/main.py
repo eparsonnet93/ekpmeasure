@@ -4,6 +4,8 @@ import numpy as np
 
 import warnings
 
+import matplotlib.pyplot as plt
+
 __all__ = ('dataset', 'common_name_mapper')
 
 
@@ -99,7 +101,10 @@ class dataset(pd.DataFrame):
 		out = {}
 
 		for k, key in enumerate(groups):
-			group_defn = {b:key[i] for i, b in enumerate(by)}
+			try:
+				group_defn = {b:key[i] for i, b in enumerate(by)}
+			except TypeError: #the case with only one element in by
+				group_defn = {b:key for b in by}
 			indices = groups[key]
 			filenames = [self.at[ind, 'filename'] for ind in indices]
 			for l, filename in enumerate(filenames):
@@ -146,6 +151,11 @@ class grouped_data(dict):
 		super().__init__(initializer)
 		
 	def mean(self, inplace = False):
+		"""
+		return grouped_data class where data is average across axis 0
+		----
+		inplace: (bool) do the operation inplace
+		"""
 		if not inplace:
 			tmp_out = {}
 			for key in self:
@@ -161,6 +171,56 @@ class grouped_data(dict):
 				mean_data = {k:np.mean(data[k], axis = 0) for k in data}
 				self[key].update({'data':mean_data})
 			return grouped_data(self)
+
+	def apply(self, data_function, inplace = False):
+		"""apply data_function to the data in each index. returns a grouped_data class
+		----
+		data_function: (function or array-like) f(dict) -> dict. if array-like, functions will be applied sequentially
+		inplace: (bool) do the operation inplace
+		"""
+		data_functions = np.array([data_function]).flatten()
+		tmp_out = self.to_dict()
+		for data_function in data_functions:
+			for key in tmp_out.keys():
+				internal_out = {
+					'defn':tmp_out[key]['defn'],
+					'data':data_function(tmp_out[key]['data'])
+				}
+				tmp_out.update({key:internal_out})
+
+		if inplace:
+			self.__init__(tmp_out)
+			return
+		return grouped_data(tmp_out)
+
+	def to_dict(self):
+		"""returns a dict class with identical structure"""
+		return {key: self[key] for key in self.keys()}
+
+	def plot(self, x=None):
+		"""simple plot of all data vs key specified by x"""
+
+		#todo improve this function
+		fig, ax = plt.subplots()
+
+		for index in self.keys():
+			if x == None:
+				data_keys_to_plot = list(self[index]['data'].keys())
+			else:
+				xs = self[index]['data'][x]
+				data_keys_to_plot = set(self[index]['data'].keys()) - set({x})
+			for plotkey in data_keys_to_plot:
+				to_plot = self[index]['data'][plotkey]
+			
+				for i in range(to_plot.shape[0]):
+					if x == None:
+						ax.plot(to_plot[i,:])
+					else:
+						ax.plot(xs[i,:], to_plot[i,:])
+
+		return fig, ax
+
+
 
 
 def common_name_mapper(fname):
