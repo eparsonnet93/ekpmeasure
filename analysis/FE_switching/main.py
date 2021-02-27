@@ -264,20 +264,29 @@ class Data(dict):
 				self[key].update({'data':mean_data})
 			return Data(self)
 
-	def apply(self, data_function, inplace = False):
+	def apply(self, data_function, kwargs_for_function=None, inplace = False):
 		"""apply data_function to the data in each index. returns a data class
 		----
-		data_function: (function or array-like) f(dict) -> dict. if array-like, functions will be applied sequentially
+		data_function: (function or array-like(function,)) f(dict) -> dict. if array-like, functions will be applied sequentially
+		kwargs_for_function: (dict or array-like(dict,)) kwargs for data_function in order to pass additional arguments to the functions being applied
 		inplace: (bool) do the operation inplace
 		"""
 		data_functions = np.array([data_function]).flatten()
+		if type(kwargs_for_function) == type(None):
+			kwargs_for_functions = [{} for ijk in range(len(data_functions))]
+		else:
+			kwargs_for_functions = np.array([kwargs_for_function]).flatten()
+
+		if len(kwargs_for_functions) != len(data_functions):
+			raise ValueError('kwargs_for_function does not match in count to the number of data_functions supplied')
+
 		tmp_out = self.to_dict().copy()
 
-		for data_function in data_functions:
+		for data_function, kwargs_for in zip(data_functions, kwargs_for_functions):
 			for key in tmp_out.keys():
 				internal_out = {
 					'definition':tmp_out[key]['definition'],
-					'data':data_function(tmp_out[key]['data'])
+					'data':data_function(tmp_out[key]['data'], **kwargs_for)
 				}
 				tmp_out.update({key:internal_out})
 
