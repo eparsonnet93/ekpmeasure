@@ -7,7 +7,7 @@ import warnings
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-__all__ = ('Dataset', 'Data')
+__all__ = ('Dataset', 'Data', 'dataset')
 
 
 class Dataset(pd.DataFrame):
@@ -15,14 +15,39 @@ class Dataset(pd.DataFrame):
 	Dataset class for analysis. subclass of pandas.DataFrame. Used to manipulate meta data with reference to the real files that can be retrieved when necessary.
 	----
 
-	path: (str) a path to where the real data lives. Dataset will search for a file in path called 'meta_data', if such a file does not exist you will be prompted to create it. You can also provide meta_data directly
+	path: (str or dict) a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
 	meta_data: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
 	"""
 
-	def __init__(self, path, meta_data = None):
-		tmp_df = self._build_df(path, meta_data)
-		super().__init__(tmp_df)
-		self.path = path
+	def __init__(self, path, initializer):
+		super().__init__(initializer)
+		if type(path) != dict:
+			assert type(path) == str, "path must be dict or str"
+			#set all indices to the single path provided
+			index_to_path = pd.Series({i:path for i in range(len(initializer))}, dtype = 'object')
+		else:
+			for l, key in enumerate(path):
+				#path is {path:[indices]}, need inverse
+				if l == 0:
+					index_to_path = pd.Series(
+						{
+							i:key for i in path[key]
+						}
+					)
+				else:
+					#do not ignore index
+					index_to_path = pd.concat(
+						(
+							index_to_path,
+							pd.Series({i:key for i in path[key]})
+						)
+					)
+		#check for duplicate indices:
+		if len(index_to_path) != len(set(index_to_path.index)):
+			raise ValueError('Duplicate indices provided in path dict!')
+		
+		self.attrs['path'] = path
+		self.attrs['index_to_path'] = index_to_path
 		self.pointercolumn = 'filename'
 		self.readfileby = lambda file: pd.read_csv(file)
 
@@ -32,6 +57,141 @@ class Dataset(pd.DataFrame):
 			return True
 		else:
 			return False
+		
+	@property
+	def path(self):
+		return self.attrs['path']
+		
+	@property
+	def index_to_path(self):
+		return self.attrs['index_to_path']
+
+	def dataset_query(self, query_str):
+		"""extension of pandas.DataFrame.query. dataset_query returns a dataset
+		----
+		query_str: (str) string of query. Example 'preset_voltage_v == 1'
+		"""
+		return Dataset(path = self.path, initializer = self.query(query_str))
+
+	def summarize(self):
+		"""return a brief summary of the data in your Dataset. Returns Dict"""
+		summary = dict()
+		for column in self.columns:
+			if column == self.pointercolumn:
+				continue
+			summary.update({column: set(self[column].values)})
+		return summary
+
+
+	def group(self, by):
+		"""need docstring"""
+		groups = self.groupby(by = by).groups
+		for ijk, key in enumerate(groups):
+			original_dataset_indices = groups[key]
+			new_row = None
+			for index in original_dataset_indices:
+				original_row = self.loc[index] #this is a pandas series of a row from the original dataset
+				#columns in this row
+				if type(new_row) == type(None):
+					#import pdb; pdb.set_trace()
+					new_row = {col:dict({index:original_row[col]}) for col in original_row.index}
+				else:
+					for col in new_row:
+						#import pdb; pdb.set_trace()
+						new_row[col].update(dict({index:original_row[col]}))
+			
+			for col in new_row:
+				if col != self.pointercolumn:
+					new_row[col] = set(list([new_row[col][x] for x in new_row[col].keys()]))
+			
+			if ijk == 0:
+				new_df = pd.DataFrame(
+					{key:[new_row[key]] for key in new_row}
+				)
+			else:
+				new_df = pd.concat(
+					(
+						new_df, 
+						pd.DataFrame(
+							{key:[new_row[key]] for key in new_row}
+						)
+					),
+					ignore_index = True
+				)
+
+		return new_df           
+
+	def get_data(self, groupby=None, labelby=None,):
+		"""needs docstring"""
+		pointercolumn = self.pointercolumn
+		readfileby = self.readfileby
+
+		if type(groupby) == type(None):
+			data_to_retrieve = self.group(by = pointercolumn) #gives us a unique col for each
+		else:
+			data_to_retrieve = self.group(by = groupby)
+
+		out = {}
+		for counter, i in enumerate(data_to_retrieve.index): #for each row
+			#data_to_retrieve.at[i, self.pointercolumn] is a dict
+			filename_index_to_path_dict = data_to_retrieve.at[i, self.pointercolumn]
+			for k, index_of_original in enumerate(filename_index_to_path_dict): #datafile in the set of datafiles in that row
+				try:
+					tdf = readfileby(self.index_to_path[index_of_original] + filename_index_to_path_dict[index_of_original])
+				except Exception as e:
+					raise Exception('error reading data. ensure self.readfileby is correct. self.readfileby is currently set to {}.\nError is: {}'.format(self.readfileby.__name__, e))
+
+				if i == 0:
+					columns_set = set(tdf.columns)
+
+				if set(tdf.columns) != columns_set:
+					raise ValueError('not all data in this Dataset has the same columns!')
+
+				if k == 0: #build the internal data out
+					internal_out = (
+						{
+							'definition': {col: data_to_retrieve.at[i, col] for col in self.columns},
+							'data': {col: tdf[col].values for col in tdf.columns}
+						}
+					)
+
+				else:
+					internal_out['data'].update({col: np.vstack((internal_out['data'][col], tdf[col].values)) for col in columns_set})
+
+			out.update({counter:internal_out})
+
+		for counter in out:
+			definition = out[counter]['definition']
+			try:
+				definition.pop(self.pointercolumn)
+			except:
+				pass
+			
+		if type(labelby) == type(None):
+			return Data(out)
+
+
+		labelby = set(np.array([labelby]).flatten())
+
+		for counter in out:
+			#pop off the labels we don't want
+			definition = out[counter]['definition']
+			to_pop = set(definition.keys()) - labelby
+			for key in to_pop:
+				try:
+					definition.pop(key)
+				except KeyError:
+					pass
+		return Data(out)
+
+class dataset(Dataset):
+	"""
+	need docstring
+	"""
+
+	def __init__(self, path, meta_data = None):
+		tmp_df = self._build_df(path, meta_data)
+		super().__init__(path, tmp_df)
 
 	def _build_df(self, path, meta_data):
 		if type(meta_data) == type(None):
@@ -73,32 +233,6 @@ class Dataset(pd.DataFrame):
 		self.__init__(path = self.path, meta_data = existing_meta_data)
 		return
 
-	def dataset_query(self, query_str):
-		"""extension of pandas.DataFrame.query. dataset_query returns a dataset
-		----
-		query_str: (str) string of query. Example 'preset_voltage_v == 1'
-		"""
-		return Dataset(path = self.path, meta_data = self.query(query_str))
-
-	def summarize(self):
-		"""return a brief summary of the data in your Dataset. Returns Dict"""
-		summary = dict()
-		for column in self.columns:
-			if column == 'filename':
-				continue
-			summary.update({column: set(self[column].values)})
-		return summary
-
-	def save(self):
-		"""used to save current meta_data to file. This can be used, for example if you wish to delete some specific outlier data, by deleting references to such data in the dataset and the saving the dataset's meta_data using this function"""
-		yn = input('you are about to replace whatever existing meta_data exists in path: {} with this Dataset. do you wish to proceed? (y/n)'.format(self.path))
-		if yn.lower() == 'n':
-			print('save aborted.')
-			return
-		else:
-			print('saved.')
-			self.to_pickle(self.path + 'meta_data')
-		return
 
 	def print_file_name(self):
 		"""use this function if you wish to print an example file for help building a mapping function for generate_met_data()"""
@@ -108,122 +242,6 @@ class Dataset(pd.DataFrame):
 			else:
 				print(fname)
 				break
-
-	def get_grouped_data(self, by):
-		"""returns a Dict of the real data grouped by argument by. Makes use of pandas.DataFrame.groupby
-		----
-		by: (array-like) which columns to group by. Example - to group across trial by should be all columns names excluding trial and filename (or more explicitly the pointer to real data column)
-		"""
-		warnings.showwarning('get_grouped_data is deprecated. use group() or get_data() instead', DeprecationWarning, '', 0,)
-
-		pointercolumn = self.pointercolumn
-		readfileby = self.readfileby
-		groups = self.groupby(by=by).groups
-		out = {}
-
-		by = list(np.array([by]).flatten())
-		
-		for k, key in enumerate(groups):
-			try:
-				group_defn = {b:key[i] for i, b in enumerate(by)}
-			except TypeError: #the case with only one element in by
-				group_defn = {b:key for b in by}
-			indices = groups[key]
-			filenames = [self.at[ind, pointercolumn] for ind in indices]
-			for l, filename in enumerate(filenames):
-				try:
-					tdf = readfileby(self.path + filename)
-				except Exception as e:
-					raise Exception('error reading data. ensure self.readfileby is correct. self.readfileby is currently set to {}.\nError is: {}'.format(self.readfileby.__name__, e))
-				
-				if l + k == 0:
-					columns_set = set(tdf.columns) #to check if all have the same columns; agnostic to what's in the data, but must be consistent
-
-				if set(tdf.columns) != columns_set:
-					raise ValueError('not all data in this Dataset has the same columns!')
-
-				if l == 0:
-					internal_out = {col:tdf[col].values for col in columns_set}
-				else:
-					#in vstack, stack the newdata second.
-					internal_out = {col: np.vstack((internal_out[col], tdf[col].values)) for col in columns_set}
-			out.update({k:{'data':internal_out, 'definition':group_defn}})
-
-		return Data(out) 
-
-	def group(self, by):
-		"""need docstring"""
-		groups = self.groupby(by = by).groups
-		for ijk, key in enumerate(groups):
-			original_dataset_indices = groups[key]
-			new_row = None
-			for index in original_dataset_indices:
-				original_row = self.loc[index] #this is a pandas series of a row from the original dataset
-				#columns in this row
-				if type(new_row) == type(None):
-					new_row = {col:set([original_row[col]]) for col in original_row.index}
-				else:
-					for col in new_row:
-						new_row[col].update(set([original_row[col]]))
-
-			if ijk == 0:
-				new_df = pd.DataFrame({key:[new_row[key]] for key in new_row})
-			else:
-				new_df = pd.concat((new_df, pd.DataFrame({key:[new_row[key]] for key in new_row})), ignore_index = True)
-				
-		return new_df           
-	
-	def get_data(self, groupby=None, labelby=None,):
-		"""needs docstring"""
-		pointercolumn = self.pointercolumn
-		readfileby = self.readfileby
-		
-		if type(groupby) == type(None):
-			data_to_retrieve = self.group(by = self.pointercolumn) #gives us a unique col for each
-		else:
-			data_to_retrieve = self.group(by = groupby)
-		
-		out = {}
-		for counter, i in enumerate(data_to_retrieve.index): #for each row
-			for k, datafile in enumerate(data_to_retrieve.at[i, self.pointercolumn]): #datafile in the set of datafiles in that row
-				try:
-					tdf = readfileby(self.path + datafile)
-				except Exception as e:
-					raise Exception('error reading data. ensure self.readfileby is correct. self.readfileby is currently set to {}.\nError is: {}'.format(self.readfileby.__name__, e))
-				
-				if i == 0:
-					columns_set = set(tdf.columns)
-
-				if set(tdf.columns) != columns_set:
-					raise ValueError('not all data in this Dataset has the same columns!')
-				
-				if k == 0: #build the internal data out
-					internal_out = (
-						{
-							'definition': {col: data_to_retrieve.at[i, col] for col in self.columns},
-							'data': {col: tdf[col].values for col in tdf.columns}
-						}
-					)
-					
-				else:
-					internal_out['data'].update({col: np.vstack((internal_out['data'][col], tdf[col].values)) for col in columns_set})
-					
-			out.update({counter:internal_out})
-			
-			
-		if type(labelby) == type(None):
-			return Data(out)
-
-
-		labelby = set(np.array([labelby]).flatten())
-
-		for counter in out:
-			#pop off the labels we don't want
-			definition = out[counter]['definition']
-			to_pop = set(definition.keys()) - labelby
-			for key in to_pop:
-				definition.pop(key)
-		return Data(out)
 		
 
 
