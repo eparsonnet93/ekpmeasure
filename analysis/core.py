@@ -7,8 +7,65 @@ import warnings
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-__all__ = ('Dataset', 'Data', 'dataset')
+__all__ = ('Dataset', 'Data', 'dataset', 'merge')
 
+def merge(datasets):
+	"""merge datasets. need docstring"""
+	
+	if not hasattr(datasets, '__iter__'):
+		raise TypeError('datasets is not iterable.')
+		
+	columns = datasets[0].columns
+	for dset in datasets[1:]:
+		if (columns != dset.columns).all():
+			raise ValueError('supplied datasets have different columns!')
+	
+	for i, dset in enumerate(datasets):
+		if i == 0:
+			new_path = dset.index_to_path
+			new_df = pd.DataFrame(dset)
+		else:
+			new_path = pd.concat((new_path, dset.index_to_path), ignore_index = True)
+			new_df = pd.concat((new_df, pd.DataFrame(dset)), ignore_index = True)
+			
+	path = _convert_ITP_to_path_to_index(new_path)
+	
+	return Dataset(path,new_df)
+
+def _convert_ITP_to_path_to_index(index_to_path):
+	"""convert index_to_path pandas series to path_to_index dict 
+	----
+	index_to_path:(pandas.series)
+
+	returns
+	path_to_index:(dict) {path:[indices corresponding to that path]}
+	"""
+	path_to_index = dict()
+	for i in index_to_path.index:
+		index, path = i, index_to_path[i]
+		if path in set(path_to_index.keys()):
+			path_to_index[path].append(index)
+		else:
+			path_to_index.update({path:[index]})
+	return path_to_index
+
+
+def construct_Dataset_from_dataframe(function):
+
+	def wrapper(*args, **kwargs):
+		dataframe = function(*args, **kwargs)
+		
+		index_to_path = args[0].index_to_path
+
+		map_new_index_to_old_index = {i:old for i, old in enumerate(dataframe.index)}
+		new_index_to_path = pd.Series({i:index_to_path[map_new_index_to_old_index[i]] for i in map_new_index_to_old_index})
+
+		new_path = _convert_ITP_to_path_to_index(new_index_to_path)
+		dataframe.reset_index(inplace = True, drop = True)
+
+		return Dataset(path = new_path, initializer = dataframe)
+
+	return wrapper
 
 class Dataset(pd.DataFrame):
 	"""
@@ -21,6 +78,35 @@ class Dataset(pd.DataFrame):
 
 	def __init__(self, path, initializer):
 		super().__init__(initializer)
+		self.attrs['path'] = path
+		self.attrs['index_to_path'] = self._construct_index_to_path(path, initializer)
+		self.pointercolumn = 'filename'
+		self.readfileby = lambda file: pd.read_csv(file)
+
+	@property  
+	def _is_empty(self):
+		if len(self) == 0 and len(self.columns) == 0:
+			return True
+		else:
+			return False
+
+	@property
+	def path(self):
+		return self.attrs['path']
+
+	@property
+	def index_to_path(self):
+		return self.attrs['index_to_path']
+	
+	@construct_Dataset_from_dataframe
+	def query(*args, **kwargs):
+		return pd.DataFrame.query(*args, **kwargs)
+
+	@construct_Dataset_from_dataframe
+	def head(*args, **kwargs):
+		return pd.DataFrame.head(*args, **kwargs)
+	
+	def _construct_index_to_path(self, path, initializer):
 		if type(path) != dict:
 			assert type(path) == str, "path must be dict or str"
 			#set all indices to the single path provided
@@ -45,33 +131,8 @@ class Dataset(pd.DataFrame):
 		#check for duplicate indices:
 		if len(index_to_path) != len(set(index_to_path.index)):
 			raise ValueError('Duplicate indices provided in path dict!')
-		
-		self.attrs['path'] = path
-		self.attrs['index_to_path'] = index_to_path
-		self.pointercolumn = 'filename'
-		self.readfileby = lambda file: pd.read_csv(file)
-
-	@property  
-	def _is_empty(self):
-		if len(self) == 0 and len(self.columns) == 0:
-			return True
-		else:
-			return False
-		
-	@property
-	def path(self):
-		return self.attrs['path']
-		
-	@property
-	def index_to_path(self):
-		return self.attrs['index_to_path']
-
-	def dataset_query(self, query_str):
-		"""extension of pandas.DataFrame.query. dataset_query returns a dataset
-		----
-		query_str: (str) string of query. Example 'preset_voltage_v == 1'
-		"""
-		return Dataset(path = self.path, initializer = self.query(query_str))
+			
+		return index_to_path
 
 	def summarize(self):
 		"""return a brief summary of the data in your Dataset. Returns Dict"""
@@ -99,11 +160,11 @@ class Dataset(pd.DataFrame):
 					for col in new_row:
 						#import pdb; pdb.set_trace()
 						new_row[col].update(dict({index:original_row[col]}))
-			
+
 			for col in new_row:
 				if col != self.pointercolumn:
 					new_row[col] = set(list([new_row[col][x] for x in new_row[col].keys()]))
-			
+
 			if ijk == 0:
 				new_df = pd.DataFrame(
 					{key:[new_row[key]] for key in new_row}
@@ -166,7 +227,7 @@ class Dataset(pd.DataFrame):
 				definition.pop(self.pointercolumn)
 			except:
 				pass
-			
+
 		if type(labelby) == type(None):
 			return Data(out)
 
@@ -183,6 +244,7 @@ class Dataset(pd.DataFrame):
 				except KeyError:
 					pass
 		return Data(out)
+
 
 class dataset(Dataset):
 	"""
