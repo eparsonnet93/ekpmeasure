@@ -7,11 +7,11 @@ Repository of computer control code for various experiments as well as analysis 
 
 ## Contents:
 
-1. [Analysis Overview](##foo)
-	>a. [Dataset](###Dataset)
-	>>i. [dataset](####dataset)
+1. [Analysis Overview](## Analysis)
+	>a. [Dataset](### Dataset)
+	>>i. [dataset](#### dataset)
 	
-	>b. [Data](###Data)
+	>b. [Data](### Data)
 
 ## Analysis
 ### Dataset
@@ -19,7 +19,7 @@ Repository of computer control code for various experiments as well as analysis 
 The Dataset class can be used broadly as a means to manipulate meta data and quickly retrieve true data. It is datatype agnostic and allows for merging of datasets from different locations on disk. 
 
 Often I find that I have large amounts of data in stored in different locations and it is difficult to group data and or compare across a set of experimental parameters by leveraging data from multiple locations. Often this ends up being a manual and arduous process. Take for example the following tree of data:
-```
+```bash
 data
 │
 └───folder1
@@ -29,10 +29,10 @@ data
 └───folder2
     │   5V_100ns_1mv.csv
     │   10V_100ns_1mv.csv
-    |	10V_50ns_2mv
+    │   10V_50ns_2mv.csv
 ```
 Each of the files (e.g. 5V_100ns_1mv.csv) is a data file, and the file name encodes the meta data. In this case the meta_data consists of three parameters (voltage, time, voltage). If I want to average all trials in data that correspond to (10V, 100ns, 1mv) I will need to retrieve data from folder1 and folder2  and then average the two together. If I wanted to compare all data that corresponds to 10V as the first parameter and 1mv as the second parameter with the second parameter  being the independent variable I would need to retrieve 
-```
+```bash
 folder1/10V_100ns_1mv.csv
 folder2/10V_100ns_1mv.csv
 folder1/10V_10ns_1mv.csv
@@ -59,7 +59,7 @@ dset.get_data()
 
 This returns a [Data](###Data) class. As a brief example of how to use the Dataset class, consider one the problems stated above of wanting to compare all data that corresponds to 10V as the first parameter and 1mv as the second parameter with the second parameter. This is done in a straightforward way using Dataset:
 
-```
+```python
 import ekpmeasure.analysis as ekp
 
 path1 = './data/folder1/'
