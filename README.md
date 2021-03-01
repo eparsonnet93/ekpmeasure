@@ -8,10 +8,10 @@ Repository of computer control code for various experiments as well as analysis 
 ## Contents:
 
 1. [Analysis Overview](#analysis)
-	>a. [Dataset](#dataset)
-	>>i. [dataset](#dataset-1)
+	a. [Dataset](#dataset)
+		i. [dataset](#dataset-1)
 	
-	>b. [Data](#data)
+b. [Data](#data)
 
 ## Analysis
 ### Dataset
