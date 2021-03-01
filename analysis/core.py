@@ -63,7 +63,7 @@ def construct_Dataset_from_dataframe(function):
 		new_path = _convert_ITP_to_path_to_index(new_index_to_path)
 		dataframe.reset_index(inplace = True, drop = True)
 
-		return Dataset(path = new_path, initializer = dataframe)
+		return Dataset(path = new_path, initializer = dataframe, readfileby = args[0].readfileby)
 
 	return wrapper
 
@@ -76,12 +76,15 @@ class Dataset(pd.DataFrame):
 	initializer: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
 	"""
 
-	def __init__(self, path, initializer):
+	def __init__(self, path, initializer,readfileby=None):
 		super().__init__(initializer)
 		self.attrs['path'] = path
 		self.attrs['index_to_path'] = self._construct_index_to_path(path, initializer)
 		self.pointercolumn = 'filename'
-		self.readfileby = lambda file: pd.read_csv(file)
+		if readfileby == None:
+			self.readfileby = lambda file: pd.read_csv(file)
+		else:
+			self.readfileby = readfileby
 
 	@property  
 	def _is_empty(self):
