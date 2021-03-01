@@ -404,7 +404,7 @@ class Data(dict):
 		"""returns a dict class with identical structure"""
 		return {key: self[key] for key in self.keys()}
 
-	def plot(self, x=None):
+	def plot(self, x=None, y=None):
 		"""simple plot of all data vs key specified by x
 
 		colors correspond to different keys (groups)
@@ -422,6 +422,13 @@ class Data(dict):
 			else:
 				xs = self[index]['data'][x]
 				data_keys_to_plot = set(self[index]['data'].keys()) - set({x})
+
+			if type(y) == type(None):
+				pass
+			else:
+				data_keys_to_plot = set(np.array([y]).flatten())
+				
+
 			for plotkey in data_keys_to_plot:
 				to_plot = self[index]['data'][plotkey]
 				
