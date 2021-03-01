@@ -73,7 +73,7 @@ class Dataset(pd.DataFrame):
 	----
 
 	path: (str or dict) a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
-	meta_data: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
+	initializer: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
 	"""
 
 	def __init__(self, path, initializer):
@@ -107,6 +107,13 @@ class Dataset(pd.DataFrame):
 		return pd.DataFrame.head(*args, **kwargs)
 	
 	def _construct_index_to_path(self, path, initializer):
+		"""
+		construct index_to_path from path provided
+		----
+		path: (str or dict) a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
+		initializer: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
+
+		"""
 		if type(path) != dict:
 			assert type(path) == str, "path must be dict or str"
 			#set all indices to the single path provided
@@ -145,7 +152,10 @@ class Dataset(pd.DataFrame):
 
 
 	def group(self, by):
-		"""need docstring"""
+		"""group data by by and return a pandas dataframe. makes use of pandas.groupby
+		----
+		by: (str, int, label or array-like()) on what to group. 
+		"""
 		groups = self.groupby(by = by).groups
 		for ijk, key in enumerate(groups):
 			original_dataset_indices = groups[key]
@@ -183,7 +193,12 @@ class Dataset(pd.DataFrame):
 		return new_df           
 
 	def get_data(self, groupby=None, labelby=None,):
-		"""needs docstring"""
+		"""
+		return data for the current Dataset: returns Data class 
+		----
+		groupby: (str, label, index or array-like()) what to group on
+		labelby: (str, label, index or array-like()) what to label the output data by. This will change 'definition' in output Data class
+		"""
 		pointercolumn = self.pointercolumn
 		readfileby = self.readfileby
 
@@ -248,10 +263,17 @@ class Dataset(pd.DataFrame):
 
 class dataset(Dataset):
 	"""
-	need docstring
+	subclass of Dataset - used to initialize/read from a specific folder. dataset, unlike Dataset will search a folder for meta_data and help create it if it does not exist
+	----
+	path: (str or dict) a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
+	initializer: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
+
 	"""
 
 	def __init__(self, path, meta_data = None):
+		"""
+		subclass of Dataset - used to initialize/read from a specific folder
+		"""
 		tmp_df = self._build_df(path, meta_data)
 		super().__init__(path, tmp_df)
 
