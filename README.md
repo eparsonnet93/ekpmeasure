@@ -7,11 +7,11 @@ Repository of computer control code for various experiments as well as analysis 
 
 ## Contents:
 
-1. [Analysis Overview](## Analysis)
-	>a. [Dataset](### Dataset)
-	>>i. [dataset](#### dataset)
+1. [Analysis Overview](#analysis)
+	>a. [Dataset](#dataset)
+	>>i. [dataset](#dataset-1)
 	
-	>b. [Data](### Data)
+	>b. [Data](#data)
 
 ## Analysis
 ### Dataset
