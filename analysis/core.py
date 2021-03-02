@@ -353,6 +353,7 @@ class Data(dict):
 		----
 		inplace: (bool) do the operation inplace
 		"""
+		
 		if not inplace:
 			tmp_out = {}
 			for key in self:
