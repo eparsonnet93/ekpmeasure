@@ -358,7 +358,12 @@ class Data(dict):
 			for key in self:
 				tmp_out.update({key:self[key].copy()})
 				data = self[key]['data']
-				mean_data = {k:np.mean(data[k], axis = 0) for k in data}
+				mean_data = {}
+				for k in data:
+					if len(data[k].shape) == 1: #1d data
+						mean_data.update({k:data[k]})
+					else:
+						mean_data.update({k:np.mean(data[k], axis = 0)})
 				tmp_out[key].update({'data':mean_data})
 			return Data(tmp_out)
 

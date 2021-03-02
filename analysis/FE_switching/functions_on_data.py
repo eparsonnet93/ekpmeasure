@@ -23,10 +23,14 @@ def find_start_reset_and_delete_before(data_dict, cutoff = 0.01, grace = 10):
 	p2 = data_dict['p2']
 	time_list, p1_list, p2_list = [],[],[]
 	for i in range(p1.shape[0]):
-		
-		tp1 = p1[i, :]
-		tp2 = p2[i, :]
-		ttime = time[i,:]
+		try:
+			tp1 = p1[i, :]
+			tp2 = p2[i, :]
+			ttime = time[i,:]
+		except IndexError:
+			tp1 = p1[:]
+			tp2 = p2[:]
+			ttime = time[:]
 		where_start = np.argwhere(tp1 > cutoff).flatten()[0]
 		grace = 10
 		
