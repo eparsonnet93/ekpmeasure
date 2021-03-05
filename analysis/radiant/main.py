@@ -3,10 +3,10 @@ import numpy as np
 
 __all__ = ('load_radiant_loop_from_text_file',)
 
-def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_meta_data = True):
+def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_meta_data = False):
     """load a radiant loop from a text file
     
-    Returns: (pandas DataFrame) columns -> 'Time(ms)', 'DriveVoltage', 'MeasuredCharge(pC)' or 'Time(ms)', 'DriveVoltage', 'MeasuredPolarization(uC/c,2)'
+    Returns: (pandas DataFrame) columns -> 'Time(ms)', 'DriveVoltage', 'MeasuredCharge(pC)' or 'Time(ms)', 'DriveVoltage', 'MeasuredPolarization(uC/cm2)'
     ----
     
     path: str
@@ -17,7 +17,7 @@ def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_met
     """
     
     if measured_value.lower() not in set({'charge', 'polarization'}):
-        raise ValueError('measured_value {} not supported. must be either charge or polarization'.format(measured_value))
+        raise ValueError('measured_value {} not supported. must be either "charge" or "polarization"'.format(measured_value))
         
         
     with open(file, 'rb') as f:

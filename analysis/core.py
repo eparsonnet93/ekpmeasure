@@ -53,7 +53,7 @@ class Dataset(pd.DataFrame):
 	initializer: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
 	"""
 
-	def __init__(self, path, initializer,readfileby=None):
+	def __init__(self, path, initializer, readfileby=None):
 		super().__init__(initializer)
 		self.attrs['path'] = path
 		self.attrs['index_to_path'] = self._construct_index_to_path(path, initializer)
