@@ -27,7 +27,7 @@ def _build_df(path, meta_data):
 	else:
 		return meta_data
 
-def generate_meta_data(path, mapper, pointercolumn = 'filename'):
+def generate_meta_data(path, mapper, pointercolumn = 'filename', overwrite = False):
 	"""
 	generate meta_data from a path.
 	----
@@ -35,12 +35,13 @@ def generate_meta_data(path, mapper, pointercolumn = 'filename'):
 	mapper: (function: filename (str) -> dict) operates on a single file name in order to get the columns (dict key) and values (dict value) for meta_data of that file 
 	"""
 	if 'meta_data' in set(os.listdir(path)):
-		yn = input('this path ({}) already has meta_data, do you wish to recreate it? (y/n)'.format(path))
-		if yn.lower() != 'y':
-			print('skipping. NOT overwriting.')
-			return
-		else:
-			print('overwriting.')
+		if not overwrite:
+			yn = input('this path ({}) already has meta_data, do you wish to recreate it? (y/n)'.format(path))
+			if yn.lower() != 'y':
+				print('skipping. NOT overwriting.')
+				return
+			else:
+				print('overwriting.')
 
 	for file in os.listdir(path):
 		try:
