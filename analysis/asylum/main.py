@@ -25,7 +25,7 @@ def load_image_from_binary(path, return_meta_data = False):
     """
     loads data from binary file (from asylum research) into a numpy array
     
-    Returns: dict({'label':(numpy array) imgdata}
+    Returns: pandas.DataFrame({'label':(numpy array) imgdata})
     ----
     
     path: str
@@ -69,7 +69,7 @@ def load_image_from_binary(path, return_meta_data = False):
     else:
         return out
 
-def load_pfmloop_from_binary(path, return_meta_data = True):
+def load_pfmloop_from_binary(path, return_meta_data = False):
     """
     loads data from binary file (from asylum research) into a numpy array
     
