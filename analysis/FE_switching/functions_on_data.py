@@ -108,8 +108,13 @@ def switching_times_from_polarization_transients(data_dict, percentile = 70, npo
 	time = data_dict['time'].copy()
 	intdp = data_dict['intdp'].copy()
 	for i in range(intdp.shape[0]):
-		currentdata = np.nan_to_num(intdp[i,:], 0)
-		currenttime = np.nan_to_num(time[i,:], 0)
+		try:
+			currentdata = np.nan_to_num(intdp[i,:], 0)
+			currenttime = np.nan_to_num(time[i,:], 0)
+		except IndexError: #1d data
+			currentdata = np.nan_to_num(intdp[:], 0)
+			currenttime = np.nan_to_num(time[:], 0)
+			
 		cutoff = np.mean(currentdata[-npoints_on_end_for_saturation:])*percentile/100
 		try:
 			where_over_percentile = np.argwhere(currentdata > cutoff).flatten()[0]

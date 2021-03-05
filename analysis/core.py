@@ -7,48 +7,8 @@ import warnings
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-__all__ = ('Dataset', 'Data', 'dataset', 'merge')
 
-def merge(datasets):
-	"""merge datasets. need docstring"""
-	
-	if not hasattr(datasets, '__iter__'):
-		raise TypeError('datasets is not iterable.')
-		
-	columns = datasets[0].columns
-	for dset in datasets[1:]:
-		if (columns != dset.columns).all():
-			raise ValueError('supplied datasets have different columns!')
-	
-	for i, dset in enumerate(datasets):
-		if i == 0:
-			new_path = dset.index_to_path
-			new_df = pd.DataFrame(dset)
-		else:
-			new_path = pd.concat((new_path, dset.index_to_path), ignore_index = True)
-			new_df = pd.concat((new_df, pd.DataFrame(dset)), ignore_index = True)
-			
-	path = _convert_ITP_to_path_to_index(new_path)
-	
-	return Dataset(path,new_df)
-
-def _convert_ITP_to_path_to_index(index_to_path):
-	"""convert index_to_path pandas series to path_to_index dict 
-	----
-	index_to_path:(pandas.series)
-
-	returns
-	path_to_index:(dict) {path:[indices corresponding to that path]}
-	"""
-	path_to_index = dict()
-	for i in index_to_path.index:
-		index, path = i, index_to_path[i]
-		if path in set(path_to_index.keys()):
-			path_to_index[path].append(index)
-		else:
-			path_to_index.update({path:[index]})
-	return path_to_index
-
+__all__ = ('Dataset', 'Data', 'dataset')
 
 def construct_Dataset_from_dataframe(function):
 
@@ -66,6 +26,23 @@ def construct_Dataset_from_dataframe(function):
 		return Dataset(path = new_path, initializer = dataframe, readfileby = args[0].readfileby)
 
 	return wrapper
+
+def _convert_ITP_to_path_to_index(index_to_path):
+	"""convert index_to_path pandas series to path_to_index dict 
+	----
+	index_to_path:(pandas.series)
+
+	returns
+	path_to_index:(dict) {path:[indices corresponding to that path]}
+	"""
+	path_to_index = dict()
+	for i in index_to_path.index:
+		index, path = i, index_to_path[i]
+		if path in set(path_to_index.keys()):
+			path_to_index[path].append(index)
+		else:
+			path_to_index.update({path:[index]})
+	return path_to_index
 
 class Dataset(pd.DataFrame):
 	"""
@@ -218,7 +195,7 @@ class Dataset(pd.DataFrame):
 				try:
 					tdf = readfileby(self.index_to_path[index_of_original] + filename_index_to_path_dict[index_of_original])
 				except Exception as e:
-					raise Exception('error reading data. ensure self.readfileby is correct. self.readfileby is currently set to {}.\nError is: {}'.format(self.readfileby.__name__, e))
+					raise Exception('error reading data. ensure self.readfileby is correct and that readfileby returns a pandas dataframe. self.readfileby is currently set to {}.\nError was: {}'.format(self.readfileby.__name__, e))
 
 				if i == 0:
 					columns_set = set(tdf.columns)
@@ -262,76 +239,7 @@ class Dataset(pd.DataFrame):
 				except KeyError:
 					pass
 		return Data(out)
-
-
-class dataset(Dataset):
-	"""
-	subclass of Dataset - used to initialize/read from a specific folder. dataset, unlike Dataset will search a folder for meta_data and help create it if it does not exist
-	----
-	path: (str or dict) a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
-	initializer: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
-
-	"""
-
-	def __init__(self, path, meta_data = None):
-		"""
-		subclass of Dataset - used to initialize/read from a specific folder
-		"""
-		tmp_df = self._build_df(path, meta_data)
-		super().__init__(path, tmp_df)
-
-	def _build_df(self, path, meta_data):
-		if type(meta_data) == type(None):
-			try:
-				return pd.read_pickle(path + 'meta_data')
-			except FileNotFoundError:
-				print('meta_data does not exist in path {} you may want to create it with .generate_meta_data()'.format(path))
-				return pd.DataFrame()
-		else:
-			return meta_data
-
-	def generate_meta_data(self, mapper):
-		"""
-		generate meta_data from a Dataset
-		----
-
-		mapper: (function: filename (str) -> dict) operates on a single file name in order to get the columns (dict key) and values (dict value) for meta_data of that file 
-		"""
-		if not self._is_empty:
-			yn = input('this Dataset already has meta_data, do you wish to recreate it? (y/n)')
-			if yn.lower() != 'y':
-				return
-
-		for file in os.listdir(self.path):
-			try:
-				meta_data = pd.DataFrame(mapper(file), index = [0])
-			except Exception as e:
-				print('unable to process file: {} \nError: {}'.format(file, e))
-				continue
-			try:
-				existing_meta_data = pd.concat([existing_meta_data, meta_data], ignore_index = True)
-			except NameError:
-				existing_meta_data = meta_data.copy()
-
-		if self.pointercolumn not in set(existing_meta_data.columns): 
-			warnings.showwarning('there is no map to key "{}" in mapping function "{}" provided\nEnsure self.pointercolumn property has been set appropriately or else you will be unable to retrieve data'.format(self.pointercolumn, mapper.__name__), SyntaxWarning, '', 0,)
-
-		existing_meta_data.to_pickle(self.path+'meta_data')
-		self.__init__(path = self.path, meta_data = existing_meta_data)
-		return
-
-
-	def print_file_name(self):
-		"""use this function if you wish to print an example file for help building a mapping function for generate_met_data()"""
-		for fname in os.listdir(self.path):
-			if fname == 'meta_data' or fname == '.ipynb_checkpoints':
-				continue
-			else:
-				print(fname)
-				break
 		
-
-
 class Data(dict):
 	"""subclass of dict
 
@@ -452,3 +360,70 @@ class Data(dict):
 						ax.plot(xs[i,:], to_plot[i,:], color = color)
 
 		return fig, ax
+
+class dataset(Dataset):
+	"""
+	subclass of Dataset - used to initialize/read from a specific folder. dataset, unlike Dataset will search a folder for meta_data and help create it if it does not exist
+	----
+	path: (str or dict) a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
+	initializer: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
+
+	"""
+
+	def __init__(self, path, meta_data = None):
+		"""
+		subclass of Dataset - used to initialize/read from a specific folder
+		"""
+		warnings.showwarning('dataset class is deprecated. use load_Dataset() instead', DeprecationWarning, '', 0,)
+		tmp_df = self._build_df(path, meta_data)
+		super().__init__(path, tmp_df)
+
+	def _build_df(self, path, meta_data):
+		if type(meta_data) == type(None):
+			try:
+				return pd.read_pickle(path + 'meta_data')
+			except FileNotFoundError:
+				print('meta_data does not exist in path {} you may want to create it with .generate_meta_data()'.format(path))
+				return pd.DataFrame()
+		else:
+			return meta_data
+
+	def generate_meta_data(self, mapper):
+		"""
+		generate meta_data from a Dataset
+		----
+
+		mapper: (function: filename (str) -> dict) operates on a single file name in order to get the columns (dict key) and values (dict value) for meta_data of that file 
+		"""
+		if not self._is_empty:
+			yn = input('this Dataset already has meta_data, do you wish to recreate it? (y/n)')
+			if yn.lower() != 'y':
+				return
+
+		for file in os.listdir(self.path):
+			try:
+				meta_data = pd.DataFrame(mapper(file), index = [0])
+			except Exception as e:
+				print('unable to process file: {} \nError: {}'.format(file, e))
+				continue
+			try:
+				existing_meta_data = pd.concat([existing_meta_data, meta_data], ignore_index = True)
+			except NameError:
+				existing_meta_data = meta_data.copy()
+
+		if self.pointercolumn not in set(existing_meta_data.columns): 
+			warnings.showwarning('there is no map to key "{}" in mapping function "{}" provided\nEnsure self.pointercolumn property has been set appropriately or else you will be unable to retrieve data'.format(self.pointercolumn, mapper.__name__), SyntaxWarning, '', 0,)
+
+		existing_meta_data.to_pickle(self.path+'meta_data')
+		self.__init__(path = self.path, meta_data = existing_meta_data)
+		return
+
+
+	def print_file_name(self):
+		"""use this function if you wish to print an example file for help building a mapping function for generate_met_data()"""
+		for fname in os.listdir(self.path):
+			if fname == 'meta_data' or fname == '.ipynb_checkpoints':
+				continue
+			else:
+				print(fname)
+				break
