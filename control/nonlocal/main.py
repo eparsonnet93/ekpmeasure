@@ -1,24 +1,17 @@
-import visa
-import numpy as np
-import matplotlib.pyplot as plt
+import pyvisa
 import pandas as pd
-import time
-import os
+import numpy as np
 
-rm = visa.ResourceManager()
-rm.list_resources()
+from ..instruments.srs830 import get_lockin_r_theta
 
-lockin = rm.open_resource('GPIB0::11::INSTR')
-lockin.write("*rst")
-lockin.query("*IDN?")
+__all__ = ('trial', 'run', 'first_and_second_harm')
 
 def trial(lockin, nave = 100, delay = .5):
     out = pd.DataFrame()
     rs, thetas = [],[]
     for i in range(nave):
         time.sleep(delay)
-        r, theta = lockin.query("SNAP? 3,4").split('\n')[0].split(',')
-        r, theta = float(r), float(theta)
+        r, theta = get_lockin_r_theta(lockin)
         rs.append(r)
         thetas.append(theta)
     return pd.DataFrame({'R':rs, 'theta':thetas})
@@ -42,14 +35,3 @@ def first_and_second_harm(path, device):
     plt.plot(out.R)
     run(path, device, 2)
     return 
-
-path = './hr345/020221/'
-
-first_and_second_harm(path, 'D0')
-
-out = run(path, 'D32', 1)
-###########################
-
-ax = out.plot(y = 'R')
-ax1 = ax.twinx()
-out.plot(y = 'theta', ax = ax1, color = 'red')
