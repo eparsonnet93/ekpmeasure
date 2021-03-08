@@ -85,6 +85,7 @@ class Dataset(pd.DataFrame):
 	@construct_Dataset_from_dataframe
 	def head(*args, **kwargs):
 		return pd.DataFrame.head(*args, **kwargs)
+
 	
 	def _construct_index_to_path(self, path, initializer):
 		"""
@@ -239,7 +240,22 @@ class Dataset(pd.DataFrame):
 				except KeyError:
 					pass
 		return Data(out)
+
 		
+class iDataIndexer():
+	
+	def __init__(self, initializer):
+		self.indexed_dict = initializer
+		return 
+	
+	def __getitem__(self, i):
+
+		if i<0:
+			index = len(self.indexed_dict) + i
+		else:
+			index = i
+		return Data({index: self.indexed_dict[index]})
+
 class Data(dict):
 	"""subclass of dict
 
@@ -254,6 +270,13 @@ class Data(dict):
 
 	def __init__(self, initializer):
 		super().__init__(initializer)
+
+	@property
+	def iloc(self):
+		"""indexing like pandas iloc. This returns Data class of specified index. 
+		usage : Data.iloc[0]
+		"""
+		return iDataIndexer(self.to_dict())
 
 	def mean(self, inplace = False):
 		"""
@@ -305,7 +328,7 @@ class Data(dict):
 			for key in tmp_out.keys():
 				internal_out = {
 					'definition':tmp_out[key]['definition'],
-					'data':data_function(tmp_out[key]['data'], **kwargs_for)
+					'data':data_function(tmp_out[key]['data'].copy(), **kwargs_for)
 				}
 				tmp_out.update({key:internal_out})
 
@@ -318,14 +341,18 @@ class Data(dict):
 		"""returns a dict class with identical structure"""
 		return {key: self[key] for key in self.keys()}
 
-	def plot(self, x=None, y=None):
+	def plot(self, x=None, y=None, ax=None):
 		"""simple plot of all data vs key specified by x
 
 		colors correspond to different keys (groups)
+		----
+		
 		"""
-
-		#todo improve this function
-		fig, ax = plt.subplots()
+		if ax == None:
+			fig, ax = plt.subplots()
+			return_fig = True
+		else:
+			return_fig = False
 
 		
 		colors = [cm.viridis(x) for x in np.linspace(0, 1, len(self.keys()))]
@@ -359,7 +386,10 @@ class Data(dict):
 					else:
 						ax.plot(xs[i,:], to_plot[i,:], color = color)
 
-		return fig, ax
+		if return_fig:
+			return fig, ax
+		else:
+			return ax
 
 class dataset(Dataset):
 	"""

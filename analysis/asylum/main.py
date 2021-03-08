@@ -62,7 +62,7 @@ def load_image_from_binary(path, return_meta_data = False):
             raise IndexError('label count does not match data count. i.e. imgdata does not have data for each label (is this file a pfm loop??)')
         out.update({label: imgdata})
 
-    out = pd.DataFrame(out)
+    #out = pd.DataFrame(out, index = [0])
         
     if return_meta_data:
         return out, meta_data
