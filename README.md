@@ -11,6 +11,8 @@ Repository of computer control code for various experiments as well as analysis 
 > 1. [Analysis Overview](#analysis)
 
 >>a. [Dataset](#dataset)
+
+>>> i. [load_dataset](#load_dataset)
 	
 >>b. [Data](#data)
 
