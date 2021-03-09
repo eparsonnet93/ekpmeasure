@@ -10,7 +10,8 @@ from ..instruments import misc
 
 __all__ = ('nonlocal_run_function', 'determine_time_constant_from_frequency')
 
-def nonlocal_run_function(lockin, current_source, frequency, amplitude, harmonic, identifier='D', angle=0, nave = 100, delay = .5, time_constant = 'default', test = False):
+def nonlocal_run_function(lockin, current_source, frequency, amplitude, harmonic, identifier='D', angle=0, 
+	channel_width = 0, bar_width = 0, channel_length = 0, nave = 100, delay = .5, time_constant = 'default', test = False):
 	"""need docstring. default time constant will be closest to 3x 1/frequency
 
 	can be used with control.core.trial()
@@ -30,7 +31,9 @@ def nonlocal_run_function(lockin, current_source, frequency, amplitude, harmonic
 	time_constant: (str) default will be 3 x 1/frequency (or cieling nearest allowed lockin timeconstant)
 	"""
 	#set up the basename and meta_data
-	basename = '{}_{}_{}_{}_{}_{}_{}'.format(identifier, frequency, amplitude, harmonic, angle, nave, delay).replace('.', 'x').lower()
+	basename = '{}_{}_{}_{}_{}_{}_{}_{}_{}_{}'.format(
+		identifier, frequency, amplitude, harmonic, angle, nave, delay, channel_width, bar_width, channel_length
+		).replace('.', 'x').lower()
 
 	if not test:
 		#set up the current source
@@ -51,6 +54,9 @@ def nonlocal_run_function(lockin, current_source, frequency, amplitude, harmonic
 		'delay':delay,
 		'time_constant':time_constant,
 		'angle':angle,
+		'channel_width':channel_width,
+		'channel_length':channel_length,
+		'bar_width':bar_width,
 		'identifier':identifier
 	}
 	if not test:
