@@ -1,5 +1,3 @@
-
-
 # ekpmeasure
 
 Repository of computer control code for various experiments as well as analysis code. 
@@ -15,6 +13,14 @@ Repository of computer control code for various experiments as well as analysis 
 >>> i. [load_dataset](#load_dataset)
 	
 >>b. [Data](#data)
+
+> 2. [Control Overview](#control)
+
+>> a. [experiment](#experiment)
+
+>>> i. [n_param_scan](#n_param_scan)
+
+>> b. [trial](#trial)
 
 ## Analysis
 ### Dataset
@@ -181,3 +187,13 @@ def some_function(data_dict):
  	1: {'definition': {'param1': {'5V'}, 'param2': {'100ns'}, 'param3': {'1mv'}},
   		'data': {'raw_data': array([1, 4, 9], dtype=int64)}}}
 ```
+
+## Control
+Control is a repository of instrument control code in addition to experimental control (often making use of one or more instruments). Experimental data obtained by using the [experiment](#experiment) class will automatically generate meta_data for usage in analysis.
+
+### experiment
+The experiment class serves to manage scans over desired parameters via the [n_param_scan](#n_param_scan) method and properly save + generate meta_data for usage in [analysis](#analysis)
+
+#### n_param_scan
+
+#### trial
