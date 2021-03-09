@@ -2,6 +2,7 @@ import pyvisa
 import pandas as pd
 import numpy as np
 import warnings
+import time
 
 from ..instruments import srs830 as srs
 from ..instruments import keithley6221 as k6221

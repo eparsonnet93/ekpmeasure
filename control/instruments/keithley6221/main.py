@@ -1,5 +1,5 @@
 import numpy as np
-from ..misc import *
+from .. import misc
 
 __all__ = ('restore', 'set_output_sin', 'set_wave_on', 'set_wave_off')
 
@@ -16,15 +16,15 @@ def set_output_sin(current_source, frequency, amplitude):
     """
     restore(current_source)
     
-    freq_number, freq_suffix = _get_number_and_suffix(frequency)
-    if freq_suffix not in set(freq_mapper.keys()):
+    freq_number, freq_suffix = misc._get_number_and_suffix(frequency)
+    if freq_suffix not in set(misc.freq_mapper.keys()):
         raise KeyError('frequency suffix {} is not allowed. (allowed are khz and hz)'.format(freq_suffix))
-    amp_number, amp_suffix = _get_number_and_suffix(amplitude)
-    if amp_suffix not in set(current_amp_mapper.keys()):
+    amp_number, amp_suffix = misc._get_number_and_suffix(amplitude)
+    if amp_suffix not in set(misc.current_amp_mapper.keys()):
         raise KeyError('amplitude suffix {} is not allowed. (allowed are ma and ua)'.format(amp_suffix))
         
-    freq = str(freq_number) + freq_mapper[freq_suffix]
-    amp = str(amp_number) + amp_mapper[amp_suffix]
+    freq = str(freq_number) + misc.freq_mapper[freq_suffix]
+    amp = str(amp_number) + misc.current_amp_mapper[amp_suffix]
 
     command = """
     SOUR:WAVE:FUNC SIN
