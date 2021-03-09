@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 import os 
 
+import warnings 
+
 import time
 
 __all__ = ('run_pund', 'apply_preset_pulse', 'run_preset_then_2pusle_TDS620B', 'trial')
@@ -220,6 +222,7 @@ def trial(run_function, run_function_args, path):
 	base_name: (str) string of base name
 	path: (str) where to save
 	"""
+	warnings.showwarning('trial() is deprecated. please use ekpmeasure.control.core.trial instead', DeprecationWarning, '', 0,)
 	base_name, meta_data, df = run_function(**run_function_args)
 	try:
 		save_name = get_save_name(base_name, path)
