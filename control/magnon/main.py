@@ -9,7 +9,7 @@ from ..instruments import misc
 
 __all__ = ('nonlocal_run_function', 'determine_time_constant_from_frequency')
 
-def nonlocal_run_function(lockin, current_source, frequency, amplitude, harmonic, nave = 100, delay = .5, time_constant = 'default', test = False):
+def nonlocal_run_function(lockin, current_source, frequency, amplitude, harmonic, identifier='D', angle=0, nave = 100, delay = .5, time_constant = 'default', test = False):
 	"""need docstring. default time constant will be closest to 3x 1/frequency
 
 	can be used with control.core.trial()
@@ -22,12 +22,14 @@ def nonlocal_run_function(lockin, current_source, frequency, amplitude, harmonic
 	frequency: (str) e.g. 1khz
 	amplitude: (str) e.g. 80ua
 	harmonic: (int) e.g. 1
+	identifer: (str) e.g. D1
+	angle: (int) e.g. 45
 	nave: (int) how many averages to do
 	delay: (float) delay time between averages
 	time_constant: (str) default will be 3 x 1/frequency (or cieling nearest allowed lockin timeconstant)
 	"""
 	#set up the basename and meta_data
-	basename = '{}_{}_{}_{}_{}'.format(frequency, amplitude, harmonic, nave, delay).replace('.', 'x').lower()
+	basename = '{}_{}_{}_{}_{}_{}_{}'.format(identifier, frequency, amplitude, harmonic, angle, nave, delay).replace('.', 'x').lower()
 
 	if not test:
 		#set up the current source
@@ -46,7 +48,9 @@ def nonlocal_run_function(lockin, current_source, frequency, amplitude, harmonic
 		'harmonic':harmonic,
 		'nave':nave,
 		'delay':delay,
-		'time_constant':time_constant
+		'time_constant':time_constant,
+		'angle':angle,
+		'identifier':identifier
 	}
 	if not test:
 		srs.set_time_constant(lockin, time_constant)
