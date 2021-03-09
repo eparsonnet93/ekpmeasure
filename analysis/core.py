@@ -7,48 +7,8 @@ import warnings
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-__all__ = ('Dataset', 'Data', 'dataset', 'merge')
 
-def merge(datasets):
-	"""merge datasets. need docstring"""
-	
-	if not hasattr(datasets, '__iter__'):
-		raise TypeError('datasets is not iterable.')
-		
-	columns = datasets[0].columns
-	for dset in datasets[1:]:
-		if (columns != dset.columns).all():
-			raise ValueError('supplied datasets have different columns!')
-	
-	for i, dset in enumerate(datasets):
-		if i == 0:
-			new_path = dset.index_to_path
-			new_df = pd.DataFrame(dset)
-		else:
-			new_path = pd.concat((new_path, dset.index_to_path), ignore_index = True)
-			new_df = pd.concat((new_df, pd.DataFrame(dset)), ignore_index = True)
-			
-	path = _convert_ITP_to_path_to_index(new_path)
-	
-	return Dataset(path,new_df)
-
-def _convert_ITP_to_path_to_index(index_to_path):
-	"""convert index_to_path pandas series to path_to_index dict 
-	----
-	index_to_path:(pandas.series)
-
-	returns
-	path_to_index:(dict) {path:[indices corresponding to that path]}
-	"""
-	path_to_index = dict()
-	for i in index_to_path.index:
-		index, path = i, index_to_path[i]
-		if path in set(path_to_index.keys()):
-			path_to_index[path].append(index)
-		else:
-			path_to_index.update({path:[index]})
-	return path_to_index
-
+__all__ = ('Dataset', 'Data', 'dataset')
 
 def construct_Dataset_from_dataframe(function):
 
@@ -67,6 +27,23 @@ def construct_Dataset_from_dataframe(function):
 
 	return wrapper
 
+def _convert_ITP_to_path_to_index(index_to_path):
+	"""convert index_to_path pandas series to path_to_index dict 
+	----
+	index_to_path:(pandas.series)
+
+	returns
+	path_to_index:(dict) {path:[indices corresponding to that path]}
+	"""
+	path_to_index = dict()
+	for i in index_to_path.index:
+		index, path = i, index_to_path[i]
+		if path in set(path_to_index.keys()):
+			path_to_index[path].append(index)
+		else:
+			path_to_index.update({path:[index]})
+	return path_to_index
+
 class Dataset(pd.DataFrame):
 	"""
 	Dataset class for analysis. subclass of pandas.DataFrame. Used to manipulate meta data with reference to the real files that can be retrieved when necessary.
@@ -76,7 +53,7 @@ class Dataset(pd.DataFrame):
 	initializer: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
 	"""
 
-	def __init__(self, path, initializer,readfileby=None):
+	def __init__(self, path, initializer, readfileby=None):
 		super().__init__(initializer)
 		self.attrs['path'] = path
 		self.attrs['index_to_path'] = self._construct_index_to_path(path, initializer)
@@ -108,6 +85,7 @@ class Dataset(pd.DataFrame):
 	@construct_Dataset_from_dataframe
 	def head(*args, **kwargs):
 		return pd.DataFrame.head(*args, **kwargs)
+
 	
 	def _construct_index_to_path(self, path, initializer):
 		"""
@@ -218,7 +196,7 @@ class Dataset(pd.DataFrame):
 				try:
 					tdf = readfileby(self.index_to_path[index_of_original] + filename_index_to_path_dict[index_of_original])
 				except Exception as e:
-					raise Exception('error reading data. ensure self.readfileby is correct. self.readfileby is currently set to {}.\nError is: {}'.format(self.readfileby.__name__, e))
+					raise Exception('error reading data. ensure self.readfileby is correct and that readfileby returns a pandas dataframe. self.readfileby is currently set to {}.\nError was: {}'.format(self.readfileby.__name__, e))
 
 				if i == 0:
 					columns_set = set(tdf.columns)
@@ -263,6 +241,155 @@ class Dataset(pd.DataFrame):
 					pass
 		return Data(out)
 
+		
+class iDataIndexer():
+	
+	def __init__(self, initializer):
+		self.indexed_dict = initializer
+		return 
+	
+	def __getitem__(self, i):
+
+		if i<0:
+			index = len(self.indexed_dict) + i
+		else:
+			index = i
+		return Data({index: self.indexed_dict[index]})
+
+class Data(dict):
+	"""subclass of dict
+
+	used for grouped real data. dict structure is as follows: 
+	{index:
+		{
+		'data':np.array(the real data), 
+		'definition':dict(describing which data is contained)
+		}
+	}
+	"""
+
+	def __init__(self, initializer):
+		super().__init__(initializer)
+
+	@property
+	def iloc(self):
+		"""indexing like pandas iloc. This returns Data class of specified index. 
+		usage : Data.iloc[0]
+		"""
+		return iDataIndexer(self.to_dict())
+
+	def mean(self, inplace = False):
+		"""
+		return data class where data is average across axis 0
+		----
+		inplace: (bool) do the operation inplace
+		"""
+		
+		if not inplace:
+			tmp_out = {}
+			for key in self:
+				tmp_out.update({key:self[key].copy()})
+				data = self[key]['data']
+				mean_data = {}
+				for k in data:
+					if len(data[k].shape) == 1: #1d data
+						mean_data.update({k:data[k]})
+					else:
+						mean_data.update({k:np.mean(data[k], axis = 0)})
+				tmp_out[key].update({'data':mean_data})
+			return Data(tmp_out)
+
+		else:
+			for key in self:
+				data = self[key]['data']
+				mean_data = {k:np.mean(data[k], axis = 0) for k in data}
+				self[key].update({'data':mean_data})
+			return Data(self)
+
+	def apply(self, data_function, kwargs_for_function=None, inplace = False):
+		"""apply data_function to the data in each index. returns a data class
+		----
+		data_function: (function or array-like(function,)) f(dict) -> dict. if array-like, functions will be applied sequentially
+		kwargs_for_function: (dict or array-like(dict,)) kwargs for data_function in order to pass additional arguments to the functions being applied
+		inplace: (bool) do the operation inplace
+		"""
+		data_functions = np.array([data_function]).flatten()
+		if type(kwargs_for_function) == type(None):
+			kwargs_for_functions = [{} for ijk in range(len(data_functions))]
+		else:
+			kwargs_for_functions = np.array([kwargs_for_function]).flatten()
+
+		if len(kwargs_for_functions) != len(data_functions):
+			raise ValueError('kwargs_for_function does not match in count to the number of data_functions supplied')
+
+		tmp_out = self.to_dict().copy()
+
+		for data_function, kwargs_for in zip(data_functions, kwargs_for_functions):
+			for key in tmp_out.keys():
+				internal_out = {
+					'definition':tmp_out[key]['definition'],
+					'data':data_function(tmp_out[key]['data'].copy(), **kwargs_for)
+				}
+				tmp_out.update({key:internal_out})
+
+		if inplace:
+			self.__init__(tmp_out)
+			return
+		return Data(tmp_out)
+
+	def to_dict(self):
+		"""returns a dict class with identical structure"""
+		return {key: self[key] for key in self.keys()}
+
+	def plot(self, x=None, y=None, ax=None):
+		"""simple plot of all data vs key specified by x
+
+		colors correspond to different keys (groups)
+		----
+		
+		"""
+		if ax == None:
+			fig, ax = plt.subplots()
+			return_fig = True
+		else:
+			return_fig = False
+
+		
+		colors = [cm.viridis(x) for x in np.linspace(0, 1, len(self.keys()))]
+
+		for color, index in zip(colors, self.keys()):
+			if x == None:
+				data_keys_to_plot = list(self[index]['data'].keys())
+			else:
+				xs = self[index]['data'][x]
+				data_keys_to_plot = set(self[index]['data'].keys()) - set({x})
+
+			if type(y) == type(None):
+				pass
+			else:
+				data_keys_to_plot = set(np.array([y]).flatten())
+				
+
+			for plotkey in data_keys_to_plot:
+				to_plot = self[index]['data'][plotkey]
+				
+				if len(to_plot.shape) == 1: #1d data
+					if x == None:
+						ax.plot(to_plot, color = color)
+					else:
+						ax.plot(xs, to_plot, color = color)
+					continue
+					
+				for i in range(to_plot.shape[0]):
+					if x == None:
+						ax.plot(to_plot[i,:], color = color)
+					else:
+						ax.plot(xs[i,:], to_plot[i,:], color = color)
+
+		if return_fig:
+			return fig, ax
+		else:
+			return ax
 
 class dataset(Dataset):
 	"""
@@ -277,6 +404,7 @@ class dataset(Dataset):
 		"""
 		subclass of Dataset - used to initialize/read from a specific folder
 		"""
+		warnings.showwarning('dataset class is deprecated. use load_Dataset() instead', DeprecationWarning, '', 0,)
 		tmp_df = self._build_df(path, meta_data)
 		super().__init__(path, tmp_df)
 
@@ -329,126 +457,3 @@ class dataset(Dataset):
 			else:
 				print(fname)
 				break
-		
-
-
-class Data(dict):
-	"""subclass of dict
-
-	used for grouped real data. dict structure is as follows: 
-	{index:
-		{
-		'data':np.array(the real data), 
-		'definition':dict(describing which data is contained)
-		}
-	}
-	"""
-
-	def __init__(self, initializer):
-		super().__init__(initializer)
-
-	def mean(self, inplace = False):
-		"""
-		return data class where data is average across axis 0
-		----
-		inplace: (bool) do the operation inplace
-		"""
-		
-		if not inplace:
-			tmp_out = {}
-			for key in self:
-				tmp_out.update({key:self[key].copy()})
-				data = self[key]['data']
-				mean_data = {}
-				for k in data:
-					if len(data[k].shape) == 1: #1d data
-						mean_data.update({k:data[k]})
-					else:
-						mean_data.update({k:np.mean(data[k], axis = 0)})
-				tmp_out[key].update({'data':mean_data})
-			return Data(tmp_out)
-
-		else:
-			for key in self:
-				data = self[key]['data']
-				mean_data = {k:np.mean(data[k], axis = 0) for k in data}
-				self[key].update({'data':mean_data})
-			return Data(self)
-
-	def apply(self, data_function, kwargs_for_function=None, inplace = False):
-		"""apply data_function to the data in each index. returns a data class
-		----
-		data_function: (function or array-like(function,)) f(dict) -> dict. if array-like, functions will be applied sequentially
-		kwargs_for_function: (dict or array-like(dict,)) kwargs for data_function in order to pass additional arguments to the functions being applied
-		inplace: (bool) do the operation inplace
-		"""
-		data_functions = np.array([data_function]).flatten()
-		if type(kwargs_for_function) == type(None):
-			kwargs_for_functions = [{} for ijk in range(len(data_functions))]
-		else:
-			kwargs_for_functions = np.array([kwargs_for_function]).flatten()
-
-		if len(kwargs_for_functions) != len(data_functions):
-			raise ValueError('kwargs_for_function does not match in count to the number of data_functions supplied')
-
-		tmp_out = self.to_dict().copy()
-
-		for data_function, kwargs_for in zip(data_functions, kwargs_for_functions):
-			for key in tmp_out.keys():
-				internal_out = {
-					'definition':tmp_out[key]['definition'],
-					'data':data_function(tmp_out[key]['data'], **kwargs_for)
-				}
-				tmp_out.update({key:internal_out})
-
-		if inplace:
-			self.__init__(tmp_out)
-			return
-		return Data(tmp_out)
-
-	def to_dict(self):
-		"""returns a dict class with identical structure"""
-		return {key: self[key] for key in self.keys()}
-
-	def plot(self, x=None, y=None):
-		"""simple plot of all data vs key specified by x
-
-		colors correspond to different keys (groups)
-		"""
-
-		#todo improve this function
-		fig, ax = plt.subplots()
-
-		
-		colors = [cm.viridis(x) for x in np.linspace(0, 1, len(self.keys()))]
-
-		for color, index in zip(colors, self.keys()):
-			if x == None:
-				data_keys_to_plot = list(self[index]['data'].keys())
-			else:
-				xs = self[index]['data'][x]
-				data_keys_to_plot = set(self[index]['data'].keys()) - set({x})
-
-			if type(y) == type(None):
-				pass
-			else:
-				data_keys_to_plot = set(np.array([y]).flatten())
-				
-
-			for plotkey in data_keys_to_plot:
-				to_plot = self[index]['data'][plotkey]
-				
-				if len(to_plot.shape) == 1: #1d data
-					if x == None:
-						ax.plot(to_plot, color = color)
-					else:
-						ax.plot(xs, to_plot, color = color)
-					continue
-					
-				for i in range(to_plot.shape[0]):
-					if x == None:
-						ax.plot(to_plot[i,:], color = color)
-					else:
-						ax.plot(xs[i,:], to_plot[i,:], color = color)
-
-		return fig, ax

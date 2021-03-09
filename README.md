@@ -11,8 +11,8 @@ Repository of computer control code for various experiments as well as analysis 
 > 1. [Analysis Overview](#analysis)
 
 >>a. [Dataset](#dataset)
-		
->>>i. [dataset](#dataset-1)
+
+>>> i. [load_dataset](#load_dataset)
 	
 >>b. [Data](#data)
 
@@ -100,13 +100,13 @@ This returns a [Data](#data) class. As a brief example of how to use the Dataset
 
 ```
 
-#### dataset
-Subclass of Dataset which does not require initializer argument. Searches a folder for a pickle file (.pkl) of name 'meta_data' and will assist in creating such a file if none exists. This can be done by
+#### load_dataset
+One can load a Dataset from a path. This method earches a folder for a pickle file (.pkl) of name 'meta_data' or will inform the user that none exists. 
 
 ```python
-dataset.generate_meta_data(mapper)
+load_dataset(path)
 ```
-mapper is a function of a single filename that returns a dict of parameters . For example, in the example above mapper might return
+If no meta_data exists, one can use the generate_meta_data method. mapper is a function of a single filename that returns a dict of parameters for meta_data. For example, in the example
 
 ```python
 def mapper(fname):
@@ -128,6 +128,13 @@ def mapper(fname):
 	'param3':'1mv',
 	'filename':'10V_100ns_1mv.csv'
 }
+```
+
+then one might use:
+
+```python
+generate_meta_data(path, mapper)
+dset = load_dataset(path)
 ```
 
 ### Data

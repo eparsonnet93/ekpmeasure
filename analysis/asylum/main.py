@@ -21,11 +21,11 @@ def plot_pfm(imgdata_dict, meta_data, cmap='viridis', figsize = (20,10)):
         
     return fig, axs
 
-def load_image_from_binary(path, return_meta_data = True):
+def load_image_from_binary(path, return_meta_data = False):
     """
     loads data from binary file (from asylum research) into a numpy array
     
-    Returns: dict({'label':(numpy array) imgdata}
+    Returns: pandas.DataFrame({'label':(numpy array) imgdata})
     ----
     
     path: str
@@ -61,13 +61,15 @@ def load_image_from_binary(path, return_meta_data = True):
         except IndexError:
             raise IndexError('label count does not match data count. i.e. imgdata does not have data for each label (is this file a pfm loop??)')
         out.update({label: imgdata})
+
+    #out = pd.DataFrame(out, index = [0])
         
     if return_meta_data:
         return out, meta_data
     else:
         return out
 
-def load_pfmloop_from_binary(path, return_meta_data = True):
+def load_pfmloop_from_binary(path, return_meta_data = False):
     """
     loads data from binary file (from asylum research) into a numpy array
     
