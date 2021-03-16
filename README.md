@@ -20,7 +20,6 @@ Repository of computer control code for various experiments as well as analysis 
 
 >>> i. [n_param_scan](#n_param_scan)
 
->> b. [trial](#trial)
 
 ## Analysis
 ### Dataset
@@ -196,4 +195,40 @@ The experiment base class serves to manage scans over desired parameters via the
 
 #### n_param_scan
 
-#### trial
+n_param_scan can be used to scan over a set of parameters in an experiment
+
+```python
+#set up the experiment class
+exp = magnon.Magnon(lockin=lockin, current_source='current_source', run_function=magnon.nonlocal_run_function_lockin_only)
+exp.config_path(path)
+```
+
+now you can configure your n_param_scan
+
+```python
+#parameters to scan over
+kw_scan_params = {
+    'frequency':['147hz',],
+    'amplitude':['200mv', '500mv', '1000mv', '1500mv','2000mv'],
+    'harmonic':[1]
+}
+
+#fixed params for each scan
+fixed_params = {
+    'lockin':lockin,
+    'identifier':'D19',
+    'angle':40,
+    'channel_width':1,
+    'channel_length':20,
+    'bar_width':1.5,
+    'nave':5,
+    'delay':'default', 
+    'time_constant':'1s',
+    'sensitivity':'10uv/pa'
+}
+
+#order of keys for scan params
+order = ['harmonic', 'frequency', 'amplitude']
+
+exp.n_param_scan(kw_scan_params, fixed_params, order)
+```
