@@ -77,6 +77,16 @@ class Dataset(pd.DataFrame):
 	@property
 	def index_to_path(self):
 		return self.attrs['index_to_path']
+
+	@property
+	def summary(self):
+		"""return a brief summary of the data in your Dataset. Returns Dict"""
+		summary = dict()
+		for column in self.columns:
+			if column == self.pointercolumn:
+				continue
+			summary.update({column: set(self[column].values)})
+		return summary
 	
 	@construct_Dataset_from_dataframe
 	def query(*args, **kwargs):
@@ -86,6 +96,9 @@ class Dataset(pd.DataFrame):
 	def head(*args, **kwargs):
 		return pd.DataFrame.head(*args, **kwargs)
 
+	@construct_Dataset_from_dataframe
+	def filter_on_column(self, column, function, **kwargs_for_function):
+		return self[self[column].apply(function, **kwargs_for_function).values].reset_index()
 	
 	def _construct_index_to_path(self, path, initializer):
 		"""
@@ -124,6 +137,7 @@ class Dataset(pd.DataFrame):
 
 	def summarize(self):
 		"""return a brief summary of the data in your Dataset. Returns Dict"""
+		warnings.showwarning('summarize() is deprecated please use .summary', DeprecationWarning, '', 0,)
 		summary = dict()
 		for column in self.columns:
 			if column == self.pointercolumn:
@@ -241,6 +255,25 @@ class Dataset(pd.DataFrame):
 					pass
 		return Data(out)
 
+def _check_definition_contains_or(definition_dict, key, values):
+		"""need docstring"""
+		out = False
+		for value in values:
+			if (np.array(list(definition_dict[key])) == value).any():
+				out = True
+				break
+		return out
+
+def _summarize_data(data):
+	out = {}
+	for index in data:
+		defn = data[index]['definition']
+		for key in defn:
+			try:
+				out[key].update(set({value for value in defn[key]}))
+			except KeyError:
+				out.update({key:set({value for value in defn[key]})})
+	return out
 		
 class iDataIndexer():
 	
@@ -276,7 +309,55 @@ class Data(dict):
 		"""indexing like pandas iloc. This returns Data class of specified index. 
 		usage : Data.iloc[0]
 		"""
-		return iDataIndexer(self.to_dict())
+		return iDataIndexer(self.to_dict().copy())
+
+	@property 
+	def summary(self):
+		"""return a summary of the definitions in data"""
+		return _summarize_data(self.to_dict().copy())
+
+	def contains(self, condition):
+		"""returns data specified by condition
+		----
+		condition: (dict) key is definition key, value is value to search for. multiple values provided will be joined by logical or, i.e. {'high_voltage_v':{'100mv', '200mv'}} will search for all data with '100mv' or '200mv' for high_voltage_v. multiple keys provided will be joined with logical AND. i.e. {'x':1, 'y':2} will search for x = 1 and y = 2.
+
+		example: 
+		Data.constains({'high_voltage_v':'100mv'}) will return all data indices with high_voltage_v containing 100mv
+		"""
+		for key in condition:
+			if not hasattr(condition[key], '__iter__'):
+				raise AttributeError('iterable not provided as value in condition arg. value associated with key "{}" is type {}'.forat(key, type(condition[key])))
+
+			if type(condition[key]) == str:
+				raise TypeError('condition value must not be str. check key: {}.'.format(key) + ' try {' +  '"{}": ["{}"]'.format(key, condition[key]) + '}?')
+
+		indices = [] #to hold which data satisfies condition
+
+		for condition_key in condition:
+			for index in self:
+				defn = self[index]['definition']
+				if _check_definition_contains_or(defn, condition_key, condition[condition_key]):
+					indices.append(index)
+
+		#we will append the index to indices everytime the logical or statement for the specific condition holds
+		#to check the logical and statement over various keys, we need to ensure that for each key we did indeed append the index to indices:
+		indices = np.array(indices)
+		indices_set = set(indices)
+		indices_out = []
+		for index in indices_set:
+			if len(indices[indices == index]) == len(condition.keys()):
+				indices_out.append(index)
+			else:
+				pass
+
+
+		#build the final Data:
+		out = {}
+		for new, old in enumerate(indices_out):
+			out.update({new: self[old]})
+
+		return Data(out)
+
 
 	def mean(self, inplace = False):
 		"""

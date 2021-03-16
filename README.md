@@ -192,7 +192,7 @@ def some_function(data_dict):
 Control is a repository of instrument control code in addition to experimental control (often making use of one or more instruments). Experimental data obtained by using the [experiment](#experiment) class will automatically generate meta_data for usage in analysis.
 
 ### experiment
-The experiment class serves to manage scans over desired parameters via the [n_param_scan](#n_param_scan) method and properly save + generate meta_data for usage in [analysis](#analysis)
+The experiment base class serves to manage scans over desired parameters via the [n_param_scan](#n_param_scan) method and properly save + generate meta_data for usage in [analysis](#analysis)
 
 #### n_param_scan
 

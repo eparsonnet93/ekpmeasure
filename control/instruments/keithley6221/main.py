@@ -8,7 +8,7 @@ def restore(current_source):
     current_source.write("*rst")
     return
 
-def set_output_sin(current_source, frequency, amplitude):
+def set_output_sin(current_source, frequency, amplitude, compliance = 1.1):
     """sets the current source to output a sin waveform with specified amp and freq
     ----
     frequency: (str) allowed suffix: khz, hz
@@ -33,7 +33,8 @@ def set_output_sin(current_source, frequency, amplitude):
     SOUR:WAVE:PMAR:STAT ON
     SOUR:WAVE:PMAR:OLIN 4
     SOUR:WAVE:RANG BEST
-    """.format(freq, amp)
+    SOUR:CURR:COMP {}
+    """.format(freq, amp, compliance)
     current_source.write(command)
     return
 

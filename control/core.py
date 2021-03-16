@@ -2,55 +2,90 @@ import pandas as pd
 import numpy as np
 import time
 import itertools
+import warnings
+import pyvisa
 
 from .misc import get_save_name
 
 __all__ = ('trial','experiment')
 
 class experiment():
-    
-    def __init__(self):
-        return
-    
-    def config(self, run_function, path):
-        self.run_function = run_function
-        self.path = path
-    
-    def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order):
-        """need docstring! scan_param_order: the first param will be scanned first (others are fixed)
-        
-        kw_scan_params: (dict) with key and array like params to scan over
-        fixed_params: (dict) fixed params to be passed to trial each time
-        """
-        if not hasattr(self, 'run_function'):
-            raise AttributeError('run_function not yet defined.')
-        if not hasattr(self, 'path'):
-            raise AttributeError('no save path defined.')
-            
-        if set(scan_param_order) != set(kw_scan_params.keys()):
-            raise KeyError('kw_scan_params do not have the same keys as scan_param_order')
-            
-        for key in kw_scan_params:
-            params = kw_scan_params[key]
-            if hasattr(params, '__getitem__') and type(params) != str:
-                pass
-            else:
-                raise TypeError('kw_scan_param: {} must be array-like of params. it is not.'.format(key))
-                
-        iterable_param_list = list(
-            itertools.product(
-                *(kw_scan_params[key] for key in scan_param_order[::-1])
-            )
-        )
-        
-        for params in iterable_param_list:
-            kwargs = fixed_params
-            for i, key in enumerate(scan_param_order[::-1]):
-                kwargs.update({key:params[i]})
-            
-            trial(self.run_function, kwargs, self.path)
-            time.sleep(1)
-        return 
+	
+	def __init__(self):
+		return
+
+	def __repr__(self):
+		out = self.__dict__.copy()
+		try:
+			out.update({'run_function':self.run_function.__name__})
+		except:
+			pass
+
+		for key in out:
+			#print out the actual instruments if we can
+			obj = out[key]
+			if type(obj) == pyvisa.resources.gpib.GPIBInstrument:
+				try:
+					out.update({key:obj.query("*idn?")})
+				except:
+					pass
+		return out.__repr__()
+
+	def __str__(self):
+		return self.__repr__()
+
+	def config_path(self, path):
+		self.path = path
+
+	def config(self, run_function, path):
+		warnings.showwarning('config is deprecated.', DeprecationWarning, '', 0,)
+		self.run_function = run_function
+		self.path = path
+	
+	def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order):
+		"""need docstring! scan_param_order: the first param will be scanned first (others are fixed)
+		
+		kw_scan_params: (dict) with key and array like params to scan over
+		fixed_params: (dict) fixed params to be passed to trial each time
+		"""
+		if not hasattr(self, 'terminate'):
+			raise AttributeError('no terminate function specified')
+		if not hasattr(self, 'run_function'):
+			raise AttributeError('run_function not yet defined.')
+		if not hasattr(self, 'path'):
+			raise AttributeError('no save path defined.')
+			
+		if set(scan_param_order) != set(kw_scan_params.keys()):
+			raise KeyError('kw_scan_params do not have the same keys as scan_param_order')
+		try:
+			for key in kw_scan_params:
+				params = kw_scan_params[key]
+				if hasattr(params, '__getitem__') and type(params) != str:
+					pass
+				else:
+					raise TypeError('kw_scan_param: {} must be array-like of params. it is not.'.format(key))
+					
+			iterable_param_list = list(
+				itertools.product(
+					*(kw_scan_params[key] for key in scan_param_order[::-1])
+				)
+			)
+			
+			for params in iterable_param_list:
+				kwargs = fixed_params
+				for i, key in enumerate(scan_param_order[::-1]):
+					kwargs.update({key:params[i]})
+				
+				trial(self.run_function, kwargs, self.path)
+				time.sleep(1)
+			return 
+		except Exception as e:
+			print(e)
+			print('terminating.')
+		finally:
+			self.terminate()
+			print('done.')
+			return
 
 
 def trial(run_function, run_function_args, path):
