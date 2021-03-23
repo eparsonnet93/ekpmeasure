@@ -41,6 +41,9 @@ class experiment():
 		warnings.showwarning('config is deprecated.', DeprecationWarning, '', 0,)
 		self.run_function = run_function
 		self.path = path
+
+	def checks(self, params):
+		pass
 	
 	def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order):
 		"""need docstring! scan_param_order: the first param will be scanned first (others are fixed)
@@ -48,6 +51,11 @@ class experiment():
 		kw_scan_params: (dict) with key and array like params to scan over
 		fixed_params: (dict) fixed params to be passed to trial each time
 		"""
+		#check to make sure no errors
+		params = kw_scan_params.copy()
+		params.update(fixed_params)
+		self.checks(params)
+
 		if not hasattr(self, 'terminate'):
 			raise AttributeError('no terminate function specified')
 		if not hasattr(self, 'run_function'):
