@@ -71,7 +71,15 @@ def determine_time_constant_from_frequency(frequency, multiplier = 3):
 
 
 def initialize_lockin(lockin, trigger, harmonic, time_constant, frequency = None, amplitude = None,):
-	"""need docstring"""
+	"""initialize lockin (srs 830) 
+	----
+	lockin: (pyvisa.resources.gpib.GPIBInstrument) SRS830
+	trigger: (str) 'internal' or 'external'
+	harmonic: (int) which harmonic
+	time_constant: (str) srs time constant
+	frequency: (str) if internal triggering, must supply frequency and amplitude
+	amplitude: (str) in voltage; if internal triggering, must supply frequency and amplitude
+	"""
 	trigger = trigger.lower()
 	assert trigger == 'internal' or trigger == 'external', 'Trigger: {} not allowed. Must me "internal" or "external"'.format(trigger)
 
@@ -86,6 +94,7 @@ def initialize_lockin(lockin, trigger, harmonic, time_constant, frequency = None
 	return 
 
 def source_on(frequency, amplitude, lockin=None, current_source=None):
+	"""turn on the source. if lockin is supplied, will turn on lockin output. if current_source is supplied, will turn on current source"""
 	if type(lockin) != type(None) and type(current_source) != type(None):
 		raise ValueError('must supply either a lockin or current_source, not both')
 
@@ -109,7 +118,11 @@ def source_on(frequency, amplitude, lockin=None, current_source=None):
 	return
 
 def set_lockin_sensitivity(lockin, sensitivity='default', sleep_time = 10):
-	"""need docstring"""
+	"""set the sensitivity on the lockin. 'default' will auto-gain the lockin
+	----
+	sensitivity: (str) sensitivity to set. default will auto-gain
+	sleep_time: (int or float) time to sleep to let the lockin stabilize
+	"""
 	time.sleep(sleep_time)
 
 	if sensitivity == 'default':
@@ -127,6 +140,8 @@ def magnon_run_function(lockin, harmonic, frequency, amplitude, current_source=F
 	identifier='D', angle=0, channel_width=0, bar_width=0, channel_length=0, nave=100, 
 	delay='default', time_constant='default', sensitivity='default'):
 	"""
+	run function for magnon (nonlocal) experiment.
+
 	can be used with control.core.trial()
 
 	returns: basename (str), meta_data (dict), data (pandas.dataframe)
