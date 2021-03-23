@@ -9,7 +9,8 @@ from ..instruments import keithley6221 as k6221
 from ..instruments import misc
 from .. import core
 
-__all__ = ('determine_time_constant_from_frequency', 'Magnon', 'magnon_run_function')
+__all__ = ('determine_time_constant_from_frequency', 'Magnon', 'magnon_run_function', 
+	'nonlocal_run_function_lockin_only', 'nonlocal_run_function')
 
 
 def get_time_constant_float(time_constant):
@@ -284,7 +285,7 @@ def nonlocal_run_function_lockin_only(lockin, frequency, amplitude, harmonic, id
 	time_constant: (str) default will be 10 x 1/frequency (or cieling nearest allowed lockin timeconstant)
 	sensitivity: (str) default will autogain the lockin. 
 	"""
-	warnings.showwarning('nonlocal_run_function_lockin_only() is deprecated please use .summary', DeprecationWarning, '', 0,)
+	warnings.showwarning('nonlocal_run_function_lockin_only() is deprecated please use magnon_run_function()', DeprecationWarning, '', 0,)
 	#set up the basename and meta_data
 	basename = '{}_{}_{}_{}_{}_{}_{}_{}_{}'.format(
 		identifier, frequency, amplitude, harmonic, angle, nave, channel_width, bar_width, channel_length
@@ -373,7 +374,7 @@ def nonlocal_run_function(lockin, current_source, frequency, amplitude, harmonic
 	delay: (float) delay time between averages
 	time_constant: (str) default will be 3 x 1/frequency (or cieling nearest allowed lockin timeconstant)
 	"""
-	warnings.showwarning('nonlocal_run_function() is deprecated please use .summary', DeprecationWarning, '', 0,)
+	warnings.showwarning('nonlocal_run_function() is deprecated please use magnon_run_function()', DeprecationWarning, '', 0,)
 	#set up the basename and meta_data
 	basename = '{}_{}_{}_{}_{}_{}_{}_{}_{}_{}'.format(
 		identifier, frequency, amplitude, harmonic, angle, nave, delay, channel_width, bar_width, channel_length
