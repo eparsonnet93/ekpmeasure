@@ -46,10 +46,38 @@ class experiment():
 		pass
 	
 	def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order):
-		"""need docstring! scan_param_order: the first param will be scanned first (others are fixed)
-		
+		"""perform a scan over a set of params
+		----
 		kw_scan_params: (dict) with key and array like params to scan over
 		fixed_params: (dict) fixed params to be passed to trial each time
+		scan_param_order: (array-like) which order to scan params
+
+		example: 
+
+		kw_scan_params = {
+			'frequency':['147hz', '47hz'],
+			'amplitude':['50ua','100ua', '250ua', '500ua', '750ua', '850ua','1000ua',],
+			'harmonic':[1,2]
+		}
+
+
+		fixed_params = {
+			'lockin':lockin,
+			'current_source':current_source,
+			'identifier':'D0',
+			'angle':20,
+			'channel_width':2,
+			'channel_length':20,
+			'bar_width':1.5,
+			'nave':5,
+			'delay':'default', 
+			'time_constant':'3s',
+			'sensitivity':'10uv/pa',
+		}
+
+		order = ['harmonic', 'frequency', 'amplitude']
+
+		exp.n_param_scan(kw_scan_params, fixed_params, order)
 		"""
 		#check to make sure no errors
 		params = kw_scan_params.copy()
@@ -99,7 +127,7 @@ class experiment():
 def trial(run_function, run_function_args, path):
 	"""
 	A trial  for an experiment. This will save to path with a unique name
-	currently supported run_functions are (run_preset_then_2pusle_TDS620B, nonlocal_run_function,) more to come
+	currently supported run_functions are (run_preset_then_2pusle_TDS620B, magnon_run_function,) more to come
 
 	any run_function which returns ((str) base_name, (dict) meta_data, (pandas.dataframe) data) should work, but only those indicated above are known to work
 	----
