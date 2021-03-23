@@ -9,7 +9,7 @@ from ..instruments import keithley6221 as k6221
 from ..instruments import misc
 from .. import core
 
-__all__ = ('nonlocal_run_function', 'determine_time_constant_from_frequency', 'Magnon', 'nonlocal_run_function_lockin_only', 'run_func')
+__all__ = ('determine_time_constant_from_frequency', 'Magnon', 'run_func')
 
 
 def nonlocal_run_function_lockin_only(lockin, frequency, amplitude, harmonic, identifier='D', angle=0, 
@@ -34,7 +34,7 @@ def nonlocal_run_function_lockin_only(lockin, frequency, amplitude, harmonic, id
 	time_constant: (str) default will be 10 x 1/frequency (or cieling nearest allowed lockin timeconstant)
 	sensitivity: (str) default will autogain the lockin. 
 	"""
-
+	warnings.showwarning('nonlocal_run_function_lockin_only() is deprecated please use .summary', DeprecationWarning, '', 0,)
 	#set up the basename and meta_data
 	basename = '{}_{}_{}_{}_{}_{}_{}_{}_{}'.format(
 		identifier, frequency, amplitude, harmonic, angle, nave, channel_width, bar_width, channel_length
@@ -135,6 +135,7 @@ def nonlocal_run_function(lockin, current_source, frequency, amplitude, harmonic
 	delay: (float) delay time between averages
 	time_constant: (str) default will be 3 x 1/frequency (or cieling nearest allowed lockin timeconstant)
 	"""
+	warnings.showwarning('nonlocal_run_function() is deprecated please use .summary', DeprecationWarning, '', 0,)
 	#set up the basename and meta_data
 	basename = '{}_{}_{}_{}_{}_{}_{}_{}_{}_{}'.format(
 		identifier, frequency, amplitude, harmonic, angle, nave, delay, channel_width, bar_width, channel_length
@@ -296,7 +297,23 @@ def set_lockin_sensitivity(lockin, sensitivity='default', sleep_time = 10):
 def run_func(lockin, harmonic, frequency, amplitude, current_source=False, 
 	identifier='D', angle=0, channel_width=0, bar_width=0, channel_length=0, nave=100, 
 	delay='default', time_constant='default', sensitivity='default'):
-	"""need docstring"""
+	"""
+	can be used with control.core.trial()
+
+	returns: basename (str), meta_data (dict), data (pandas.dataframe)
+	----
+	lockin: (pyvisa.resources.gpib.GPIBInstrument)
+	harmonic: (int) which harmonic to measure
+	frequency: (str) e.g. 1khz
+	amplitude in volts or amps: (str) e.g. 1v, 100ua
+	current_source:(False or pyvisa.resources.gpib.GPIBInstrument) - if none provided, will use the lockin alone (internal reference)
+	identifer: (str) e.g. D1
+	angle: (int) e.g. 45
+	nave: (int) how many averages to do
+	delay: (float) delay time between averages default is 3xdelay 
+	time_constant: (str) default will be 10 x 1/frequency (or cieling nearest allowed lockin timeconstant)
+	sensitivity: (str) default will autogain the lockin
+	"""
 	#set up the basename and meta_data
 	basename = '{}_{}_{}_{}_{}_{}_{}_{}_{}'.format(
 		identifier, frequency, amplitude, harmonic, angle, nave, channel_width, bar_width, channel_length
