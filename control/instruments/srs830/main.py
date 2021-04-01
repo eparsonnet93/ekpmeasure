@@ -1,9 +1,11 @@
 from .. import misc
+import time
 
 __all__ = (
 	'get_lockin_r_theta','set_harmonic', 'set_time_constant', 'get_time_constant', 'auto_gain',
 	'get_sensitivity', 'set_sensitivity', 'get_reference_source', 'set_reference_source',
-	'set_internal_frequency', 'set_internal_amplitude'
+	'set_internal_frequency', 'set_internal_amplitude', 'get_time_constant_from_frequency',
+	'get_time_constant_float', 'set_lockin_sensitivity', 'initialize_lockin'
 )
 
 
@@ -24,6 +26,105 @@ sensitivity_to_index_mapper = {
 }
 
 index_to_sensitivity_mapper = {sensitivity_to_index_mapper[key]:key for key in sensitivity_to_index_mapper}
+
+def initialize_lockin(lockin, trigger, harmonic, time_constant, frequency = None, amplitude = None,):
+	"""initialize lockin (srs 830) 
+	----
+	lockin: (pyvisa.resources.gpib.GPIBInstrument) SRS830
+	trigger: (str) 'internal' or 'external'
+	harmonic: (int) which harmonic
+	time_constant: (str) srs time constant
+	frequency: (str) if internal triggering, must supply frequency and amplitude
+	amplitude: (str) in voltage; if internal triggering, must supply frequency and amplitude
+	"""
+	trigger = trigger.lower()
+	assert trigger == 'internal' or trigger == 'external', 'Trigger: {} not allowed. Must me "internal" or "external"'.format(trigger)
+
+	if trigger == 'internal' and (type(frequency) == type(None) or type(amplitude) == type(None)):
+		raise ValueError('must supply a frequency if internal triggering. currently supplied None')
+	
+	#initialize
+	set_reference_source(lockin, trigger)
+	set_time_constant(lockin, time_constant)
+
+	set_harmonic(lockin, harmonic)
+	return 
+
+def set_lockin_sensitivity(lockin, sensitivity='default', sleep_time = 10):
+	"""set the sensitivity on the lockin. 'default' will auto-gain the lockin
+	----
+	sensitivity: (str) sensitivity to set. default will auto-gain
+	sleep_time: (int or float) time to sleep to let the lockin stabilize
+	"""
+	time.sleep(sleep_time)
+
+	if sensitivity == 'default':
+		#autogain the lockin
+		auto_gain(lockin)
+
+		#wait for the autogain to progress
+		time.sleep(10)
+	else:
+		set_sensitivity(lockin, sensitivity)
+		time.sleep(sleep_time)
+	return
+
+def get_time_constant_float(time_constant):
+	"""return a float of time_constant"""
+	warnings.showwarning('get_time_constant_float() is deprecated please use instruments.srs830.get_time_constant_float()', DeprecationWarning, '', 0,)
+	try:
+		out = time_constant.replace('s','')
+		out.replace('u', 'e-6')
+		out.replace('m', 'e-3')
+		out.replace('k', 'e3')
+		return float(out)
+	except:
+		raise TypeError('unable to convert {} to float. allowed suffixes are us, ms, s, ks'.time_constant)
+
+def get_time_constant_from_frequency(frequency, multiplier = 3):
+	"""gets the time constant from the frequency
+	----
+	frequency: (str) e.g. 47hz
+	multiplier: (int) what to multiply 1/frequency by to get the time_constant
+	"""
+	number, suffix = misc._get_number_and_suffix(frequency)
+	freq = float(str(number) + misc.freq_mapper[suffix])
+	time = multiplier*1/freq
+	sci_time = misc._scientific_notation(time)
+	
+	exponent = sci_time.split('e')[-1]
+	counter = 0
+	while float(exponent) not in set({-6, -3, 0, 3}):
+		exponent = str(int(exponent) + 1)
+		counter += 1
+		
+	number = sci_time[0]
+	if number == '2':
+		number = '3'
+	elif number != '1' and number != '3':
+		number = '10'
+		
+	for i in range(counter):
+		number = str(float(number))
+		spl = number.split('.')
+		number = spl[0][:-1] + '.' + spl[0][-1:] + spl[1]
+	
+	tmp_out = '{}e{}'.format(number, exponent)
+	#final check
+	if tmp_out[0] == '0' or tmp_out[0] == '.':
+		new_exponent = int(tmp_out.split('e')[-1])-3
+		new_number = float(tmp_out.split('e')[0])*10**3
+		tmp_out = '{}e{}'.format(new_number, new_exponent)
+		
+	try:
+		tmp_out = tmp_out.split('.')[0] + tmp_out.split('.')[1][1:]
+	except:
+		pass
+	tmp_out.replace('.','')
+	
+	tmp_out = tmp_out.split('e')[0] + misc.sci_to_time_mapper['e' + tmp_out.split('e')[-1]]
+	
+	return tmp_out
 
 def get_lockin_r_theta(lockin):
 	r, theta = lockin.query('SNAP? 3,4').split('\n')[0].split(',')

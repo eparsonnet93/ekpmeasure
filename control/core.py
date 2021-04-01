@@ -34,6 +34,11 @@ class experiment():
 	def __str__(self):
 		return self.__repr__()
 
+	def print_run_function_args(self):
+		"""print the run function arguments"""
+		print(self.run_function.__code__.co_varnames)
+		return
+
 	def config_path(self, path):
 		self.path = path
 

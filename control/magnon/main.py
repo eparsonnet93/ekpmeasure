@@ -15,6 +15,7 @@ __all__ = ('determine_time_constant_from_frequency', 'Magnon', 'magnon_run_funct
 
 def get_time_constant_float(time_constant):
 	"""return a float of time_constant"""
+	warnings.showwarning('get_time_constant_float() is deprecated please use instruments.srs830.get_time_constant_float()', DeprecationWarning, '', 0,)
 	try:
 		out = time_constant.replace('s','')
 		out.replace('u', 'e-6')
@@ -30,7 +31,7 @@ def determine_time_constant_from_frequency(frequency, multiplier = 3):
 	frequency: (str) e.g. 47hz
 	multiplier: (int) what to multiply 1/frequency by to get the time_constant
 	"""
-	
+	warnings.showwarning('determine_time_constant_from_frequency() is deprecated please use instruments.srs830.get_time_constant_from_frequency()', DeprecationWarning, '', 0,)
 	number, suffix = misc._get_number_and_suffix(frequency)
 	freq = float(str(number) + misc.freq_mapper[suffix])
 	time = multiplier*1/freq
@@ -81,6 +82,7 @@ def initialize_lockin(lockin, trigger, harmonic, time_constant, frequency = None
 	frequency: (str) if internal triggering, must supply frequency and amplitude
 	amplitude: (str) in voltage; if internal triggering, must supply frequency and amplitude
 	"""
+	warnings.showwarning('initialize_lockin() is deprecated please use instruments.srs830.initialize_lockin()', DeprecationWarning, '', 0,)
 	trigger = trigger.lower()
 	assert trigger == 'internal' or trigger == 'external', 'Trigger: {} not allowed. Must me "internal" or "external"'.format(trigger)
 
@@ -124,6 +126,7 @@ def set_lockin_sensitivity(lockin, sensitivity='default', sleep_time = 10):
 	sensitivity: (str) sensitivity to set. default will auto-gain
 	sleep_time: (int or float) time to sleep to let the lockin stabilize
 	"""
+	warnings.showwarning('set_lockin_sensitivity() is deprecated please use instruments.srs830.set_lockin_sensitivity()', DeprecationWarning, '', 0,)
 	time.sleep(sleep_time)
 
 	if sensitivity == 'default':
