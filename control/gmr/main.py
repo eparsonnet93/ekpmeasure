@@ -12,14 +12,14 @@ from .. import core
 
 __all__ = ('measure_field_and_lockin', 'gmr', 'cyclic_gmr', 'GMR')
 
-def measure_field_and_lockin(gaussmeter, lockin, navg=10):
+def measure_field_and_lockin(gaussmeter, lockin, navg=10, sleep_time = .1):
     """returns dict and std of field and resistance at the time called"""
     fields, rs, thetas = [], [], []
     
     for i in range(navg):
         field = measure_field(gaussmeter)
         r, theta = srs.get_lockin_r_theta(lockin)
-        time.sleep(.2)
+        time.sleep(sleep_time)
         fields.append(field)
         rs.append(r)
         thetas.append(theta)
@@ -27,7 +27,7 @@ def measure_field_and_lockin(gaussmeter, lockin, navg=10):
     
     return dict({'H_mean':np.mean(fields), 'H_std': np.std(fields), 'R_mean':np.mean(rs), 'R_std': np.std(rs), 'Theta_mean':np.mean(rs), 'Theta_std':np.std(thetas)})
 
-def gmr(magnet_power_supply, gaussmeter, lockin, start_current, end_current, steps=100, ramp_rate=.05, avg=5,):
+def gmr(magnet_power_supply, gaussmeter, lockin, start_current, end_current, steps=100, ramp_rate=.05, avg=5,sleep_time = .1):
     
     #go to start
     ramp_powersupply_to_current(magnet_power_supply, start_current, .3)
@@ -44,7 +44,7 @@ def gmr(magnet_power_supply, gaussmeter, lockin, start_current, end_current, ste
     currents = np.linspace(start_current, end_current, steps)
     for i, current in enumerate(currents):
         ramp_powersupply_to_current(magnet_power_supply, current, ramp_rate) #go to new current
-        measurement = measure_field_and_lockin(gaussmeter, lockin, navg=avg)
+        measurement = measure_field_and_lockin(gaussmeter, lockin, navg=avg, sleep_time = sleep_time)
         out.at[i, 'H_mean'] = measurement['H_mean']
         out.at[i, 'H_std'] = measurement['H_std']
         out.at[i, 'R_mean'] = measurement['R_mean']
@@ -54,7 +54,7 @@ def gmr(magnet_power_supply, gaussmeter, lockin, start_current, end_current, ste
     
     return out
     
-def cyclic_gmr(magnet_power_supply, gaussmeter, lockin, low_current, high_current, steps=100, ramp_rate=.05, avg=5, ramp_up_first = True):
+def cyclic_gmr(magnet_power_supply, gaussmeter, lockin, low_current, high_current, steps=100, ramp_rate=.05, avg=5, ramp_up_first = True, sleep_time = .1):
     if ramp_up_first:
         start_current = low_current
         end_current = high_current
@@ -62,8 +62,8 @@ def cyclic_gmr(magnet_power_supply, gaussmeter, lockin, low_current, high_curren
         start_current = high_current
         end_current = low_current
     
-    first_data = gmr(magnet_power_supply, gaussmeter, lockin, start_current, end_current, steps=steps, ramp_rate=ramp_rate, avg=avg)
-    second_data = gmr(magnet_power_supply, gaussmeter, lockin, end_current, start_current, steps=steps, ramp_rate=ramp_rate, avg=avg)
+    first_data = gmr(magnet_power_supply, gaussmeter, lockin, start_current, end_current, steps=steps, ramp_rate=ramp_rate, avg=avg, sleep_time = sleep_time)
+    second_data = gmr(magnet_power_supply, gaussmeter, lockin, end_current, start_current, steps=steps, ramp_rate=ramp_rate, avg=avg, sleep_time = sleep_time)
     out = pd.concat((first_data, second_data))
     return out
 
@@ -137,7 +137,7 @@ def gmr_cyclic_run_function(lockin, current_source, gaussmeter, magnet_power_sup
     #do the measurement
     out = cyclic_gmr(
         magnet_power_supply, gaussmeter, lockin, low_current, high_current, steps=steps, 
-        ramp_rate=ramp_rate, avg=nave, ramp_up_first = ramp_up_first
+        ramp_rate=ramp_rate, avg=nave, ramp_up_first = ramp_up_first, sleep_time = sleep_time
         )
 
     meta_data.update({'sensitivity': srs.get_sensitivity(lockin)})
