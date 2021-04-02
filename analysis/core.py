@@ -415,7 +415,7 @@ class Data(dict):
 					tmp_out.update({key:internal_out})
 				except Exception as e:
 					print('Error in data_function: {} \n{}'.format(data_function.__name__, e))
-					print('Skipping data key: {} with defintion: \n{}'.format(key, tmp_out[key]['defintion']))
+					print('Skipping data key: {} with defintion: \n{}'.format(key, tmp_out[key]['definition']))
 
 		if inplace:
 			self.__init__(tmp_out)
