@@ -14,8 +14,10 @@ def merge(datasets):
 		
 	columns = datasets[0].columns
 	for dset in datasets[1:]:
+		if len(columns) != len(dset.columns):
+			raise ValueError('supplied datasets do not all have the same columns!')
 		if (columns != dset.columns).all():
-			raise ValueError('supplied datasets have different columns!')
+			raise ValueError('supplied datasets do not all have the same columns!')
 	
 	for i, dset in enumerate(datasets):
 		if i == 0:

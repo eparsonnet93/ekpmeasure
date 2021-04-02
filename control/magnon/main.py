@@ -211,13 +211,13 @@ def magnon_run_function(lockin, harmonic, frequency, amplitude, current_source=F
 		current_source_to_source_on = current_source
 
 	#configure run
-	initialize_lockin(lockin, trigger, harmonic, time_constant, frequency = frequency, amplitude = amplitude)
+	srs.initialize_lockin(lockin, trigger, harmonic, time_constant, frequency = frequency, amplitude = amplitude)
 
 	#start the source (either current or lockin)
 	source_on(frequency, amplitude, lockin_to_source_on, current_source_to_source_on)
 
 	#set_lockin_sensitivity. must come after the source on
-	set_lockin_sensitivity(lockin, sensitivity, sleep_time)
+	srs.set_lockin_sensitivity(lockin, sensitivity, sleep_time)
 
 	#do the measurement
 	rs, thetas = [], []
