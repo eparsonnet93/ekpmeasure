@@ -407,11 +407,15 @@ class Data(dict):
 
 		for data_function, kwargs_for in zip(data_functions, kwargs_for_functions):
 			for key in tmp_out.keys():
-				internal_out = {
-					'definition':tmp_out[key]['definition'],
-					'data':data_function(tmp_out[key]['data'].copy(), **kwargs_for)
-				}
-				tmp_out.update({key:internal_out})
+				try:
+					internal_out = {
+						'definition':tmp_out[key]['definition'],
+						'data':data_function(tmp_out[key]['data'].copy(), **kwargs_for)
+					}
+					tmp_out.update({key:internal_out})
+				except Exception as e:
+					print('Error in data_function: {} \n{}'.format(data_function.__name__, e))
+					print('Skipping data key: {} with defintion: \n{}'.format(key, tmp_out[key]['defintion']))
 
 		if inplace:
 			self.__init__(tmp_out)
