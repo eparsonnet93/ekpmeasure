@@ -326,7 +326,7 @@ class Data(dict):
 		"""
 		for key in condition:
 			if not hasattr(condition[key], '__iter__'):
-				raise AttributeError('iterable not provided as value in condition arg. value associated with key "{}" is type {}'.forat(key, type(condition[key])))
+				raise AttributeError('iterable not provided as value in condition arg. value associated with key "{}" is type {}'.format(key, type(condition[key])))
 
 			if type(condition[key]) == str:
 				raise TypeError('condition value must not be str. check key: {}.'.format(key) + ' try {' +  '"{}": ["{}"]'.format(key, condition[key]) + '}?')
@@ -391,7 +391,7 @@ class Data(dict):
 		"""apply data_function to the data in each index. returns a data class
 		----
 		data_function: (function or array-like(function,)) f(dict) -> dict. if array-like, functions will be applied sequentially
-		kwargs_for_function: (dict or array-like(dict,)) kwargs for data_function in order to pass additional arguments to the functions being applied
+		kwargs_for_function: (dict or array-like(dict,)) kwargs for data_function in order to pass additional arguments tfo the functions being applied
 		inplace: (bool) do the operation inplace
 		"""
 		data_functions = np.array([data_function]).flatten()
