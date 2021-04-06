@@ -87,9 +87,9 @@ def reset_time(data_dict, key = 'p1', cutoff = 0.01, grace = 10):
         l = len(time_list[i])
         nnans_to_add_to_front = max_number_of_timestamps - l
         for ticker in range(nnans_to_add_to_front):
-            time_list[i] = np.concatenate((np.nan, time_list[i]))
-            p1_list[i] = np.concatenate((np.nan, p1_list[i]))
-            p2_list[i] = np.concatenate((np.nan, p2_list[i]))
+            time_list[i] = np.concatenate(([np.nan], time_list[i]))
+            p1_list[i] = np.concatenate(([np.nan], p1_list[i]))
+            p2_list[i] = np.concatenate(([np.nan], p2_list[i]))
 
     time_out = np.array(time_list[0])
     p1_out = np.array(p1_list[0])
@@ -132,8 +132,8 @@ def get_polarization_transients_from_dps(data_dict):
 
     returns dict with keys 'intdp' and 'time'
     """ 
-    dp = data_dict['dp']
-    time = data_dict['time']
+    dp = np.nan_to_num(data_dict['dp'], 0)
+    time = np.nan_to_num(data_dict['time'], 0)
     
     if len(dp.shape) == 1:
         dp = dp.reshape((1, len(dp)))
@@ -152,7 +152,7 @@ def get_polarization_transients_from_dps(data_dict):
 def smooth(data_dict, key='dp', N = 3, Wn = 0.05):
     assert key in set(data_dict.keys()), "key {} is does not exist in data_dict".format(key)
     
-    to_smooth = data_dict[key]
+    to_smooth = np.nan_to_num(data_dict[key], 0)
     
     if len(to_smooth.shape) == 1:
         to_smooth = to_smooth.reshape((1, len(to_smooth)))
@@ -174,7 +174,7 @@ def smooth(data_dict, key='dp', N = 3, Wn = 0.05):
 def subtract_median_of_lastN(data_dict, key = 'dp', N=20):
     assert key in set(data_dict.keys()), "key {} is does not exist in data_dict".format(key)
     
-    to_subtract = data_dict[key]
+    to_subtract = np.nan_to_num(data_dict[key], 0)
     
     if len(to_subtract.shape) == 1:
         to_subtract = to_subtract.reshape((1, len(to_subtract)))
@@ -209,24 +209,27 @@ def get_saturation_and_switching_time(data_dict, n_points_for_saturation=50,
     out = {}
     
     for d in range(ndims):
-        X = intdp[d, :]
-        ttime = time[d, :]
-        #saturation 
-        saturation = np.mean(X[-n_points_for_saturation:])
-        #define switching time as time from 10% of sat to 90% of sat
-        arg_at_topsat = np.argwhere(X > saturation*top_percent/100).flatten()[0]
-        arg_at_bottomsat = np.argwhere(X > saturation*bottom_percent/100).flatten()[0]
-        time_at_top, time_at_bottom = ttime[arg_at_topsat], ttime[arg_at_bottomsat]
-        
-        t_switch = np.array([time_at_top - time_at_bottom])
-        saturation = np.array([saturation])
-        
         try:
-            for_out_a = np.vstack((for_out_a, saturation))
-            for_out_b = np.vstack((for_out_b, t_switch))
-        except NameError:
-            for_out_a = saturation
-            for_out_b = t_switch
+            X = intdp[d, :]
+            ttime = time[d, :]
+            #saturation 
+            saturation = np.mean(X[-n_points_for_saturation:])
+            #define switching time as time from 10% of sat to 90% of sat
+            arg_at_topsat = np.argwhere(X > saturation*top_percent/100).flatten()[0]
+            arg_at_bottomsat = np.argwhere(X > saturation*bottom_percent/100).flatten()[0]
+            time_at_top, time_at_bottom = ttime[arg_at_topsat], ttime[arg_at_bottomsat]
+
+            t_switch = np.array([time_at_top - time_at_bottom])
+            saturation = np.array([saturation])
+
+            try:
+                for_out_a = np.vstack((for_out_a, saturation))
+                for_out_b = np.vstack((for_out_b, t_switch))
+            except NameError:
+                for_out_a = saturation
+                for_out_b = t_switch
+        except:
+            continue
             
     out.update({'saturation':for_out_a})
     out.update({'switching_time':for_out_b})
