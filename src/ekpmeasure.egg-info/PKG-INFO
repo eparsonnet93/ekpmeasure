@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: ekpmeasure
-Version: 0.0.3
+Version: 0.0.4
 Summary: A collection of control and analysis code for experiments
 Home-page: https://github.com/eparsonnet93/ekpmeasure
 Author: Eric Parsonnet
@@ -15,7 +15,7 @@ Description: # ekpmeasure
         ## Installation:
         
         ```bash
-        pip install ekpmeasure==0.0.2
+        pip install ekpmeasure
         ```
         ---
         
@@ -23,17 +23,17 @@ Description: # ekpmeasure
         
         1. [Analysis Overview](#analysis)
         
-        a. [Dataset](#dataset)
+        2. [Dataset](#dataset)
         
-        i. [load_dataset](#load_dataset)
+        3. [load_dataset](#load_dataset)
         	
-        b. [Data](#data)
+        4. [Data](#data)
         
-        2. [Control Overview](#control)
+        5. [Control Overview](#control)
         
-        a. [experiment](#experiment)
+        6. [experiment](#experiment)
         
-        i. [n_param_scan](#n_param_scan)
+        7. [n_param_scan](#n_param_scan)
         
         
         ## Analysis
