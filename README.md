@@ -6,7 +6,7 @@ Repository of computer control code for various experiments as well as analysis 
 ## Installation:
 
 ```bash
-pip install ekpmeasure==0.0.2
+pip install ekpmeasure
 ```
 ---
 
@@ -14,17 +14,17 @@ pip install ekpmeasure==0.0.2
 
 1. [Analysis Overview](#analysis)
 
-a. [Dataset](#dataset)
+  1. [Dataset](#dataset)
 
-i. [load_dataset](#load_dataset)
+    1. [load_dataset](#load_dataset)
 	
-b. [Data](#data)
+  2. [Data](#data)
 
 2. [Control Overview](#control)
 
-a. [experiment](#experiment)
+  1. [experiment](#experiment)
 
-i. [n_param_scan](#n_param_scan)
+    1. [n_param_scan](#n_param_scan)
 
 
 ## Analysis
