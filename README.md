@@ -3,22 +3,28 @@
 Repository of computer control code for various experiments as well as analysis code. 
 
 ---
+## Installation:
+
+```bash
+pip install ekpmeasure--0.0.2
+```
+---
 
 ## Contents:
 
-> 1. [Analysis Overview](#analysis)
+1. [Analysis Overview](#analysis)
 
->>a. [Dataset](#dataset)
+  a. [Dataset](#dataset)
 
->>> i. [load_dataset](#load_dataset)
+    i. [load_dataset](#load_dataset)
 	
->>b. [Data](#data)
+  b. [Data](#data)
 
-> 2. [Control Overview](#control)
+2. [Control Overview](#control)
 
->> a. [experiment](#experiment)
+  a. [experiment](#experiment)
 
->>> i. [n_param_scan](#n_param_scan)
+    i. [n_param_scan](#n_param_scan)
 
 
 ## Analysis
