@@ -6,7 +6,7 @@ Repository of computer control code for various experiments as well as analysis 
 ## Installation:
 
 ```bash
-pip install ekpmeasure--0.0.2
+pip install ekpmeasure==0.0.2
 ```
 ---
 
