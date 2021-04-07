@@ -316,17 +316,11 @@ class Data(dict):
 		"""return a summary of the definitions in data"""
 		return _summarize_data(self.to_dict().copy())
 
-	def contains(self, condition):
-		"""returns data specified by condition
-		----
-		condition: (dict) key is definition key, value is value to search for. multiple values provided will be joined by logical or, i.e. {'high_voltage_v':{'100mv', '200mv'}} will search for all data with '100mv' or '200mv' for high_voltage_v. multiple keys provided will be joined with logical AND. i.e. {'x':1, 'y':2} will search for x = 1 and y = 2.
-
-		example: 
-		Data.constains({'high_voltage_v':'100mv'}) will return all data indices with high_voltage_v containing 100mv
-		"""
+	def _get_indices_satisfying_definition_condtion(self, condition):
+		"""need docstring"""
 		for key in condition:
 			if not hasattr(condition[key], '__iter__'):
-				raise AttributeError('iterable not provided as value in condition arg. value associated with key "{}" is type {}'.forat(key, type(condition[key])))
+				raise AttributeError('iterable not provided as value in condition arg. value associated with key "{}" is type {}'.format(key, type(condition[key])))
 
 			if type(condition[key]) == str:
 				raise TypeError('condition value must not be str. check key: {}.'.format(key) + ' try {' +  '"{}": ["{}"]'.format(key, condition[key]) + '}?')
@@ -338,6 +332,38 @@ class Data(dict):
 				defn = self[index]['definition']
 				if _check_definition_contains_or(defn, condition_key, condition[condition_key]):
 					indices.append(index)
+		return indices
+
+	def filter(self, data_condition_function_dict, definition_condition_dict):
+		"""need docstring"""
+		
+		assert len(data_condition_function_dict) == 1, "more than one condition supplied in data_condition_function_dict. only one is supported at a time."
+		data_function_key = list(data_condition_function_dict)[0]
+		assert hasattr(data_condition_function_dict[data_function_key], '__call__'), "value associated with key '{}' in data_condition_function_dict is a not a function. is type {}".format(data_condition_function_dict, type(data_condition_function_dict[data_function_key]))
+		assert data_function_key in set(self[0]['data'].keys()), "data_function_key '{}' not in data. available keys are {}".format(data_function_key, set(self['data'].keys()))
+		
+		sat_indices = self._get_indices_satisfying_definition_condtion(definition_condition_dict)
+		all_index = set(self.keys())
+		not_sat_indices = all_index - set(sat_indices)
+		
+		func = data_condition_function_dict[data_function_key]
+		
+		for index in sat_indices:
+			old = self[index]['data'][data_function_key]
+			old_shape = old.shape
+			self[index]['data'].update({data_function_key:old[func(old)]})
+			
+		return Data(self.to_dict())
+
+	def contains(self, condition):
+		"""returns data specified by condition
+		----
+		condition: (dict) key is definition key, value is value to search for. multiple values provided will be joined by logical or, i.e. {'high_voltage_v':{'100mv', '200mv'}} will search for all data with '100mv' or '200mv' for high_voltage_v. multiple keys provided will be joined with logical AND. i.e. {'x':1, 'y':2} will search for x = 1 and y = 2.
+
+		example: 
+		Data.constains({'high_voltage_v':'100mv'}) will return all data indices with high_voltage_v containing 100mv
+		"""
+		indices = self._get_indices_satisfying_definition_condtion(condition)
 
 		#we will append the index to indices everytime the logical or statement for the specific condition holds
 		#to check the logical and statement over various keys, we need to ensure that for each key we did indeed append the index to indices:
@@ -391,7 +417,7 @@ class Data(dict):
 		"""apply data_function to the data in each index. returns a data class
 		----
 		data_function: (function or array-like(function,)) f(dict) -> dict. if array-like, functions will be applied sequentially
-		kwargs_for_function: (dict or array-like(dict,)) kwargs for data_function in order to pass additional arguments to the functions being applied
+		kwargs_for_function: (dict or array-like(dict,)) kwargs for data_function in order to pass additional arguments tfo the functions being applied
 		inplace: (bool) do the operation inplace
 		"""
 		data_functions = np.array([data_function]).flatten()
@@ -407,11 +433,15 @@ class Data(dict):
 
 		for data_function, kwargs_for in zip(data_functions, kwargs_for_functions):
 			for key in tmp_out.keys():
-				internal_out = {
-					'definition':tmp_out[key]['definition'],
-					'data':data_function(tmp_out[key]['data'].copy(), **kwargs_for)
-				}
-				tmp_out.update({key:internal_out})
+				try:
+					internal_out = {
+						'definition':tmp_out[key]['definition'],
+						'data':data_function(tmp_out[key]['data'].copy(), **kwargs_for)
+					}
+					tmp_out.update({key:internal_out})
+				except Exception as e:
+					print('Error in data_function: {} \n{}'.format(data_function.__name__, e))
+					print('Skipping data key: {} with defintion: \n{}'.format(key, tmp_out[key]['definition']))
 
 		if inplace:
 			self.__init__(tmp_out)
