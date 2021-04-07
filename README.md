@@ -14,17 +14,17 @@ pip install ekpmeasure
 
 1. [Analysis Overview](#analysis)
 
-  1. [Dataset](#dataset)
+2. [Dataset](#dataset)
 
-    1. [load_dataset](#load_dataset)
+3. [load_dataset](#load_dataset)
 	
-  2. [Data](#data)
+4. [Data](#data)
 
-2. [Control Overview](#control)
+5. [Control Overview](#control)
 
-  1. [experiment](#experiment)
+6. [experiment](#experiment)
 
-    1. [n_param_scan](#n_param_scan)
+7. [n_param_scan](#n_param_scan)
 
 
 ## Analysis
