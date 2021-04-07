@@ -5,7 +5,7 @@ __all__ = (
 	'get_lockin_r_theta','set_harmonic', 'set_time_constant', 'get_time_constant', 'auto_gain',
 	'get_sensitivity', 'set_sensitivity', 'get_reference_source', 'set_reference_source',
 	'set_internal_frequency', 'set_internal_amplitude', 'get_time_constant_from_frequency',
-	'get_time_constant_float', 'set_lockin_sensitivity', 'initialize_lockin'
+	'get_time_constant_float', 'set_lockin_sensitivity', 'initialize_lockin', 'set_phase'
 )
 
 
@@ -26,6 +26,18 @@ sensitivity_to_index_mapper = {
 }
 
 index_to_sensitivity_mapper = {sensitivity_to_index_mapper[key]:key for key in sensitivity_to_index_mapper}
+
+def set_phase(lockin, phase=None):
+	"""set the phase of the lockin
+	----
+
+	phase: (float or int) phase in degrees
+	"""
+	if type(phase) == type(None):
+		return
+	else:
+		lockin.write("phas {}".format(phase))
+	return
 
 def initialize_lockin(lockin, trigger, harmonic, time_constant, frequency = None, amplitude = None,):
 	"""initialize lockin (srs 830) 

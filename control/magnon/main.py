@@ -142,7 +142,7 @@ def set_lockin_sensitivity(lockin, sensitivity='default', sleep_time = 10):
 
 def magnon_run_function(lockin, harmonic, frequency, amplitude, current_source=False, 
 	identifier='D', angle=0, channel_width=0, bar_width=0, channel_length=0, nave=100, 
-	delay='default', time_constant='default', sensitivity='default'):
+	delay='default', time_constant='default', sensitivity='default',phase=None,compliance=1.1):
 	"""
 	run function for magnon (nonlocal) experiment.
 
@@ -190,7 +190,8 @@ def magnon_run_function(lockin, harmonic, frequency, amplitude, current_source=F
 		'channel_width':channel_width,
 		'channel_length':channel_length,
 		'bar_width':bar_width,
-		'identifier':identifier
+		'identifier':identifier,
+		"phase":phase
 	}
 
 	if current_source == False:
@@ -204,7 +205,7 @@ def magnon_run_function(lockin, harmonic, frequency, amplitude, current_source=F
 
 		#set up the current source
 		k6221.restore(current_source)
-		k6221.set_output_sin(current_source,frequency,amplitude)
+		k6221.set_output_sin(current_source,frequency,amplitude, compliance = compliance)
 
 		#for source_on
 		lockin_to_source_on = None
@@ -212,6 +213,7 @@ def magnon_run_function(lockin, harmonic, frequency, amplitude, current_source=F
 
 	#configure run
 	srs.initialize_lockin(lockin, trigger, harmonic, time_constant, frequency = frequency, amplitude = amplitude)
+	srs.set_phase(lockin, phase)
 
 	#start the source (either current or lockin)
 	source_on(frequency, amplitude, lockin_to_source_on, current_source_to_source_on)
