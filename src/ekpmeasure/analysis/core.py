@@ -102,7 +102,7 @@ class Dataset(pd.DataFrame):
 		return summary
 	
 	@construct_Dataset_from_dataframe
-	def query(expr, **kwargs):
+	def query(*args, **kwargs):
 		"""Query the columns of a DataFrame with a boolean expression.
 
 		Parameters:
@@ -111,7 +111,7 @@ class Dataset(pd.DataFrame):
 		Returns:
 			dataset (Dataset): the result of the query
 		"""
-		return pd.DataFrame.query(expr, **kwargs)
+		return pd.DataFrame.query(*args, **kwargs)
 
 	@construct_Dataset_from_dataframe
 	def head(*args, **kwargs):
