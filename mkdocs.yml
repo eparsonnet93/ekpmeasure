@@ -1,0 +1,22 @@
+site_name: ekpmeasure
+nav: 
+  - Home: index.md
+  - Getting Started: start.md
+  - Code Reference:
+    - Analysis: analysis-core-reference.md
+
+theme: readthedocs
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - attr_list
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings
