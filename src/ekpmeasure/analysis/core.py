@@ -45,12 +45,20 @@ def _convert_ITP_to_path_to_index(index_to_path):
 	return path_to_index
 
 class Dataset(pd.DataFrame):
-	"""
-	Dataset class for analysis. subclass of pandas.DataFrame. Used to manipulate meta data with reference to the real files that can be retrieved when necessary.
-	----
+	"""Dataset class for analysis. 
 
-	path: (str or dict) a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
-	initializer: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
+	Dataset is a subclass of pandas.DataFrame. Used to manipulate meta data while keeping track of location for the real data, which can be retrieved when necessary.
+
+	Args:
+	    path (str or dict): a path to where the real data lives. if dict, form is 
+
+	    		{path: [indices of initializer for this path]} 
+
+	    initializer (pandas.DataFrame):  the meta data. one column must contain a pointer (i.e. filename) to where the real data is stored
+	    readfileby (function): how to read the data. default of None corresponds to 
+
+	    		pandas.read_csv()
+
 	"""
 
 	def __init__(self, path, initializer, readfileby=None):
@@ -72,15 +80,20 @@ class Dataset(pd.DataFrame):
 
 	@property
 	def path(self):
+		"""Return path to data."""
 		return self.attrs['path']
 
 	@property
 	def index_to_path(self):
+		"""Return Dict of index and corresponding path"""
 		return self.attrs['index_to_path']
 
 	@property
 	def summary(self):
-		"""return a brief summary of the data in your Dataset. Returns Dict"""
+		"""Return a brief summary of the data in your Dataset. 
+
+		Returns:
+		    summary (Dict): a summary of the Dataset"""
 		summary = dict()
 		for column in self.columns:
 			if column == self.pointercolumn:
@@ -89,8 +102,16 @@ class Dataset(pd.DataFrame):
 		return summary
 	
 	@construct_Dataset_from_dataframe
-	def query(*args, **kwargs):
-		return pd.DataFrame.query(*args, **kwargs)
+	def query(expr, **kwargs):
+		"""Query the columns of a DataFrame with a boolean expression.
+
+		Parameters:
+			expr (str): The query string to evaluate. You can refer to variables in the environment by prefixing them with an ‘@’ character like @a + b. You can refer to column names that are not valid Python variable names by surrounding them in backticks. Thus, column names containing spaces or punctuations (besides underscores) or starting with digits must be surrounded by backticks. (For example, a column named “Area (cm^2) would be referenced as Area (cm^2)). Column names which are Python keywords (like “list”, “for”, “import”, etc) cannot be used. For example, if one of your columns is called a a and you want to sum it with b, your query should be `a a` + b.
+		
+		Returns:
+			dataset (Dataset): the result of the query
+		"""
+		return pd.DataFrame.query(expr, **kwargs)
 
 	@construct_Dataset_from_dataframe
 	def head(*args, **kwargs):
@@ -101,11 +122,11 @@ class Dataset(pd.DataFrame):
 		return self[self[column].apply(function, **kwargs_for_function).values].reset_index()
 	
 	def _construct_index_to_path(self, path, initializer):
-		"""
-		construct index_to_path from path provided
-		----
-		path: (str or dict) a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
-		initializer: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
+		"""construct index_to_path from path provided
+		
+		args:
+			path (str or Dict): a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
+			initializer (pandas.DataFrame: meta data. one column must contain a pointer (filename) to where each the real data is stored
 
 		"""
 		if type(path) != dict:
@@ -135,9 +156,9 @@ class Dataset(pd.DataFrame):
 			
 		return index_to_path
 
-	def summarize(self):
+	def _summarize(self):
 		"""return a brief summary of the data in your Dataset. Returns Dict"""
-		warnings.showwarning('summarize() is deprecated please use .summary', DeprecationWarning, '', 0,)
+		warnings.showwarning('_summarize() is deprecated please use .summary', DeprecationWarning, '', 0,)
 		summary = dict()
 		for column in self.columns:
 			if column == self.pointercolumn:
@@ -146,10 +167,11 @@ class Dataset(pd.DataFrame):
 		return summary
 
 
-	def group(self, by):
-		"""group data by by and return a pandas dataframe. makes use of pandas.groupby
-		----
-		by: (str, int, label or array-like()) on what to group. 
+	def _group(self, by):
+		"""Group data by 'by' and return a pandas dataframe. makes use of pandas.groupby
+
+		args:
+			by (str, int, label or array-like of): on what to group. 
 		"""
 		groups = self.groupby(by = by).groups
 		for ijk, key in enumerate(groups):
@@ -189,18 +211,22 @@ class Dataset(pd.DataFrame):
 
 	def get_data(self, groupby=None, labelby=None,):
 		"""
-		return data for the current Dataset: returns Data class 
-		----
-		groupby: (str, label, index or array-like()) what to group on
-		labelby: (str, label, index or array-like()) what to label the output data by. This will change 'definition' in output Data class
+		Return data in Data (Data class) for the current Dataset: returns Data class 
+		
+		args:
+				groupby (str, label, index or array-like of):  what to group on
+				labelby (str, label, index or array-like of):  what to label the output data by. This will change 'definition' in output Data class
+
+		returns:
+				data (Data): the data
 		"""
 		pointercolumn = self.pointercolumn
 		readfileby = self.readfileby
 
 		if type(groupby) == type(None):
-			data_to_retrieve = self.group(by = pointercolumn) #gives us a unique col for each
+			data_to_retrieve = self._group(by = pointercolumn) #gives us a unique col for each
 		else:
-			data_to_retrieve = self.group(by = groupby)
+			data_to_retrieve = self._group(by = groupby)
 
 		out = {}
 		for counter, i in enumerate(data_to_retrieve.index): #for each row
