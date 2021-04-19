@@ -1,12 +1,12 @@
 # Welcome to ekpmeasure 
 
-<a href='https://ekpmeasure.readthedocs.io/en/latest/?badge=latest'>
-    <img src='https://readthedocs.org/projects/ekpmeasure/badge/?version=latest' alt='Documentation Status' />
-</a>
+
+[![Documentation Status](https://readthedocs.org/projects/ekpmeasure/badge/?version=latest)](http://ekpmeasure.readthedocs.io/?badge=latest)
+[![PyPI version fury.io](https://badge.fury.io/py/ekpmeasure.svg)](https://pypi.org/project/ekpmeasure/)
+[![PyPI license](https://img.shields.io/pypi/l/ekpmeasure.svg)](https://pypi.org/project/ekpmeasure/)
+
 
 Repository of computer control code for various experiments as well as analysis code. 
-
-
 
 
 ## Overview
