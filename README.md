@@ -1,8 +1,13 @@
-# Welcome to ekpmeasure
+# Welcome to ekpmeasure 
+
+<a href='https://ekpmeasure.readthedocs.io/en/latest/?badge=latest'>
+    <img src='https://readthedocs.org/projects/ekpmeasure/badge/?version=latest' alt='Documentation Status' />
+</a>
 
 Repository of computer control code for various experiments as well as analysis code. 
 
-https://ekpmeasure.readthedocs.io/en/latest/
+
+
 
 ## Overview
 
