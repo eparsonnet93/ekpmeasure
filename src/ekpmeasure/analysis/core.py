@@ -50,14 +50,14 @@ class Dataset(pd.DataFrame):
 	Dataset is a subclass of pandas.DataFrame. Used to manipulate meta data while keeping track of location for the real data, which can be retrieved when necessary.
 
 	Args:
-	    path (str or dict): a path to where the real data lives. if dict, form is 
+		path (str or dict): a path to where the real data lives. if dict, form is 
 
-	    		{path: [indices of initializer for this path]} 
+				{path: [indices of initializer for this path]} 
 
-	    initializer (pandas.DataFrame):  the meta data. one column must contain a pointer (i.e. filename) to where the real data is stored
-	    readfileby (function): how to read the data. default of None corresponds to 
+		initializer (pandas.DataFrame):  the meta data. one column must contain a pointer (i.e. filename) to where the real data is stored
+		readfileby (function): how to read the data. default of None corresponds to 
 
-	    		pandas.read_csv()
+				pandas.read_csv()
 
 	"""
 
@@ -93,7 +93,7 @@ class Dataset(pd.DataFrame):
 		"""Return a brief summary of the data in your Dataset. 
 
 		Returns:
-		    summary (Dict): a summary of the Dataset"""
+			summary (Dict): a summary of the Dataset"""
 		summary = dict()
 		for column in self.columns:
 			if column == self.pointercolumn:
@@ -306,15 +306,49 @@ class iDataIndexer():
 		return Data({index: self.indexed_dict[index]})
 
 class Data(dict):
-	"""subclass of dict
+	"""Data class for maintaining and manipulating the real data. Typically retrieved via Dataset.get_data()
 
-	used for grouped real data. dict structure is as follows: 
+	args:
+		dict (Dict): a dict (with form shown below) of the data. 
+
+
+	The real data. Subclass of dict. Each piece of data (may be grouped) is given a numerical index and structure as follows: 
+
+	```
 	{index:
 		{
-		'data':np.array(the real data), 
+		'data':dict({'key':np.array(the real data)}), 
 		'definition':dict(describing which data is contained)
 		}
 	}
+	```
+	for example, an instance of the Data class corresponding to an experiment may be:
+	
+	```
+	{0: {
+		'definition': {'frequency': {'1067hz'},
+					   'amplitude': {'500ua'},
+					   'nave': {5},
+					   'low_current': {-2.5},
+					   'high_current': {2.5},
+					   'delay': {1},
+					   'time_constant': {'30ms'},
+					   'ramp_rate': {0.05},
+					   'ramp_up_first': {True},
+					   'identifier': {'B1'},
+					   'sensitivity': {'50mv/na'},
+					   'trial': {0}},
+		'data': {'H_mean': array([-403.524  , -407.18   , -395.602  , -382.146  , -367.444  , ... ]),
+			   'H_std': array([10.39320663,  4.7261697 ,  5.3691951 ,  5.71281577,  5.9829578 , ... ]),
+			   'R_mean': array([0.0324881 , 0.03248582, 0.03248772, 0.03248544, 0.03248354, ... ]),
+			   'R_std': array([1.69941166e-06, 1.42182981e-06, 1.42182981e-06, 3.31276320e-06, ...]),
+			   'Theta_mean': array([0.0324881 , 0.03248582, 0.03248772, 0.03248544, 0.03248354, ...]),
+			   'Theta_std': array([0.    , 0.    , 0.    , 0.    , 0.    , 0.    , 0.    , 0.    , ...])}
+		}
+	}
+	```
+
+
 	"""
 
 	def __init__(self, initializer):
@@ -322,14 +356,28 @@ class Data(dict):
 
 	@property
 	def iloc(self):
-		"""indexing like pandas iloc. This returns Data class of specified index. 
-		usage : Data.iloc[0]
+		"""
+		An indexer as in pandas .iloc Usage is Data.iloc[index]
+
+		returns:
+			indexer (iDataIndexer): indexer for indexing
+
+		example:
+
+			```
+			>>> Data.iloc[0]
+			```
 		"""
 		return iDataIndexer(self.to_dict().copy())
 
 	@property 
 	def summary(self):
-		"""return a summary of the definitions in data"""
+		"""Return a summary of the definitions in data
+		
+		returns:
+			summary (dict): summary of the data included
+
+		"""
 		return _summarize_data(self.to_dict().copy())
 
 	def _get_indices_satisfying_definition_condtion(self, condition):
@@ -350,15 +398,40 @@ class Data(dict):
 					indices.append(index)
 		return indices
 
-	def filter(self, data_condition_function_dict, definition_condition_dict):
-		"""need docstring"""
+	def filter(self, data_condition_function_dict, definition_condition_dict=None):
+		"""Filter the data.
 		
-		assert len(data_condition_function_dict) == 1, "more than one condition supplied in data_condition_function_dict. only one is supported at a time."
+		args:
+			data_condition_function_dict (dict): a dict with one entry. key is data key, value is function which operates on a single value.
+			definition_condition_dict (dict): a dict specifying specific definition conditions, which when satisfied can allow their data to be operated on. If None, all data will be filtered
+
+		returns:
+			data (Data): filtered Data
+
+		Example:
+
+		Filter the data such that the data key 'R' only contains values >10. This leaves all other data keys unchanged.
+		```
+		>>> Data.filter({'R': lambda x: x>10}) 
+		```
+		Filter data corresponding to an amplitude of '500ua' such that data key 'R' contains only values >10.
+		```
+		>>> Data.filter({'R': labmda x: x>10}, {'amplitude':'500ua'}) 
+		```
+		You may use this method to remove outliers.
+
+		"""
+		if definition_condition_dict == None:
+			definition_condition_dict = {}
+		
+		assert len(data_condition_function_dict) <= 1, "more than one condition supplied in data_condition_function_dict. only one is supported at a time."
 		data_function_key = list(data_condition_function_dict)[0]
 		assert hasattr(data_condition_function_dict[data_function_key], '__call__'), "value associated with key '{}' in data_condition_function_dict is a not a function. is type {}".format(data_condition_function_dict, type(data_condition_function_dict[data_function_key]))
-		assert data_function_key in set(self[0]['data'].keys()), "data_function_key '{}' not in data. available keys are {}".format(data_function_key, set(self['data'].keys()))
+		assert data_function_key in set(self[0]['data'].keys()), "data_function_key '{}' not in data. available keys are {}".format(data_function_key, set(self[0]['data'].keys()))
 		
 		sat_indices = self._get_indices_satisfying_definition_condtion(definition_condition_dict)
+		if definition_condition_dict == {}:
+			sat_indices = set(self.keys())
 		all_index = set(self.keys())
 		not_sat_indices = all_index - set(sat_indices)
 		
@@ -372,12 +445,28 @@ class Data(dict):
 		return Data(self.to_dict())
 
 	def contains(self, condition):
-		"""returns data specified by condition
-		----
-		condition: (dict) key is definition key, value is value to search for. multiple values provided will be joined by logical or, i.e. {'high_voltage_v':{'100mv', '200mv'}} will search for all data with '100mv' or '200mv' for high_voltage_v. multiple keys provided will be joined with logical AND. i.e. {'x':1, 'y':2} will search for x = 1 and y = 2.
+		"""Returns data specified by condition.
 
-		example: 
-		Data.constains({'high_voltage_v':'100mv'}) will return all data indices with high_voltage_v containing 100mv
+		args:
+			condition (dict): key is definition key, value is value to find. Multiple values provided will be joined by logical OR. Multiple keys will be joined with logical AND.
+
+		returns:
+			data (Data): data satisfying condition 
+		
+		example:
+
+		Providing multiple values will be joined by logical or, i.e.
+		```
+		Data.contains({'high_voltage_v':{'100mv', '200mv'}})
+		```
+		will search for all data with '100mv' OR '200mv' for high_voltage_v. 
+
+		Multiple keys provided will be joined with logical AND. i.e. 
+		```
+		Data.contains({'x':1, 'y':2})
+		``` 
+		will search for x = 1 AND y = 2.
+	
 		"""
 		indices = self._get_indices_satisfying_definition_condtion(condition)
 
@@ -403,9 +492,13 @@ class Data(dict):
 
 	def mean(self, inplace = False):
 		"""
-		return data class where data is average across axis 0
-		----
-		inplace: (bool) do the operation inplace
+		Return data class where data is averaged across 0th axis. This is best used for averaging across trials or similar.
+
+		args:
+			inplace (bool): do operation inplace
+
+		returns:
+			data (Data): averaged data across 0th axis.
 		"""
 		
 		if not inplace:
@@ -430,11 +523,55 @@ class Data(dict):
 			return Data(self)
 
 	def apply(self, data_function, kwargs_for_function=None, inplace = False):
-		"""apply data_function to the data in each index. returns a data class
-		----
-		data_function: (function or array-like(function,)) f(dict) -> dict. if array-like, functions will be applied sequentially
-		kwargs_for_function: (dict or array-like(dict,)) kwargs for data_function in order to pass additional arguments tfo the functions being applied
-		inplace: (bool) do the operation inplace
+		"""Apply data_function to the data in each index.
+
+		args:
+			data_function (function or array-like(function, )): f(dict) -> dict. function operates is passed the data_dict (corresponding to self[index]['data']). if array-like, functions will be applied sequentially
+			kwargs_for_function (dict or array-like(dict, )): kwargs for data_function in order to pass additional arguments to the functions being applied. 
+			inplace (bool): operate in place
+
+		returns:
+				data (Data): the new data after operating on it
+
+		example:
+
+		```
+		>>> some_data
+		>
+		{
+			0: {'definition': {'param1': {'10V'},
+				'param2': {'100ns', '10ns', '50ns'},
+				'param3': {'1mv', '2mv'}},
+				'data': {'raw_data': array([[1, 2, 3],
+					  [1, 2, 3],
+					  [1, 2, 3],
+					  [1, 2, 3]], dtype=int64)}},
+			1: {'definition': {'param1': {'5V'}, 'param2': {'100ns'}, 'param3': {'1mv'}},
+				'data': {'raw_data': array([1, 2, 3], dtype=int64)}}
+		}
+
+		#some function will square the data
+
+		def some_function(data_dict):
+			"a function which operates on the data dict and returns a data dict"
+			out = dict()
+			for key in data_dict:
+				out.update({key:data_dict[key]**2})
+			return out
+
+		>>> some_data.apply(some_function)
+		>
+		{
+			0: {'definition': {'param1': {'10V'},
+				'param2': {'100ns', '10ns', '50ns'},
+				'param3': {'1mv', '2mv'}},
+				'data': {'raw_data': array([[1, 4, 9],
+				  [1, 4, 9],
+				  [1, 4, 9],
+				  [1, 4, 9]], dtype=int64)}},
+			1: {'definition': {'param1': {'5V'}, 'param2': {'100ns'}, 'param3': {'1mv'}},
+				'data': {'raw_data': array([1, 4, 9], dtype=int64)}}}
+		```
 		"""
 		data_functions = np.array([data_function]).flatten()
 		if type(kwargs_for_function) == type(None):
@@ -465,15 +602,26 @@ class Data(dict):
 		return Data(tmp_out)
 
 	def to_dict(self):
-		"""returns a dict class with identical structure"""
+		"""
+		Return a dict of the Data class.  
+
+
+		returns:
+			out (dict): a dict class with identical structure"""
 		return {key: self[key] for key in self.keys()}
 
 	def plot(self, x=None, y=None, ax=None):
-		"""simple plot of all data vs key specified by x
+		"""
+		Plot the data. If ax is provided returns ax, otherwise returns fig, ax.
 
-		colors correspond to different keys (groups)
-		----
-		
+		args:
+			x (key): data dict key for x axis.
+			y (key or array-like): data dict key for y axis
+			ax (matplotlib.axis): axis to plot on 
+
+		returns:
+			fig (matplotlib.figure): figure of plot
+			ax (matplotlib.axis): axis of plot. if ax is provided as an argument, only returns ax.
 		"""
 		if ax == None:
 			fig, ax = plt.subplots()
