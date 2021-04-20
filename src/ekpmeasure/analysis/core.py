@@ -156,16 +156,6 @@ class Dataset(pd.DataFrame):
 			
 		return index_to_path
 
-	def _summarize(self):
-		"""return a brief summary of the data in your Dataset. Returns Dict"""
-		warnings.showwarning('_summarize() is deprecated please use .summary', DeprecationWarning, '', 0,)
-		summary = dict()
-		for column in self.columns:
-			if column == self.pointercolumn:
-				continue
-			summary.update({column: set(self[column].values)})
-		return summary
-
 
 	def _group(self, by):
 		"""Group data by 'by' and return a pandas dataframe. makes use of pandas.groupby
