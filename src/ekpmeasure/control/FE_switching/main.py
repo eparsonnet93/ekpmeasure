@@ -296,7 +296,7 @@ def run_preset_then_2pusle_TDS6604(pg, scope, identifier, pulsewidth, delay, hig
 			pg.write('pulsegenc:stop') 
 
 			initialize_scope_tds6604(scope, channel = 'Ch1', force_yes = True)
-			tdf = get_waveform_tds6604(scope)
+			tdf = get_wf_tds6604(scope)
 			time.sleep(3)
 			if pulsen == 1:
 				df = tdf.copy()
