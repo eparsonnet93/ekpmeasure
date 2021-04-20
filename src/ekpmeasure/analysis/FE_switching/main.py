@@ -32,6 +32,13 @@ def common_name_mapper(fname):
 		}
 	)
 
+	area_diameter_dict.update({
+			'8um': (np.pi*(8/2)**2, 8),
+			'4um': (np.pi*(4/2)**2, 4),
+			'6um': (np.pi*(6/2)**2, 6),
+		}
+	)
+
 	area, diameter = area_diameter_dict[spl[0].split('um')[0] + 'um']
 
 	out = dict({
