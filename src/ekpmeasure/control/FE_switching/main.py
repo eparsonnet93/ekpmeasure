@@ -11,7 +11,7 @@ import warnings
 
 import time
 
-__all__ = ('run_pund', 'apply_preset_pulse', 'run_preset_then_2pusle_TDS620B', 'trial')
+__all__ = ('run_pund', 'apply_preset_pulse', 'run_preset_then_2pusle_TDS620B', 'trial', 'run_preset_then_2pusle_TDS6604')
 
 def run_pund(inst, up, down, up_first = False, wait_time = 1, channel = '1'):
 	"""
