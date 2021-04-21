@@ -68,14 +68,14 @@ def symmetric_up_down_SCPI(pulsewidth, amplitude, offset='0mv', channel = '1', *
 			raise ValueError('offset ' + str(offset) + ' not supported')
 	
 	try: 
-		amp = int(amplitude[:-1])*1000
+		amp = int(float(amplitude[:-1]))*1000
 	except ValueError:
 		#means mv is the unit
-		amp = int(amplitude[:-2])
+		amp = int(float(amplitude[:-2]))
 	try: 
-		off = int(offset[:-1])*1000 #now in mv units
+		off = int(float(offset[:-1]))*1000 #now in mv units
 	except ValueError:
-		off = int(offset[:-2])
+		off = int(float(offset[:-2]))
 		
 	high = str(off + amp) + 'mv'
 	low = str(off) + 'mv'
