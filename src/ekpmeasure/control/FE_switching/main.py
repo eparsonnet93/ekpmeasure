@@ -261,6 +261,13 @@ class FE(core.experiment):
 			except KeyError:
 				raise ValueError('scope provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scope, None))
 
+		if self.scopetype != params['scopetype']:
+			try:
+				raise ValueError('scopetype provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scopetype, params['scope']))
+
+			except KeyError:
+				raise ValueError('scopetype provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scopetype, None))
+
 	def terminate(self):
 		"""to perform at end"""
 		stop(self.pg)
