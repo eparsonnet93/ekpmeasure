@@ -13,6 +13,8 @@ import time
 
 __all__ = ('run_pund', 'apply_preset_pulse', 'run_preset_then_2pusle_TDS620B', 'trial', 'run_preset_then_2pusle_TDS6604')
 
+identifier_to_diameter_dict = dict({'4':4, '6':6, '8':8, '5':5, '125':12.5, '95':9.5,'14':14, '185':18.5,'25':25})
+
 def run_pund(inst, up, down, up_first = False, wait_time = 1, channel = '1'):
 	"""
 	runs a pund for a given up and down SCPI sequence. This operates by applying single pulses only and using python for timing. This is not recommended for accurate timing. 
@@ -206,7 +208,9 @@ def run_preset_then_2pusle_TDS620B(pg, scope, identifier, pulsewidth, delay, hig
 		'delay_ns':float(save_delay[:-2].replace('x','.')),
 		'high_voltage_v':float(save_highvoltage.replace('x', '.')[:-2])/1000,
 		'preset_voltage_v':float(save_presetvoltage.replace('x', '.')[:-2])/1000,
-		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.'))
+		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.')),
+		'diameter':identifier_to_diameter_dict[identifier.split('um')[0]],
+		'area':np.pi*(identifier_to_diameter_dict[identifier.split('um')[0]]/2)**2
 	}
 			
 	return save_base_name, meta_data, df
@@ -325,10 +329,54 @@ def run_preset_then_2pusle_TDS6604(pg, scope, identifier, pulsewidth, delay, hig
 		'delay_ns':float(save_delay[:-2].replace('x','.')),
 		'high_voltage_v':float(save_highvoltage.replace('x', '.')[:-2])/1000,
 		'preset_voltage_v':float(save_presetvoltage.replace('x', '.')[:-2])/1000,
-		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.'))
+		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.')),
+		'diameter':identifier_to_diameter_dict[identifier.split('um')[0]],
+		'area':np.pi*(identifier_to_diameter_dict[identifier.split('um')[0]]/2)**2
 	}
 			
 	return save_base_name, meta_data, df
+
+
+
+class FE(core.experiment):
+	"""need docstring"""
+
+	def __init__(self, pg, scope, scopetype = '6604',):
+		super().__init__()
+		if scopetype != '6604' and scopetype != '620B':
+			raise ValueError('must specify scope type as either 6604 or 620B (corresponding to the correct scope you are using)')
+
+		if scopetype == '6604':
+			self.run_function = run_preset_then_2pusle_TDS6604
+		elif scopetype == '620B':
+			self.run_function = run_preset_then_2pusle_TDS620B
+		else:
+			raise ValueError('error in specifying run function. Please check scopetype')
+		self.pg = pg
+		self.scope = scope
+		return
+
+	def checks(self, params):
+		"""to be checked by """
+		if self.pg != params['pg']:
+			try:
+				raise ValueError('pg provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.pg, params['pg']))
+
+			except KeyError:
+				raise ValueError('pg provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.pg, None))
+
+		
+		if self.scope != params['scope']:
+			try:
+				raise ValueError('scope provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scope, params['scope']))
+
+			except KeyError:
+				raise ValueError('scope provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scope, None))
+
+	def terminate(self):
+		"""to perform at end"""
+		stop(self.pg)
+		return
 
 
 def trial(run_function, run_function_args, path):
