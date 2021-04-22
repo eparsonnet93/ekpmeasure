@@ -14,7 +14,7 @@ import time
 
 __all__ = ('FE',)
 
-identifier_to_diameter_dict = dict({'4':4, '6':6, '8':8, '5':5, '125':12.5, '95':9.5,'14':14, '185':18.5,'25':25})
+identifier_to_diameter_dict = dict({'4':4, '6':6, '8':8, '5':5, '125':12.5, '95':9.5,'14':14, '185':18.5,'25':25, '23':23})
 
 def run_pund(inst, up, down, up_first = False, wait_time = 1, channel = '1'):
 	"""
