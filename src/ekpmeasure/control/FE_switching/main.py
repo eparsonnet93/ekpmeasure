@@ -242,6 +242,7 @@ class FE(core.experiment):
 		self.run_function = preset_run_function
 		self.pg = pg
 		self.scope = scope
+		self.scopetype = scopetype
 		return
 
 	def checks(self, params):
@@ -260,14 +261,17 @@ class FE(core.experiment):
 
 			except KeyError:
 				raise ValueError('scope provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scope, None))
+		try:
+			if self.scopetype != params['scopetype']:
+				try:
+					raise ValueError('scopetype provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scopetype, params['scopetype']))
 
-		if self.scopetype != params['scopetype']:
-			try:
-				raise ValueError('scopetype provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scopetype, params['scope']))
-
-			except KeyError:
-				raise ValueError('scopetype provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scopetype, None))
-
+				except KeyError:
+					raise ValueError('scopetype provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scopetype, None))
+		except KeyError:
+			if self.scopetype != '6604':
+				raise ValueError('check scopetype. If you think this is done correctly, please specify explicitly scopetype in params.')
+		
 	def terminate(self):
 		"""to perform at end"""
 		stop(self.pg)
