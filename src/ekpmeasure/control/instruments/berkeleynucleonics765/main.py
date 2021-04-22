@@ -1,4 +1,4 @@
-__all__= ('single_pulse_SCPI', 'symmetric_up_down_SCPI', 'initialize_2pulse', 'initialize_pulse', 'manual_trigger','initialize_trig')
+__all__= ('single_pulse_SCPI', 'symmetric_up_down_SCPI', 'initialize_2pulse', 'initialize_pulse', 'manual_trigger','initialize_trig', 'stop')
 
 def single_pulse_SCPI(pulsewidth, updown, high_voltage, low_voltage, channel = '1', *args, **kwargs):
 	"""

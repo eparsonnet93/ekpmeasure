@@ -3,6 +3,7 @@ from ..instruments.tektronixTDS620B import get_wf_from_scope as tds620B_get_wf
 from ..instruments.tektronixTDS6604 import initialize_scope as initialize_scope_tds6604
 from ..instruments.tektronixTDS6604 import get_waveform as get_wf_tds6604
 from ..misc import get_save_name
+from .. import core
 import pandas as pd
 import numpy as np
 import os 
@@ -11,7 +12,7 @@ import warnings
 
 import time
 
-__all__ = ('run_pund', 'apply_preset_pulse', 'run_preset_then_2pusle_TDS620B', 'trial', 'run_preset_then_2pusle_TDS6604')
+__all__ = ('FE',)
 
 identifier_to_diameter_dict = dict({'4':4, '6':6, '8':8, '5':5, '125':12.5, '95':9.5,'14':14, '185':18.5,'25':25})
 
