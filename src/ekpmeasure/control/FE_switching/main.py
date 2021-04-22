@@ -210,7 +210,7 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 	save_presetvoltage = preset_voltage.replace('.', 'x')
 	save_presetpulsewidth = str(float(preset_pulsewidth.replace('ns', 'e-9').replace('us','e-6').replace('ms', 'e-3').replace('s', ''))*1e9).replace('.', 'x') + 'ns'
 
-	save_base_name = identifier
+	save_base_name = identifier + '_'
 	for namer in [save_pulsewidth, save_delay, save_highvoltage, save_presetvoltage, save_presetpulsewidth]:
 		save_base_name += namer + '_'
 	save_base_name = save_base_name[:-1] #remove final '_'
