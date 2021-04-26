@@ -3,7 +3,6 @@
 
 [![Documentation Status](https://readthedocs.org/projects/ekpmeasure/badge/?version=latest)](http://ekpmeasure.readthedocs.io/?badge=latest)
 [![PyPI version fury.io](https://badge.fury.io/py/ekpmeasure.svg)](https://pypi.org/project/ekpmeasure/)
-[![PyPI download total](https://img.shields.io/pypi/dt/ekpmeasure.svg)](https://pypi.python.org/pypi/ekpmeasure/)
 [![PyPI license](https://img.shields.io/pypi/l/ekpmeasure.svg)](https://pypi.org/project/ekpmeasure/)
 
 

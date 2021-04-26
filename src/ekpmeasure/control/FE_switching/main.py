@@ -1,5 +1,7 @@
 from ..instruments.berkeleynucleonics765 import *
 from ..instruments.tektronixTDS620B import get_wf_from_scope as tds620B_get_wf
+from ..instruments.tektronixTDS6604 import initialize_scope as initialize_scope_tds6604
+from ..instruments.tektronixTDS6604 import get_waveform as get_wf_tds6604
 from ..misc import get_save_name
 import pandas as pd
 import numpy as np
@@ -9,7 +11,7 @@ import warnings
 
 import time
 
-__all__ = ('run_pund', 'apply_preset_pulse', 'run_preset_then_2pusle_TDS620B', 'trial')
+__all__ = ('run_pund', 'apply_preset_pulse', 'run_preset_then_2pusle_TDS620B', 'trial', 'run_preset_then_2pusle_TDS6604')
 
 def run_pund(inst, up, down, up_first = False, wait_time = 1, channel = '1'):
 	"""
@@ -193,6 +195,125 @@ def run_preset_then_2pusle_TDS620B(pg, scope, identifier, pulsewidth, delay, hig
 	save_presetpulsewidth = str(float(preset_pulsewidth.replace('ns', 'e-9').replace('us','e-6').replace('ms', 'e-3').replace('s', ''))*1e9).replace('.', 'x') + 'ns'
 
 	save_base_name = 'PRESET2PULSE_'
+	for namer in [save_pulsewidth, save_delay, save_highvoltage, save_presetvoltage, save_presetpulsewidth]:
+		save_base_name += namer + '_'
+	save_base_name = save_base_name[:-1] #remove final '_'
+
+	meta_data = {
+		'type':'preset2pulse', 
+		'identifier':identifier, 
+		'pulsewidth_ns':float(save_pulsewidth[:-2].replace('x','.')),
+		'delay_ns':float(save_delay[:-2].replace('x','.')),
+		'high_voltage_v':float(save_highvoltage.replace('x', '.')[:-2])/1000,
+		'preset_voltage_v':float(save_presetvoltage.replace('x', '.')[:-2])/1000,
+		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.'))
+	}
+			
+	return save_base_name, meta_data, df
+
+def run_preset_then_2pusle_TDS6604(pg, scope, identifier, pulsewidth, delay, high_voltage, preset_pulsewidth = '100ns', preset_voltage = '3000mv',test=False):
+	"""
+	run a preset and then 2 pulse measurement using the BN765 and tektronix tds6604. This oscope IS preferred for the fastest timing measurements
+	returns tuple((str) save_base_name,  (pandas.DataFrame) data)
+
+	this function is supported in trial()
+	----
+	identifier: (str) some indentifier for the capacitor or sample you are studying
+	pg: (pyvisa.resources.gpib.GPIBInstrument) bn765
+	scope: (pyvisa.resources.gpib.GPIBInstrument) tektronix tds620B
+	delay: (str) example '10ns' delay between the two pulses (preset delay is set at approximately 1s)
+	high_voltage: (str) example '100mV' allowed units are V and mv. this parameter sets the amplitude of the two pulse 
+	preset_pulsewidth: (str) example '100ns' sets the pulsewidth of the preset
+	preset_voltage: (str) example '10mv' sets the amplitude of the preset
+	"""
+
+	#get types correct
+	try:
+		float(pulsewidth)
+	except ValueError:
+		try:
+			pw = pulsewidth.replace('ns', 'e-9').replace('us', 'e-6').replace('ms', 'e-3').replace('s','')
+			float(pw)
+			pulsewidth = pw
+		except ValueError:
+			raise ValueError('unable to interpret pulsewidth {}, interpreted as {}'.format(pulsewidth, pw))
+	#now should have scientific notation format (str)
+
+	try:
+		float(delay)
+	except ValueError:
+		try:
+			dlay = delay.replace('ns', 'e-9').replace('us', 'e-6').replace('ms', 'e-3').replace('s','')
+			float(dlay)
+			delay = dlay
+		except ValueError:
+			raise ValueError('unable to interpret delay {}, interpreted as {}'.format(delay, dlay))
+	#now has scientific notation format (str)
+
+	#fix high_voltage units
+	if high_voltage[-2:].lower() not in set({'mv'}):
+		if high_voltage[-1].lower() != 'v':
+			raise ValueError('high_voltage ' + str(high_voltage) + ' not supported')
+
+	try: 
+		high_voltage = float(high_voltage[:-1])*1000
+	except ValueError:
+		#means mv is the unit
+		high_voltage = float(high_voltage[:-2])
+	high_voltage = str(high_voltage) + 'mv' #put it in consistent units (mV)
+	#now has units of mv with 'mv' on end
+
+	#fix preset_voltage units
+	if preset_voltage[-2:].lower() not in set({'mv'}):
+		if preset_voltage[-1].lower() != 'v':
+			raise ValueError('preset_voltage ' + str(preset_voltage) + ' not supported')
+
+	try: 
+		preset_voltage = float(preset_voltage[:-1])*1000
+	except ValueError:
+		#means mv is the unit
+		preset_voltage = float(preset_voltage[:-2])
+	preset_voltage = str(preset_voltage) + 'mv' #put it in consistent units (mV)
+	#now has units of mv with 'mv' on end
+
+
+
+	if preset_pulsewidth[-1] != 's':
+		raise ValueError('preset_pulsewidth {} is not supported please use ns, us, ms, s suffix'.format(preset_pulsewidth))
+	#now is a str with suffix like ms
+
+	if not test:
+
+		for pulsen in [1,2]:
+			initialize_trig(pg, pulsen, pulsewidth=pulsewidth, delay=delay)
+			time.sleep(.1)
+			apply_preset_pulse(pg, preset_pulsewidth, preset_voltage)
+			time.sleep(.8)
+			initialize_2pulse(pg, pulsewidth=pulsewidth, delay=delay, high_voltage=high_voltage)
+			time.sleep(.2)
+			manual_trigger(pg)
+			time.sleep(.1)
+			pg.write('pulsegenc:stop') 
+
+			initialize_scope_tds6604(scope, channel = 'Ch1', force_yes = True)
+			tdf = get_wf_tds6604(scope)
+			time.sleep(3)
+			if pulsen == 1:
+				df = tdf.copy()
+				df.rename(columns={'v':'p1'}, inplace = True)
+			else:
+				df['p2'] = tdf.v
+	else:
+		df = pd.DataFrame({'data':[1,2,3]})
+
+
+	save_pulsewidth = str(float(pulsewidth)*1e9).replace('.', 'x') + 'ns'
+	save_delay = str(float(delay)*1e9).replace('.', 'x') + 'ns'
+	save_highvoltage = high_voltage.replace('.','x')
+	save_presetvoltage = preset_voltage.replace('.', 'x')
+	save_presetpulsewidth = str(float(preset_pulsewidth.replace('ns', 'e-9').replace('us','e-6').replace('ms', 'e-3').replace('s', ''))*1e9).replace('.', 'x') + 'ns'
+
+	save_base_name = ''
 	for namer in [save_pulsewidth, save_delay, save_highvoltage, save_presetvoltage, save_presetpulsewidth]:
 		save_base_name += namer + '_'
 	save_base_name = save_base_name[:-1] #remove final '_'
