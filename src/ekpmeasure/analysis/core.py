@@ -50,14 +50,14 @@ class Dataset(pd.DataFrame):
 	Dataset is a subclass of pandas.DataFrame. Used to manipulate meta data while keeping track of location for the real data, which can be retrieved when necessary.
 
 	Args:
-	    path (str or dict): a path to where the real data lives. if dict, form is 
+		path (str or dict): a path to where the real data lives. if dict, form is 
 
-	    		{path: [indices of initializer for this path]} 
+				{path: [indices of initializer for this path]} 
 
-	    initializer (pandas.DataFrame):  the meta data. one column must contain a pointer (i.e. filename) to where the real data is stored
-	    readfileby (function): how to read the data. default of None corresponds to 
+		initializer (pandas.DataFrame):  the meta data. one column must contain a pointer (i.e. filename) to where the real data is stored
+		readfileby (function): how to read the data. default of None corresponds to 
 
-	    		pandas.read_csv()
+				pandas.read_csv()
 
 	"""
 
@@ -93,7 +93,7 @@ class Dataset(pd.DataFrame):
 		"""Return a brief summary of the data in your Dataset. 
 
 		Returns:
-		    summary (Dict): a summary of the Dataset"""
+			summary (Dict): a summary of the Dataset"""
 		summary = dict()
 		for column in self.columns:
 			if column == self.pointercolumn:
@@ -122,36 +122,36 @@ class Dataset(pd.DataFrame):
 		return self[self[column].apply(function, **kwargs_for_function).values].reset_index()
 
 	def remove_index(self, index):
-        """
-        Remove an index or array-like of indices.
+		"""
+		Remove an index or array-like of indices.
 
-        args:
-        	index (index or array-like): index to be removed
+		args:
+			index (index or array-like): index to be removed
 
-        returns:
+		returns:
 			out (Dataset): updated Dataset
 
-        """
-        index = np.array([index]).flatten()
-        
-        #adjust index_to_path and convert to path_to_index
-        path = _convert_ITP_to_path_to_index(self.index_to_path.drop(index = index).reset_index(drop = True))
-        meta_data = self.drop(index = index).reset_index(drop = True)
-        return Dataset(path, meta_data, readfileby=self.readfileby)
-    
-    
-    def remove_nonexistant_files_from_metadata(self):
-        """
-        Remove references to files that do not exist in path.
-        """
-        remove_index = []
-        for ind, path in enumerate(t.index_to_path):
-            if _check_file_exists(path, self[self.pointercolumn].iloc[ind]):
-                continue
-            else:
-                remove_index.append(ind)
-        
-        return self.remove_index(remove_index)
+		"""
+		index = np.array([index]).flatten()
+		
+		#adjust index_to_path and convert to path_to_index
+		path = _convert_ITP_to_path_to_index(self.index_to_path.drop(index = index).reset_index(drop = True))
+		meta_data = self.drop(index = index).reset_index(drop = True)
+		return Dataset(path, meta_data, readfileby=self.readfileby)
+	
+	
+	def remove_nonexistant_files_from_metadata(self):
+		"""
+		Remove references to files that do not exist in path.
+		"""
+		remove_index = []
+		for ind, path in enumerate(t.index_to_path):
+			if _check_file_exists(path, self[self.pointercolumn].iloc[ind]):
+				continue
+			else:
+				remove_index.append(ind)
+		
+		return self.remove_index(remove_index)
 	
 	def _construct_index_to_path(self, path, initializer):
 		"""construct index_to_path from path provided
