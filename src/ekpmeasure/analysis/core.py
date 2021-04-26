@@ -120,6 +120,38 @@ class Dataset(pd.DataFrame):
 	@construct_Dataset_from_dataframe
 	def filter_on_column(self, column, function, **kwargs_for_function):
 		return self[self[column].apply(function, **kwargs_for_function).values].reset_index()
+
+	def remove_index(self, index):
+        """
+        Remove an index or array-like of indices.
+
+        args:
+        	index (index or array-like): index to be removed
+
+        returns:
+			out (Dataset): updated Dataset
+
+        """
+        index = np.array([index]).flatten()
+        
+        #adjust index_to_path and convert to path_to_index
+        path = _convert_ITP_to_path_to_index(self.index_to_path.drop(index = index).reset_index(drop = True))
+        meta_data = self.drop(index = index).reset_index(drop = True)
+        return Dataset(path, meta_data, readfileby=self.readfileby)
+    
+    
+    def remove_nonexistant_files_from_metadata(self):
+        """
+        Remove references to files that do not exist in path.
+        """
+        remove_index = []
+        for ind, path in enumerate(t.index_to_path):
+            if _check_file_exists(path, self[self.pointercolumn].iloc[ind]):
+                continue
+            else:
+                remove_index.append(ind)
+        
+        return self.remove_index(remove_index)
 	
 	def _construct_index_to_path(self, path, initializer):
 		"""construct index_to_path from path provided
