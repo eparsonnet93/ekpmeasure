@@ -44,6 +44,12 @@ def _convert_ITP_to_path_to_index(index_to_path):
 			path_to_index.update({path:[index]})
 	return path_to_index
 
+def _check_file_exists(path, filename):
+	if filename in set(os.listdir(path)):
+		return True
+	else:
+		return False
+
 class Dataset(pd.DataFrame):
 	"""Dataset class for analysis. 
 
@@ -145,7 +151,7 @@ class Dataset(pd.DataFrame):
 		Remove references to files that do not exist in path.
 		"""
 		remove_index = []
-		for ind, path in enumerate(t.index_to_path):
+		for ind, path in enumerate(self.index_to_path):
 			if _check_file_exists(path, self[self.pointercolumn].iloc[ind]):
 				continue
 			else:
