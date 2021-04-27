@@ -116,7 +116,7 @@ class experiment():
 				kwargs = fixed_params
 				for i, key in enumerate(scan_param_order[::-1]):
 					kwargs.update({key:params[i]})
-				
+
 				trial(self.run_function, kwargs, self.path)
 				time.sleep(1)
 			return 
