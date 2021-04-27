@@ -3,6 +3,7 @@ from ..instruments.tektronixTDS620B import get_wf_from_scope as tds620B_get_wf
 from ..instruments.tektronixTDS6604 import initialize_scope as initialize_scope_tds6604
 from ..instruments.tektronixTDS6604 import get_waveform as get_wf_tds6604
 from ..misc import get_save_name
+from .. import core
 import pandas as pd
 import numpy as np
 import os 
@@ -11,7 +12,9 @@ import warnings
 
 import time
 
-__all__ = ('run_pund', 'apply_preset_pulse', 'run_preset_then_2pusle_TDS620B', 'trial', 'run_preset_then_2pusle_TDS6604')
+__all__ = ('FE',)
+
+identifier_to_diameter_dict = dict({'4':4, '6':6, '8':8, '5':5, '125':12.5, '95':9.5,'14':14, '185':18.5,'25':25, '23':23})
 
 def run_pund(inst, up, down, up_first = False, wait_time = 1, channel = '1'):
 	"""
@@ -91,6 +94,193 @@ def apply_preset_pulse(pg, pulsewidth, amplitude, channel = '1', wait_time = 1, 
 	
 	return 
 
+def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, scopetype = '6604', area='fromdiameter', diameter = 'fromidentifier', 
+	preset_pulsewidth = '100ns', preset_voltage = '3000mv', test=False):
+	"""
+	Run a preset and then 2 pulse measurement using the BN765 and tektronix scope. Allowed scopes are 6604 and 620B. 6604 is preferred for fast measurements.
+
+	args:
+	pg (pyvisa.resources.gpib.GPIBInstrument): Pulse generator berkeley nucleonics 765
+	scope (pyvisa.resources.gpib.GPIBInstrument): tektronix scope (either 6604 or 620B)
+	identifier (str): some indentifier for the capacitor or sample you are studying
+	pulsewidth (str): which pulsewidth to use on 2 pulse. example '500ns'
+	delay (str): Example '10ns' delay between the two pulses (delay after preset is set at approximately 1s)
+	high_voltage (str): Example '100mV' allowed units are V and mv. This parameter sets the amplitude of the two pulse.
+	scopetype (str): Either '6604' or '620B' the scope you are using
+	area ('fromdiameter' or float): Area of sample, if 'fromdiameter' will use pi*R^2 from diameter
+	diameter ('fromidentifier' or float): Diameter of capacitor. If 'fromidentifier' will split identifier by 'um' and retrieve diameter that way. Example: 4um1 will give 4 as diameter. Arbitrary identifier will not work.
+	preset_pulsewidth (str): Example '100ns' sets the pulsewidth of the preset
+	preset_voltage (str): Example '10mv' sets the amplitude of the preset
+
+	returns:
+	out (tuple): save_base_name, meta_data, data_df
+	"""
+	if scopetype != '6604' and scopetype != '620B':
+		raise ValueError('scopetype must be "6604" or "620B". Recieved {}'.format(scopetype))
+
+	#get types correct
+	try:
+		float(pulsewidth)
+	except ValueError:
+		try:
+			pw = pulsewidth.replace('ns', 'e-9').replace('us', 'e-6').replace('ms', 'e-3').replace('s','')
+			float(pw)
+			pulsewidth = pw
+		except ValueError:
+			raise ValueError('unable to interpret pulsewidth {}, interpreted as {}'.format(pulsewidth, pw))
+	#now should have scientific notation format (str)
+
+	try:
+		float(delay)
+	except ValueError:
+		try:
+			dlay = delay.replace('ns', 'e-9').replace('us', 'e-6').replace('ms', 'e-3').replace('s','')
+			float(dlay)
+			delay = dlay
+		except ValueError:
+			raise ValueError('unable to interpret delay {}, interpreted as {}'.format(delay, dlay))
+	#now has scientific notation format (str)
+
+	#fix high_voltage units
+	if high_voltage[-2:].lower() not in set({'mv'}):
+		if high_voltage[-1].lower() != 'v':
+			raise ValueError('high_voltage ' + str(high_voltage) + ' not supported')
+
+	try: 
+		high_voltage = float(high_voltage[:-1])*1000
+	except ValueError:
+		#means mv is the unit
+		high_voltage = float(high_voltage[:-2])
+	high_voltage = str(high_voltage) + 'mv' #put it in consistent units (mV)
+	#now has units of mv with 'mv' on end
+
+	#fix preset_voltage units
+	if preset_voltage[-2:].lower() not in set({'mv'}):
+		if preset_voltage[-1].lower() != 'v':
+			raise ValueError('preset_voltage ' + str(preset_voltage) + ' not supported')
+
+	try: 
+		preset_voltage = float(preset_voltage[:-1])*1000
+	except ValueError:
+		#means mv is the unit
+		preset_voltage = float(preset_voltage[:-2])
+	preset_voltage = str(preset_voltage) + 'mv' #put it in consistent units (mV)
+	#now has units of mv with 'mv' on end
+
+
+
+	if preset_pulsewidth[-1] != 's':
+		raise ValueError('preset_pulsewidth {} is not supported please use ns, us, ms, s suffix'.format(preset_pulsewidth))
+	#now is a str with suffix like ms
+
+	if not test:
+
+		for pulsen in [1,2]:
+			initialize_trig(pg, pulsen, pulsewidth=pulsewidth, delay=delay)
+			time.sleep(.1)
+			apply_preset_pulse(pg, preset_pulsewidth, preset_voltage)
+			time.sleep(.8)
+			initialize_2pulse(pg, pulsewidth=pulsewidth, delay=delay, high_voltage=high_voltage)
+			time.sleep(.2)
+			manual_trigger(pg)
+			time.sleep(.1)
+			pg.write('pulsegenc:stop') 
+
+			if scopetype == '6604':
+				initialize_scope_tds6604(scope, channel = 'Ch1', force_yes = True)
+				tdf = get_wf_tds6604(scope)
+			elif scopetype == '620B':
+				tdf = tds620B_get_wf(scope)
+			else:
+				raise ValueError('Please check scopetype. Set to {}, which is not allowed'.format(scopetype))
+
+			time.sleep(3)
+			if pulsen == 1:
+				df = tdf.copy()
+				df.rename(columns={'v':'p1'}, inplace = True)
+			else:
+				df['p2'] = tdf.v
+	else:
+		df = pd.DataFrame({'data':[1,2,3]})
+
+
+	save_pulsewidth = str(float(pulsewidth)*1e9).replace('.', 'x') + 'ns'
+	save_delay = str(float(delay)*1e9).replace('.', 'x') + 'ns'
+	save_highvoltage = high_voltage.replace('.','x')
+	save_presetvoltage = preset_voltage.replace('.', 'x')
+	save_presetpulsewidth = str(float(preset_pulsewidth.replace('ns', 'e-9').replace('us','e-6').replace('ms', 'e-3').replace('s', ''))*1e9).replace('.', 'x') + 'ns'
+
+	save_base_name = identifier + '_'
+	for namer in [save_pulsewidth, save_delay, save_highvoltage, save_presetvoltage, save_presetpulsewidth]:
+		save_base_name += namer + '_'
+	save_base_name = save_base_name[:-1] #remove final '_'
+
+	meta_data = {
+		'type':'preset2pulse', 
+		'identifier':identifier, 
+		'pulsewidth_ns':float(save_pulsewidth[:-2].replace('x','.')),
+		'delay_ns':float(save_delay[:-2].replace('x','.')),
+		'high_voltage_v':float(save_highvoltage.replace('x', '.')[:-2])/1000,
+		'preset_voltage_v':float(save_presetvoltage.replace('x', '.')[:-2])/1000,
+		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.')),
+		'diameter':identifier_to_diameter_dict[identifier.split('um')[0]],
+		'area':np.pi*(identifier_to_diameter_dict[identifier.split('um')[0]]/2)**2
+	}
+			
+	return save_base_name, meta_data, df
+
+
+
+class FE(core.experiment):
+	"""need docstring"""
+
+	def __init__(self, pg, scope, scopetype = '6604',run_function = preset_run_function):
+		super().__init__()
+		if scopetype != '6604' and scopetype != '620B':
+			raise ValueError('must specify scope type as either 6604 or 620B (corresponding to the correct scope you are using)')
+
+		self.run_function = preset_run_function
+		self.pg = pg
+		self.scope = scope
+		self.scopetype = scopetype
+		return
+
+	def checks(self, params):
+		"""to be checked by """
+		if self.pg != params['pg']:
+			try:
+				raise ValueError('pg provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.pg, params['pg']))
+
+			except KeyError:
+				raise ValueError('pg provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.pg, None))
+
+		
+		if self.scope != params['scope']:
+			try:
+				raise ValueError('scope provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scope, params['scope']))
+
+			except KeyError:
+				raise ValueError('scope provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scope, None))
+		try:
+			if self.scopetype != params['scopetype']:
+				try:
+					raise ValueError('scopetype provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scopetype, params['scopetype']))
+
+				except KeyError:
+					raise ValueError('scopetype provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.scopetype, None))
+		except KeyError:
+			if self.scopetype != '6604':
+				raise ValueError('check scopetype. If you think this is done correctly, please specify explicitly scopetype in params.')
+		
+	def terminate(self):
+		"""to perform at end"""
+		stop(self.pg)
+		return
+
+
+##########DEPRECATED BELOW################
+
+
 def run_preset_then_2pusle_TDS620B(pg, scope, identifier, pulsewidth, delay, high_voltage, preset_pulsewidth = '100ns', preset_voltage = '3000mv',test=False):
 	"""
 	run a preset and then 2 pulse measurement using the BN765 and tektronix tds620B. This oscope is not preferred for the fastest timing measurements
@@ -108,7 +298,7 @@ def run_preset_then_2pusle_TDS620B(pg, scope, identifier, pulsewidth, delay, hig
 	preset_pulsewidth: (str) example '100ns' sets the pulsewidth of the preset
 	preset_voltage: (str) example '10mv' sets the amplitude of the preset
 	"""
-
+	warnings.showwarning('run_preset_then_2pusle_TDS620B() is deprecated. please use preset_run_function instead', DeprecationWarning, '', 0,)
 	#get types correct
 	try:
 		float(pulsewidth)
@@ -206,7 +396,9 @@ def run_preset_then_2pusle_TDS620B(pg, scope, identifier, pulsewidth, delay, hig
 		'delay_ns':float(save_delay[:-2].replace('x','.')),
 		'high_voltage_v':float(save_highvoltage.replace('x', '.')[:-2])/1000,
 		'preset_voltage_v':float(save_presetvoltage.replace('x', '.')[:-2])/1000,
-		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.'))
+		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.')),
+		'diameter':identifier_to_diameter_dict[identifier.split('um')[0]],
+		'area':np.pi*(identifier_to_diameter_dict[identifier.split('um')[0]]/2)**2
 	}
 			
 	return save_base_name, meta_data, df
@@ -226,6 +418,7 @@ def run_preset_then_2pusle_TDS6604(pg, scope, identifier, pulsewidth, delay, hig
 	preset_pulsewidth: (str) example '100ns' sets the pulsewidth of the preset
 	preset_voltage: (str) example '10mv' sets the amplitude of the preset
 	"""
+	warnings.showwarning('run_preset_then_2pusle_TDS6604() is deprecated. please use preset_run_function instead', DeprecationWarning, '', 0,)
 
 	#get types correct
 	try:
@@ -325,11 +518,12 @@ def run_preset_then_2pusle_TDS6604(pg, scope, identifier, pulsewidth, delay, hig
 		'delay_ns':float(save_delay[:-2].replace('x','.')),
 		'high_voltage_v':float(save_highvoltage.replace('x', '.')[:-2])/1000,
 		'preset_voltage_v':float(save_presetvoltage.replace('x', '.')[:-2])/1000,
-		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.'))
+		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.')),
+		'diameter':identifier_to_diameter_dict[identifier.split('um')[0]],
+		'area':np.pi*(identifier_to_diameter_dict[identifier.split('um')[0]]/2)**2
 	}
 			
 	return save_base_name, meta_data, df
-
 
 def trial(run_function, run_function_args, path):
 	"""
