@@ -12,7 +12,7 @@ import warnings
 
 import time
 
-__all__ = ('FE',)
+__all__ = ('FE', 'preset_run_function')
 
 identifier_to_diameter_dict = dict({'4':4, '6':6, '8':8, '5':5, '125':12.5, '95':9.5,'14':14, '185':18.5,'25':25, '23':23})
 
@@ -222,10 +222,19 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 		'delay_ns':float(save_delay[:-2].replace('x','.')),
 		'high_voltage_v':float(save_highvoltage.replace('x', '.')[:-2])/1000,
 		'preset_voltage_v':float(save_presetvoltage.replace('x', '.')[:-2])/1000,
-		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.')),
-		'diameter':identifier_to_diameter_dict[identifier.split('um')[0]],
-		'area':np.pi*(identifier_to_diameter_dict[identifier.split('um')[0]]/2)**2
+		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.'))
 	}
+	try:
+		meta_data.update({
+			'diameter':identifier_to_diameter_dict[identifier.split('um')[0]],
+			'area':np.pi*(identifier_to_diameter_dict[identifier.split('um')[0]]/2)**2
+		})
+	except KeyError:
+		print('unable to extract diameter and area from key {}'.format(identifier))
+		meta_data.update({
+			'diameter':np.nan,
+			'area':np.nan
+		})
 			
 	return save_base_name, meta_data, df
 
