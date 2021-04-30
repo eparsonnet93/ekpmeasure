@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 
-__all__ = ('Dataset', 'Data', 'dataset')
+__all__ = ('Dataset', 'Data',)
 
 def construct_Dataset_from_dataframe(function):
 

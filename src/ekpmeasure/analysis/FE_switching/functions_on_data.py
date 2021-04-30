@@ -13,7 +13,7 @@ __all__ = (
 	'subtract_median_of_lastN'
 	)
 
-def get_startarg_1d(p, cutoff = 0.01):
+def _get_startarg_1d(p, cutoff = 0.01):
     """returns the index of where p (could be p1 or p2) is first greater than cutoff"""
     assert type(p) == type(np.array([])), "p must be numpy array"
     if len(p.shape) > 1:
@@ -22,7 +22,7 @@ def get_startarg_1d(p, cutoff = 0.01):
     arg = np.argwhere(p > cutoff).flatten()[0]
     return arg
 
-def get_starttime_from_startarg_1d(time, start_arg):
+def _get_starttime_from_startarg_1d(time, start_arg):
     """return the time at start_arg"""
     assert type(time) == type(np.array([])), "time must be numpy array"
     if len(time.shape) > 1:
@@ -30,14 +30,16 @@ def get_starttime_from_startarg_1d(time, start_arg):
     return time[start_arg].flatten()[0]
 
 def reset_time(data_dict, key = 'p1', cutoff = 0.01, grace = 10):
-    """finds the start of the pulse and resets it to zero time
-    ----
-    data_dict: (dict) with keys 'time', 'p1', 'p2'
-    key: (str) key of data_dict to find where first above cutoff
-    cutoff: (float) a voltage value above which to call the start of the pulse
-    grace: (int) how many datapoints to include before time = 0
+    """Finds the start of the data (defined as first time data[key]>cutoff) and resets it to zero time
 
-    returns dict with keys 'time', 'p1' and 'p2'
+    args:
+        data_dict (dict): data dict. 
+        key (str):  key of data_dict to find where first above cutoff
+        cutoff (float):  A voltage value above which to call the start of the pulse
+        grace (int):  How many datapoints to include before new time = 0
+
+    returns 
+        out: (dict) with keys 'time', 'p1' and 'p2'
     """
     assert set(data_dict.keys()) == set({'p1', 'p2', 'time'}), "data_dict keys ({}) do not match required keys: {}".format(set(data_dict.keys()), set({'p1', 'p2', 'time'}))
     key = key.lower()
@@ -65,8 +67,8 @@ def reset_time(data_dict, key = 'p1', cutoff = 0.01, grace = 10):
     for d in range(ndim):
         ttime = time[d, :]
         tp = p_dict[key][d, :]
-        arg = get_startarg_1d(tp, cutoff = cutoff)
-        start_time = get_starttime_from_startarg_1d(ttime, arg)
+        arg = _get_startarg_1d(tp, cutoff = cutoff)
+        start_time = _get_starttime_from_startarg_1d(ttime, arg)
         
         new_1d_time = ttime[arg - grace:] - start_time
         tp1 = p1[d, :]
@@ -101,11 +103,13 @@ def reset_time(data_dict, key = 'p1', cutoff = 0.01, grace = 10):
     return out
 
 def get_dps(data_dict):
-    """calculate the difference between p1 and p2
-    ----
-    data_dict: (dict) with keys 'time', 'p1', 'p2'
+    """Calculate the difference between data keys 'p1' and 'p2'
 
-    returns dict with keys 'dp' and 'time'
+    args:
+        data_dict (dict): dict with keys 'time', 'p1', 'p2'
+
+    returns:
+        out (dict) : dict with keys 'dp' and 'time'. Key 'dp' corresponds to 'p1' - 'p2' for each timestep.
     """
     p1 = data_dict['p1']
     p2 = data_dict['p2']
@@ -123,11 +127,13 @@ def get_dps(data_dict):
 
 def get_polarization_transients_from_dps(data_dict):
     """
-    returns integrated dp
-    ----
-    data_dict: (dict) with keys 'time', 'dp'
+    Integrate dps.
 
-    returns dict with keys 'intdp' and 'time'
+    args:
+        data_dict (dict): dict with keys 'time', 'dp'
+
+    returns:
+        out (dict): dict with keys 'intdp' and 'time'. 'intdp' is scipy.integrate.cumtrapz(dp, x = 'time')
     """ 
     dp = np.nan_to_num(data_dict['dp'], 0)
     time = np.nan_to_num(data_dict['time'], 0)
@@ -147,6 +153,19 @@ def get_polarization_transients_from_dps(data_dict):
     return {'time':data_dict['time'], 'intdp':intdp}
 
 def smooth(data_dict, key='dp', N = 3, Wn = 0.05):
+    """
+    Apply butterworth filter (`[scipy.signal.butter](#https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html)`) to specified key of data.
+
+    args:
+        data_dict (dict): Data
+        key (str or key): Specify the key to apply filter to
+        N (int): The order of the filter
+        Wn (array-like): The critical frequency or frequencies. For lowpass and highpass filters, Wn is a scalar; for bandpass and bandstop filters, Wn is a length-2 sequence. For a Butterworth filter, this is the point at which the gain drops to 1/sqrt(2) that of the passband (the “-3 dB point”). For digital filters, Wn are in the same units as fs. By default, fs is 2 half-cycles/sample, so these are normalized from 0 to 1, where 1 is the Nyquist frequency. (Wn is thus in half-cycles / sample.) For analog filters, Wn is an angular frequency (e.g. rad/s).
+
+    returns: 
+        out (dict): dict with same as original keys. 
+
+    """
     assert key in set(data_dict.keys()), "key {} is does not exist in data_dict".format(key)
     
     to_smooth = np.nan_to_num(data_dict[key], 0)
@@ -169,6 +188,18 @@ def smooth(data_dict, key='dp', N = 3, Wn = 0.05):
     return out
 
 def subtract_median_of_lastN(data_dict, key = 'dp', N=20):
+    """
+    Subtract the median of the last N samples. This may be used to account for constant offsets in the noise floor, for example.
+
+    args:
+        data_dict (dict): Data
+        key (str or key): Which key to use.
+        N (int) : The number of points to subtract median of.
+
+    returns:
+        out (dict): dict with original keys. 
+
+    """
     assert key in set(data_dict.keys()), "key {} is does not exist in data_dict".format(key)
     
     to_subtract = np.nan_to_num(data_dict[key], 0)
@@ -192,6 +223,21 @@ def subtract_median_of_lastN(data_dict, key = 'dp', N=20):
 
 def get_saturation_and_switching_time(data_dict, n_points_for_saturation=50, 
                                       top_percent = 90, bottom_percent = 10):
+
+    """
+    Get the saturation and switching time for data. Calculates saturation value as average of n points (n_points_for_saturation) at the end of the data. Calculates switching time as time between bottom_percent and top_percent, both calcuated as percentages of saturation.
+
+    args:
+        data_dict (dict): Data
+        n_points_for_saturation (int): The number of points to use at the end of the data to calculate the saturation value (mean).
+        top_percent (int or float): The percent of saturation to use as switching completion.
+        bottom_percent (int or float): The percent of saturaiton to use as switching start commencement. 
+
+    returns: 
+        out (dict): dict with keys 'saturation' and 'switching_time'
+
+    """
+
     assert 'intdp' in set(data_dict.keys()), '"intdp" does not exist in data_dict'
     assert 'time' in set(data_dict.keys()), "'time' does not exist in data_dict"
     
