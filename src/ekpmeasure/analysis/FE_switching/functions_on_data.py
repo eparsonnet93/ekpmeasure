@@ -154,7 +154,7 @@ def get_polarization_transients_from_dps(data_dict):
 
 def smooth(data_dict, key='dp', N = 3, Wn = 0.05):
     """
-    Apply butterworth filter (`[scipy.signal.butter](#https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html)`) to specified key of data.
+    Apply butterworth filter (scipy.signal.butter) to specified key of data.
 
     args:
         data_dict (dict): Data
