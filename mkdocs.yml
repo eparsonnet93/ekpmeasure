@@ -3,7 +3,9 @@ nav:
   - Home: index.md
   - Getting Started: start.md
   - Code Reference:
-    - Analysis: analysis-core-reference.md
+    - analysis.core: analysis-core-reference.md
+    - analysis.load: analysis-load-reference.md
+    - analysis.FE_switching: analysis-fe_switching-reference.md
 
 theme: readthedocs
 

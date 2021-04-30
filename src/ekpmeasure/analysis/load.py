@@ -9,11 +9,14 @@ from .core import Dataset
 __all__ = ('load_Dataset', 'generate_meta_data')
 
 def load_Dataset(path, meta_data = None):
-	"""load a Dataset from a path
-	----
-	
-	path: (str) path to data
-	meta_data: (pandas.DataFrame) meta_data
+	"""Load a dataset from path. Path must contain pickle file 'meta_data'. 
+
+	args:
+		path (str): Path to data
+		meta_data (pandas.DataFrame): meta_data if one wishes to provide different meta_data from that provided in path. 
+
+	returns: 
+		Dataset
 	"""
 	return Dataset(path, _build_df(path, meta_data))
 
@@ -29,10 +32,13 @@ def _build_df(path, meta_data):
 
 def generate_meta_data(path, mapper, pointercolumn = 'filename', overwrite = False):
 	"""
-	generate meta_data from a path.
-	----
+	Generate meta_data from a path for a given mapper function. 
 
-	mapper: (function: filename (str) -> dict) operates on a single file name in order to get the columns (dict key) and values (dict value) for meta_data of that file 
+	args:
+		path (str): Specify the path to the directory
+		mapper ( function ) : filename (str) -> dict. A function which operates on a single file name in order to get the columns (dict key) and values (dict value) for meta_data of that file.
+		pointercolumn (str) : The name of the pointercolumn in the created meta_data
+		overwrite (bool) : True will overwrite any existing meta_data in path. 
 	"""
 	if 'meta_data' in set(os.listdir(path)):
 		if not overwrite:
