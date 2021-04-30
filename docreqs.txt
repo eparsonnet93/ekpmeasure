@@ -3,3 +3,4 @@ mkdocs-autorefs==0.1.1
 pandas
 numpy
 matplotlib
+scipy
