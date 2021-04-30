@@ -194,10 +194,10 @@ def subtract_median_of_lastN(data_dict, key = 'dp', N=20):
     args:
         data_dict (dict): Data
         key (str or key): Which key to use.
-        N (int) : The number of points to subtract median of.
+        N ( int ) : The number of points to subtract median of.
 
-    returns:
-        out (dict): dict with original keys. 
+    returns: 
+        out ( dict ): dict with same as original keys. 
 
     """
     assert key in set(data_dict.keys()), "key {} is does not exist in data_dict".format(key)
