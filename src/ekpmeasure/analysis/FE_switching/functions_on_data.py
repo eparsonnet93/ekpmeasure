@@ -4,6 +4,8 @@ from scipy.integrate import cumtrapz
 import warnings
 from scipy import signal
 
+from ..functions_on_data import _fod_dimensionality_fixer
+
 __all__ = (
 	'get_dps',
 	'reset_time', 
@@ -46,16 +48,12 @@ def reset_time(data_dict, key = 'p1', cutoff = 0.01, grace = 10):
     assert key in set({'p1', 'p2'}), "key {} is not in allowed. must be 'p1' or 'p2'".format(key)
     assert key in set(data_dict.keys()), "key {} does not exist in data_dict keys ({})".format(key, data_dict.keys())
     
-    time, p1, p2 = data_dict['time'], data_dict['p1'], data_dict['p2']
+    #dimensionality of data:
+    time, p1, p2 = _fod_dimensionality_fixer(data_dict, check_key = 'time', keys_to_fix = ['time', 'p1', 'p2'])
+
     assert time.shape == p1.shape and time.shape == p2.shape, "shapes do not match: time - {}, p1 - {}, p2 - {}".format(time.shape, p1.shape, p2.shape)
     if len(time.shape) > 2:
         raise ValueError('len(time.shape) > 2 meaning the dimensionality of the data is greater than 2. this is not allowed')
-    
-    #dimensionality of data:
-    if len(time.shape) == 1:
-        time = time.reshape((1, len(time)))
-        p1 = p1.reshape((1, len(p1)))
-        p2 = p2.reshape((1, len(p2)))
     
     ndim = time.shape[0]
     
@@ -111,12 +109,8 @@ def get_dps(data_dict):
     returns:
         out (dict) : dict with keys 'dp' and 'time'. Key 'dp' corresponds to 'p1' - 'p2' for each timestep.
     """
-    p1 = data_dict['p1']
-    p2 = data_dict['p2']
-    
-    if len(p1.shape) == 1:
-        p1 = p1.reshape((1, len(p1)))
-        p2 = p2.reshape((1, len(p2)))
+    #dimensionality
+    p1, p2 = _fod_dimensionality_fixer(data_dict, check_key = 'p1', keys_to_fix = ['p1', 'p2'])
     
     for i in range(p1.shape[0]):
         if i == 0:
@@ -135,12 +129,12 @@ def get_polarization_transients_from_dps(data_dict):
     returns:
         out (dict): dict with keys 'intdp' and 'time'. 'intdp' is scipy.integrate.cumtrapz(dp, x = 'time')
     """ 
-    dp = np.nan_to_num(data_dict['dp'], 0)
-    time = np.nan_to_num(data_dict['time'], 0)
-    
-    if len(dp.shape) == 1:
-        dp = dp.reshape((1, len(dp)))
-        time = time.reshape(1, len(time))
+
+    #dimensionality
+    dp, time = _fod_dimensionality_fixer(data_dict, check_key = 'dp', keys_to_fix = ['dp', 'time'])
+
+    dp = np.nan_to_num(dp, 0)
+    time = np.nan_to_num(time, 0)
     
     for i in range(dp.shape[0]):
         if i == 0:
@@ -167,11 +161,10 @@ def smooth(data_dict, key='dp', N = 3, Wn = 0.05):
 
     """
     assert key in set(data_dict.keys()), "key {} is does not exist in data_dict".format(key)
+
+    to_smooth = _fod_dimensionality_fixer(data_dict, check_key = key, keys_to_fix = [key])
     
-    to_smooth = np.nan_to_num(data_dict[key], 0)
-    
-    if len(to_smooth.shape) == 1:
-        to_smooth = to_smooth.reshape((1, len(to_smooth)))
+    to_smooth = np.nan_to_num(to_smooth, 0)
         
     ndims = to_smooth.shape[0]
     out = data_dict.copy()
@@ -202,10 +195,9 @@ def subtract_median_of_lastN(data_dict, key = 'dp', N=20):
     """
     assert key in set(data_dict.keys()), "key {} is does not exist in data_dict".format(key)
     
-    to_subtract = np.nan_to_num(data_dict[key], 0)
-    
-    if len(to_subtract.shape) == 1:
-        to_subtract = to_subtract.reshape((1, len(to_subtract)))
+    to_subtract = _fod_dimensionality_fixer(data_dict, check_key = key, keys_to_fix = [key])
+
+    to_subtract = np.nan_to_num(to_subtract, 0)
         
     ndims = to_subtract.shape[0]
     out = data_dict.copy()
@@ -240,13 +232,8 @@ def get_saturation_and_switching_time(data_dict, n_points_for_saturation=50,
 
     assert 'intdp' in set(data_dict.keys()), '"intdp" does not exist in data_dict'
     assert 'time' in set(data_dict.keys()), "'time' does not exist in data_dict"
-    
-    intdp = data_dict['intdp']
-    time = data_dict['time']
-    
-    if len(intdp.shape) == 1:
-        intdp = intdp.reshape((1, len(intdp)))
-        time = time.reshape((1, len(time)))
+
+    intdp, time = _fod_dimensionality_fixer(data_dict, check_key = 'intdp', keys_to_fix = ['intdp', 'time'])
     
     ndims = intdp.shape[0]
     out = {}
