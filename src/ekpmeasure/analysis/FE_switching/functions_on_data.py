@@ -194,10 +194,10 @@ def subtract_median_of_lastN(data_dict, key = 'dp', N=20):
 
     """
     assert key in set(data_dict.keys()), "key {} is does not exist in data_dict".format(key)
-    
-    to_subtract = _fod_dimensionality_fixer(data_dict, check_key = key, keys_to_fix = [key])
 
-    to_subtract = np.nan_to_num(to_subtract, 0)
+    data_dict.update({key:np.nan_to_num(data_dict[key], 0)})
+    
+    to_subtract,  = _fod_dimensionality_fixer(data_dict, check_key = key, keys_to_fix = [key])
         
     ndims = to_subtract.shape[0]
     out = data_dict.copy()
