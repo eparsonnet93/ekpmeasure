@@ -5,6 +5,8 @@ import warnings
 from scipy import signal
 
 from ..functions_on_data import _fod_dimensionality_fixer
+from ..functions_on_data import iterable_data_array
+from ..functions_on_data import data_array_builder
 
 __all__ = (
 	'get_dps',
@@ -44,61 +46,57 @@ def reset_time(data_dict, key = 'p1', cutoff = 0.01, grace = 10):
         out: (dict) with keys 'time', 'p1' and 'p2'
     """
     assert set(data_dict.keys()) == set({'p1', 'p2', 'time'}), "data_dict keys ({}) do not match required keys: {}".format(set(data_dict.keys()), set({'p1', 'p2', 'time'}))
+    
     key = key.lower()
+    
     assert key in set({'p1', 'p2'}), "key {} is not in allowed. must be 'p1' or 'p2'".format(key)
     assert key in set(data_dict.keys()), "key {} does not exist in data_dict keys ({})".format(key, data_dict.keys())
     
-    #dimensionality of data:
-    time, p1, p2 = _fod_dimensionality_fixer(data_dict, check_key = 'time', keys_to_fix = ['time', 'p1', 'p2'])
+    time_ida = iterable_data_array(data_dict, 'time')
+    p1_ida = iterable_data_array(data_dict, 'p1')
+    p2_ida = iterable_data_array(data_dict, 'p2')
 
-    assert time.shape == p1.shape and time.shape == p2.shape, "shapes do not match: time - {}, p1 - {}, p2 - {}".format(time.shape, p1.shape, p2.shape)
-    if len(time.shape) > 2:
-        raise ValueError('len(time.shape) > 2 meaning the dimensionality of the data is greater than 2. this is not allowed')
+    tmpout = {'time':data_array_builder(), 'p1': data_array_builder(), 'p2': data_array_builder()}
     
-    ndim = time.shape[0]
-    
-    #which p do we want to use to be above the cutoff?
-    p_dict = {'p1':p1, 'p2':p2}
-    
-    time_list, p1_list, p2_list = [], [], []
-    
-    for d in range(ndim):
-        ttime = time[d, :]
-        tp = p_dict[key][d, :]
-        arg = _get_startarg_1d(tp, cutoff = cutoff)
-        start_time = _get_starttime_from_startarg_1d(ttime, arg)
-        
-        new_1d_time = ttime[arg - grace:] - start_time
-        tp1 = p1[d, :]
-        tp2 = p2[d, :]
-        new_p1 = tp1[arg - grace:]
-        new_p2 = tp2[arg - grace:]
-        
-        #in order to account for nans in vstacking later we need to keep allow for different shapes
-        time_list.append(new_1d_time)
-        p1_list.append(new_p1)
-        p2_list.append(new_p2)
-        
-    max_number_of_timestamps = max([len(x) for x in time_list])
-    for i in range(len(time_list)):
-        l = len(time_list[i])
+    for time, p1, p2 in zip(time_ida, p1_ida, p2_ida):
+        assert time.shape == p1.shape and time.shape == p2.shape, "shapes do not match: time - {}, p1 - {}, p2 - {}".format(time.shape, p1.shape, p2.shape)
+        if key == 'p1':
+            checker = p1
+        elif key == 'p2':
+            checker == p2
+        else:
+            raise KeyError('key {}. Not allowed. Must be "p1" or "p2"'.format(key))
+        arg = _get_startarg_1d(checker, cutoff = cutoff)
+        start_time = _get_starttime_from_startarg_1d(time, arg)
+        tmpout['time'].append(time[arg - grace:] - start_time)
+        tmpout['p1'].append(p1[arg - grace:]) 
+        tmpout['p2'].append(p2[arg - grace:])
+
+
+    out = {'time':data_array_builder(), 'p1': data_array_builder(), 'p2': data_array_builder()}
+
+    #handle the fact that after this removal not all will have the same number of data points   
+
+    max_number_of_timestamps = max([len(x) for x in tmpout['time']])
+    for i in range(len(tmpout['time'])):
+        #import pdb; pdb.set_trace()
+        l = len(tmpout['time'][i])
         nnans_to_add_to_front = max_number_of_timestamps - l
+
+        ttime = tmpout['time'][i]
+        tp1 = tmpout['p1'][i]
+        tp2 = tmpout['p2'][i]
+
         for ticker in range(nnans_to_add_to_front):
-            time_list[i] = np.concatenate(([np.nan], time_list[i]))
-            p1_list[i] = np.concatenate(([np.nan], p1_list[i]))
-            p2_list[i] = np.concatenate(([np.nan], p2_list[i]))
+            ttime = np.concatenate(([np.nan], ttime))
+            tp1 = np.concatenate(([np.nan], tp1))
+            tp2 = np.concatenate(([np.nan], tp2))
 
-    time_out = np.array(time_list[0])
-    p1_out = np.array(p1_list[0])
-    p2_out = np.array(p2_list[0])
-    for i, tlist in enumerate(time_list[1:]):
-        time_out = np.vstack((time_out, tlist))
-        p1_out = np.vstack((p1_out, p1_list[i]))
-        p2_out = np.vstack((p2_out, p2_list[i]))
+        out['time'].append(ttime)
+        out['p1'].append(tp1)
+        out['p2'].append(tp2)
 
-    out = {'time':time_out, 'p1':p1_out, 'p2':p2_out}
-        
-    return out
+    return {key: out[key].build() for key in out}
 
 def get_dps(data_dict):
     """Calculate the difference between data keys 'p1' and 'p2'
@@ -109,15 +107,14 @@ def get_dps(data_dict):
     returns:
         out (dict) : dict with keys 'dp' and 'time'. Key 'dp' corresponds to 'p1' - 'p2' for each timestep.
     """
-    #dimensionality
-    p1, p2 = _fod_dimensionality_fixer(data_dict, check_key = 'p1', keys_to_fix = ['p1', 'p2'])
+    p1_ida = iterable_data_array(data_dict, 'p1')
+    p2_ida = iterable_data_array(data_dict, 'p2')
+    worker = data_array_builder()
     
-    for i in range(p1.shape[0]):
-        if i == 0:
-            dp = p1[i,:] - p2[i,:]
-        else:
-            dp = np.vstack((dp,p1[i,:] - p2[i,:]))
-    return {'time':data_dict['time'], 'dp':dp}
+    for p1, p2 in zip(p1_ida, p2_ida):
+        worker.append(p1 - p2)   
+        
+    return {'time':data_dict['time'], 'dp':worker.build()}
 
 def get_polarization_transients_from_dps(data_dict):
     """
@@ -129,22 +126,23 @@ def get_polarization_transients_from_dps(data_dict):
     returns:
         out (dict): dict with keys 'intdp' and 'time'. 'intdp' is scipy.integrate.cumtrapz(dp, x = 'time')
     """ 
+    assert 'dp' in set(data_dict.keys()), "data_dict must contain key 'dp'. It does not. Keys are {}".format(data_dict.keys())
 
-    #dimensionality
-    dp, time = _fod_dimensionality_fixer(data_dict, check_key = 'dp', keys_to_fix = ['dp', 'time'])
+    dp_ida = iterable_data_array(data_dict, 'dp')
+    time_ida = iterable_data_array(data_dict, 'time')
 
-    dp = np.nan_to_num(dp, 0)
-    time = np.nan_to_num(time, 0)
-    
-    for i in range(dp.shape[0]):
-        if i == 0:
-            intdp = cumtrapz(dp[i,:], x = time[i,:])
-            intdp = np.concatenate((np.array([0]), intdp))
-        else:
-            tintdp = cumtrapz(dp[i,:], x = time[i,:])
-            tintdp = np.concatenate((np.array([0]), tintdp))
-            intdp = np.vstack((intdp,tintdp))
-    return {'time':data_dict['time'], 'intdp':intdp}
+    out = {'time':data_array_builder(), 'intdp':data_array_builder()}
+
+    for dp, time in zip(dp_ida, time_ida):
+        dp = np.nan_to_num(dp, 0)
+        time = np.nan_to_num(time, 0)
+        intdp = cumtrapz(dp, x = time)
+        intdp = np.concatenate((np.array([0]), intdp))
+        out['time'].append(time)
+        out['intdp'].append(intdp)
+
+    return {key: out[key].build() for key in out}
+
 
 def smooth(data_dict, key='dp', N = 3, Wn = 0.05):
     """
