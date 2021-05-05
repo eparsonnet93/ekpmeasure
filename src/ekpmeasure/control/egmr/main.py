@@ -7,7 +7,7 @@ import time
 import numpy as np
 import pandas as pd
 
-__all__ = ('ready_for_pulse', 'pulse', 'EGMR')
+__all__ = ('ready_for_pulse', 'pulse', 'EGMR', 'collect_lockin_data')
 
 def ready_for_pulse(pulse_gen, voltage_pulse_amplitude, voltage_pulse_width, inverted = False):
     """need docstring"""

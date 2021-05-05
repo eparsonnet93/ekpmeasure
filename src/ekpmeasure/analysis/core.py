@@ -125,7 +125,20 @@ class Dataset(pd.DataFrame):
 
 	@construct_Dataset_from_dataframe
 	def filter_on_column(self, column, function, **kwargs_for_function):
-		return self[self[column].apply(function, **kwargs_for_function).values].reset_index()
+		return self[self[column].apply(function, **kwargs_for_function).values].reset_index(drop = True)
+
+	@construct_Dataset_from_dataframe
+	def select_index(self, index):
+		"""Return dataset with single index specified.
+
+		args:	
+			index (int or index): index to select
+
+		returns:
+			(Dataset): Single row dataset.
+
+		"""
+		return pd.DataFrame(self.iloc[index]).T.reset_index(drop = True)
 
 	def remove_index(self, index):
 		"""
