@@ -64,12 +64,15 @@ def magnon_run_function(lockin, harmonic, frequency, amplitude, current_source=F
 		delay (float): Delay time between averages. Default is 3 x delay.
 		time_constant (str): Lockin time constant. Default is 10 x 1/frequency (or cieling of nearest alled lockin time constant).
 		sensitivity (str): Sensitiviy of locking. Default is autogain.
+		phase (str): Lockin phase
+		compliance (float): Current source compliance
 
 
 	returns:
-		basename (str):
-		meta_data (pandas.DataFrame):
-		data (pandas.DataFrame):
+		basename (str): Basename of file for saving.
+		meta_data (pandas.DataFrame): Meta data associated with run. 
+		data (pandas.DataFrame): Data of run.
+
 
 
 
