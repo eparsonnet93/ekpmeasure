@@ -12,8 +12,18 @@ from .. import core
 __all__ = ('Magnon', 'magnon_run_function')
 
 
-def source_on(frequency, amplitude, lockin=None, current_source=None):
-	"""turn on the source. if lockin is supplied, will turn on lockin output. if current_source is supplied, will turn on current source"""
+def _source_on(frequency, amplitude, lockin=None, current_source=None):
+	"""Turn on the source. If lockin is supplied, will turn on lockin output. If current_source is supplied, will turn on current source.
+
+	args:
+		frequency (str): Frequency
+		amplitude (str): Amplitude
+		lockin (pyvisa.resources.gpib.GPIBInstrument): SRS 830
+		current_source (pyvisa.resources.gpib.GPIBInstrument): Keithley6221
+
+
+
+	"""
 	if type(lockin) != type(None) and type(current_source) != type(None):
 		raise ValueError('must supply either a lockin or current_source, not both')
 
@@ -40,23 +50,30 @@ def magnon_run_function(lockin, harmonic, frequency, amplitude, current_source=F
 	identifier='D', angle=0, channel_width=0, bar_width=0, channel_length=0, nave=100, 
 	delay='default', time_constant='default', sensitivity='default',phase=None,compliance=1.1):
 	"""
-	run function for magnon (nonlocal) experiment.
+	Run function for Magnon (nonlocal) experiment. 
 
-	can be used with control.core.trial()
+	args:
+		lockin (pyvisa.resources.gpib.GPIBInstrument): SRS830
+		harmonic (int): Harmonic for lockin.
+		frequency (str): Frequency.
+		amplitude (str): Amplitude.
+		current_source (pyvisa.resources.gpib.GPIBInstrument): Keithley6221. If none provided will use lockin alone (internal reference)
+		identifier (str): Unique identifier 
+		angle (int): Angle of device
+		nave (int): Number of averages to perform
+		delay (float): Delay time between averages. Default is 3 x delay.
+		time_constant (str): Lockin time constant. Default is 10 x 1/frequency (or cieling of nearest alled lockin time constant).
+		sensitivity (str): Sensitiviy of locking. Default is autogain.
 
-	returns: basename (str), meta_data (dict), data (pandas.dataframe)
-	----
-	lockin: (pyvisa.resources.gpib.GPIBInstrument)
-	harmonic: (int) which harmonic to measure
-	frequency: (str) e.g. 1khz
-	amplitude in volts or amps: (str) e.g. 1v, 100ua
-	current_source:(False or pyvisa.resources.gpib.GPIBInstrument) - if none provided, will use the lockin alone (internal reference)
-	identifer: (str) e.g. D1
-	angle: (int) e.g. 45
-	nave: (int) how many averages to do
-	delay: (float) delay time between averages default is 3xdelay 
-	time_constant: (str) default will be 10 x 1/frequency (or cieling nearest allowed lockin timeconstant)
-	sensitivity: (str) default will autogain the lockin
+
+	returns:
+		basename (str):
+		meta_data (pandas.DataFrame):
+		data (pandas.DataFrame):
+
+
+
+
 	"""
 	#set up the basename and meta_data
 	basename = '{}_{}_{}_{}_{}_{}_{}_{}_{}'.format(
@@ -112,7 +129,7 @@ def magnon_run_function(lockin, harmonic, frequency, amplitude, current_source=F
 	srs.set_phase(lockin, phase)
 
 	#start the source (either current or lockin)
-	source_on(frequency, amplitude, lockin_to_source_on, current_source_to_source_on)
+	_source_on(frequency, amplitude, lockin_to_source_on, current_source_to_source_on)
 
 	#set_lockin_sensitivity. must come after the source on
 	srs.set_lockin_sensitivity(lockin, sensitivity, sleep_time)
@@ -131,7 +148,15 @@ def magnon_run_function(lockin, harmonic, frequency, amplitude, current_source=F
 
 
 class Magnon(core.experiment):
-	"""need docstring"""
+	"""Magnon experiment.
+
+	args:
+		lockin (pyvisa.resources.gpib.GPIBInstrument): SRS830
+		current_source (pyvisa.resources.gpib.GPIBInstrument): Keithley6221
+		run_function (function): Run function. 
+
+
+	"""
 
 	def __init__(self, lockin, current_source=None, run_function=magnon_run_function):
 		super().__init__()
@@ -141,7 +166,6 @@ class Magnon(core.experiment):
 		return
 
 	def checks(self, params):
-		"""to be checked by """
 		try:
 			if self.current_source != None and (params['current_source'] != self.current_source):
 				raise ValueError('current_source provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.current_source, params['current_source']))
@@ -155,7 +179,7 @@ class Magnon(core.experiment):
 				raise ValueError('lockin provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.lockin, None))
 
 	def terminate(self):
-		"""turn off the current source"""
+		#turn off current source
 		if self.current_source != None:
 			k6221.set_wave_off(self.current_source)
 		srs.set_reference_source(self.lockin, 'external')

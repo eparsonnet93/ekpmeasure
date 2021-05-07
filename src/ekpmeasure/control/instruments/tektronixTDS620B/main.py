@@ -4,7 +4,14 @@ import numpy as np
 __all__ = ('get_wf_from_scope',)
 
 def get_wf_from_scope(scope, channel = 'ch1'):
-    """returns pandas df of waveform displayed on scope"""
+    """Get displayed waveform from single channel.
+
+    args:
+        scope (pyvisa.resources.gpib.GPIBInstrument): Tektronix TDS620B
+        channel (str): Channel to acquire from. 
+
+
+    """
     scope.query("*idn?")
     #hardcoding channel 1 in 
     scope.write('dat:sou ' + channel)

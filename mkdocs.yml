@@ -5,9 +5,10 @@ nav:
   - Code Reference:
     - analysis.Dataset: analysis-dataset-reference.md
     - analysis.Data: analysis-data-reference.md
-    - control.experiment: control-experiment-reference.md
     - Experimental Analysis: analysis-experiments-reference.md
+    - control.experiment: control-experiment-reference.md
     - Instruments: control-instrument-reference.md
+    - Experiments: control-experiments-reference.md
 
 theme: readthedocs
 

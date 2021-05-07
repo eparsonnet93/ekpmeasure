@@ -30,7 +30,7 @@ def start_pulse_gen(pulse_gen, channel = 1, both = False):
 
 def stop_pulse_gen(pulse_gen, channel = 1, both = False):
     """
-    Stops the pulse generator.
+    Stop the pulse generator.
 
     args:
         pulse_gen (pyvisa.resources.gpib.GPIBInstrument): Tektronix AFG 3252

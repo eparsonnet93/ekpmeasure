@@ -3,7 +3,17 @@ import time
 __all__ = ('ramp_powersupply_to_current',)
 
 def ramp_powersupply_to_current(magnet_power_supply, final_current, ramp_rate):
-    """ramp power supply to specified current"""
+    """Ramp power supply to specified current.
+
+    args:
+        magnet_power_supply (pyvisa.resources.gpib.GPIBInstrument): Lakeshore 647
+        final_current (float): Current to ramp to.
+        ramp_rate (float): Ramp rate. 
+
+        
+
+
+    """
     if ramp_rate > .5: #to ensure we don't ramp too quickly
         raise ValueError('ramp_rate must be <= .5')
     

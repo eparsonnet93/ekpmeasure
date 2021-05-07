@@ -58,3 +58,51 @@
         filters:
             - "!^_"  
             - "^__init__$" 
+
+
+## Lakeshore 647
+::: src.ekpmeasure.control.instruments.lakeshore647.main
+    rendering:
+        show_source: false
+        show_root_heading: yes
+        show_category_heading: no
+    selection:
+        filters:
+            - "!^_"  
+            - "^__init__$" 
+
+
+## Tektronix 3252
+::: src.ekpmeasure.control.instruments.tektronix3252.main
+    rendering:
+        show_source: false
+        show_root_heading: yes
+        show_category_heading: no
+    selection:
+        filters:
+            - "!^_"  
+            - "^__init__$" 
+
+
+## Tektronix TDS620B
+::: src.ekpmeasure.control.instruments.tektronixTDS620B.main
+    rendering:
+        show_source: false
+        show_root_heading: yes
+        show_category_heading: no
+    selection:
+        filters:
+            - "!^_"  
+            - "^__init__$" 
+
+
+## Tektronix TDS6604
+::: src.ekpmeasure.control.instruments.tektronixTDS6604.main
+    rendering:
+        show_source: false
+        show_root_heading: yes
+        show_category_heading: no
+    selection:
+        filters:
+            - "!^_"  
+            - "^__init__$" 
