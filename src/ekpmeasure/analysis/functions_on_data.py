@@ -6,6 +6,28 @@ __all__ = ('_fod_dimensionality_fixer', 'iterable_data_array', 'data_array_build
 class iterable_data_array():
     
     def __init__(self, data_dict, key):
+        """
+        Iterable for usage building functions on data. 
+
+        args:
+            data_dict (dict): data
+            key (str or key): Key for which to return iterable data array.
+
+        Examples:
+            ```
+            >>> data
+            >   {0: 
+                    {'defintion': {'test': {1}}}
+                    {'data'}: {'testdata':np.array([[1,2,3], [1,2,3]])}
+                }
+            >>> ida = iterable_data_array(data[0]['data'], key = 'testdata')
+            >>> for x in ida:
+            ...     print(x)
+
+            > [1,2,3]
+            [1,2,3]
+            ```
+        """
         data_dict = self._data_dimensionality_fixer(data_dict)
         array = data_dict[key]
         self.array = array
@@ -46,9 +68,11 @@ class iterable_data_array():
 class data_array_builder(list):
     
     def __init__(self,):
+        """Class for building data arrays. Subclass of list"""
         super().__init__()
     
     def build(self,):
+        """Build the final array (numpy.vstack)"""
         for thing in self:
             try:
                 out = np.vstack((out, thing))
