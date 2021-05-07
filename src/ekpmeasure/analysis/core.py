@@ -133,8 +133,8 @@ class Dataset(pd.DataFrame):
 	def select_index(self, index):
 		"""Return dataset with single index specified.
 
-		args:	
-			index (int or index): index to select
+		parameters:	
+			index (int or index): Index to select
 
 		returns:
 			(Dataset): Single row dataset.
