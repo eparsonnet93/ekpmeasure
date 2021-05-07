@@ -69,9 +69,8 @@ def magnon_run_function(lockin, harmonic, frequency, amplitude, current_source=F
 
 
 	returns:
-		basename (str): Basename of file for saving.
-		meta_data (pandas.DataFrame): Meta data associated with run. 
-		data (pandas.DataFrame): Data of run.
+		(tuple): Basename (str), meta_data (pandas.DataFrame), data (pandas.DataFrame)
+
 
 
 
