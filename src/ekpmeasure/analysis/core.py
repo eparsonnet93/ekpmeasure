@@ -6,12 +6,14 @@ import warnings
 
 import matplotlib.pyplot as plt
 from matplotlib import cm
+from functools import wraps
 
 
 __all__ = ('Dataset', 'Data',)
 
 def construct_Dataset_from_dataframe(function):
 
+	@wraps(function)
 	def wrapper(*args, **kwargs):
 		dataframe = function(*args, **kwargs)
 		
@@ -99,7 +101,7 @@ class Dataset(pd.DataFrame):
 		"""Return a brief summary of the data in your Dataset. 
 
 		Returns:
-			summary (Dict): a summary of the Dataset"""
+			(Dict): a summary of the Dataset"""
 		summary = dict()
 		for column in self.columns:
 			if column == self.pointercolumn:
@@ -109,13 +111,13 @@ class Dataset(pd.DataFrame):
 	
 	@construct_Dataset_from_dataframe
 	def query(*args, **kwargs):
-		"""Query the columns of a DataFrame with a boolean expression.
+		"""Query the columns of a Dataset with a boolean expression.
 
 		Parameters:
 			expr (str): The query string to evaluate. You can refer to variables in the environment by prefixing them with an ‘@’ character like @a + b. You can refer to column names that are not valid Python variable names by surrounding them in backticks. Thus, column names containing spaces or punctuations (besides underscores) or starting with digits must be surrounded by backticks. (For example, a column named “Area (cm^2) would be referenced as Area (cm^2)). Column names which are Python keywords (like “list”, “for”, “import”, etc) cannot be used. For example, if one of your columns is called a a and you want to sum it with b, your query should be `a a` + b.
 		
 		Returns:
-			dataset (Dataset): the result of the query
+			(Dataset): the result of the query
 		"""
 		return pd.DataFrame.query(*args, **kwargs)
 
@@ -148,7 +150,7 @@ class Dataset(pd.DataFrame):
 			index (index or array-like): index to be removed
 
 		returns:
-			out (Dataset): updated Dataset
+			(Dataset): updated Dataset
 
 		"""
 		index = np.array([index]).flatten()
@@ -259,7 +261,7 @@ class Dataset(pd.DataFrame):
 				labelby (str, label, index or array-like of):  what to label the output data by. This will change 'definition' in output Data class
 
 		returns:
-				data (Data): the data
+				(Data): the data
 		"""
 		pointercolumn = self.pointercolumn
 		readfileby = self.readfileby
@@ -411,7 +413,7 @@ class Data(dict):
 		An indexer as in pandas .iloc Usage is Data.iloc[index]
 
 		returns:
-			indexer (iDataIndexer): indexer for indexing
+			(iDataIndexer): indexer for indexing
 
 		example:
 
@@ -426,7 +428,7 @@ class Data(dict):
 		"""Return a summary of the definitions in data
 		
 		returns:
-			summary (dict): summary of the data included
+			(dict): summary of the data included
 
 		"""
 		return _summarize_data(self.to_dict().copy())
@@ -457,7 +459,7 @@ class Data(dict):
 			definition_condition_dict (dict): a dict specifying specific definition conditions, which when satisfied can allow their data to be operated on. If None, all data will be filtered
 
 		returns:
-			data (Data): filtered Data
+			(Data): filtered Data
 
 		Example:
 
@@ -502,7 +504,7 @@ class Data(dict):
 			condition (dict): key is definition key, value is value to find. Multiple values provided will be joined by logical OR. Multiple keys will be joined with logical AND.
 
 		returns:
-			data (Data): data satisfying condition 
+			(Data): data satisfying condition 
 		
 		example:
 
@@ -549,7 +551,7 @@ class Data(dict):
 			inplace (bool): do operation inplace
 
 		returns:
-			data (Data): averaged data across 0th axis.
+			(Data): averaged data across 0th axis.
 		"""
 		
 		if not inplace:
@@ -582,7 +584,7 @@ class Data(dict):
 			inplace (bool): operate in place
 
 		returns:
-				data (Data): the new data after operating on it
+				(Data): the new data after operating on it
 
 		example:
 
@@ -658,7 +660,7 @@ class Data(dict):
 
 
 		returns:
-			out (dict): a dict class with identical structure"""
+			(dict): a dict class with identical structure"""
 		return {key: self[key] for key in self.keys()}
 
 	def plot(self, x=None, y=None, ax=None):

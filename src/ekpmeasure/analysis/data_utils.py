@@ -68,15 +68,18 @@ def get_vals_by_definition(data, definition_key, data_key):
 			out.update({out_key:[app for app in to_append]})
 	return out
 
-def vals_by_definition_to_2darray(vals_by_definition, converter = lambda x: float(x)):
+def vals_by_definition_to_2darray(vals_by_definition, converter = 'Default'):
 	"""Convert vals by definition to 2d array. Typically used for plotting and after .get_vals_by_definition().
 
 	args:
 		vals_by_definition (dict, vbd): vals by definition dict. See .get_vals_by_definition()
 		converter (function): Function to which each value for each key from vals_by_definition is passed. Default is convert to float. 
+			```
+			converter = lambda x: float(x)
+			```
 
 	returns:
-		out (numpy.array (2D)): X, Y
+		(numpy.array (2D)): X, Y
 
 	Examples:
 		```
@@ -92,6 +95,13 @@ def vals_by_definition_to_2darray(vals_by_definition, converter = lambda x: floa
 		> [1, 2, 3, 2, 1, 1]
 		```
 	"""
+	if type(converter) == str:
+		if converter == 'Default':
+			converter = lambda x: float(x)
+
+	if not hasattr(converter, '__call__'):
+		raise TypeError('Converter must be a function. Got type {}'.format(type(converter)))
+
 	xout, yout = np.array([]), np.array([])
 	vbdef = vals_by_definition
 	for key in vbdef:

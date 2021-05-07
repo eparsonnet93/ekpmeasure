@@ -7,7 +7,15 @@ from .core import _convert_ITP_to_path_to_index
 __all__ = ('merge',)
 
 def merge(datasets):
-	"""merge datasets. need docstring"""
+	"""Merge datasets.
+
+	args:
+		datasets (iter of Dataset): Iterable of Dataset objects to merge.
+
+	returns:
+		(Dataset): Merged dataset.
+
+	"""
 	
 	if not hasattr(datasets, '__iter__'):
 		raise TypeError('datasets is not iterable.')

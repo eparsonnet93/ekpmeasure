@@ -58,6 +58,7 @@ def collect_lockin_data(lockin, npoints, delay_between_points):
     return {'R':np.array(rs), 'theta':np.array(thetas)}
 
 def cycle(lockin, pulse_generator, voltage_pulse_amplitude, voltage_pulse_width, npoints_after_pulse, delay_between_points,):
+    """need docstring"""
     #start by pulsing up
     ready_for_pulse(pulse_generator, voltage_pulse_amplitude, voltage_pulse_width, inverted = False)
     #pulse up
