@@ -1,14 +1,44 @@
 import numpy as np
 
-__all__ = ('_get_number_and_suffix','freq_mapper', 'current_amp_mapper', 'sci_to_time_mapper', '_scientific_notation', 'voltage_amp_mapper')
+__all__ = ('get_number_and_suffix', '_get_number_and_suffix','freq_mapper', 'current_amp_mapper', 
+    'sci_to_time_mapper', '_scientific_notation', 'voltage_amp_mapper')
 
 freq_mapper = {'khz':'e3', 'hz':'e0'}
 current_amp_mapper = {'ma':'e-3', 'ua':'e-6'}
 sci_to_time_mapper = {'e0':'s', 'e3':'ks', 'e-3':'ms', 'e-6':'us', 'e-9':'ns'}
 voltage_amp_mapper = {'mv':'e-3', 'v':''}
 
+
+def get_number_and_suffix(string):
+    """Return number and suffix of a string.
+
+    args:
+        string (str): String.
+
+    returns:
+        (tuple): number, suffix
+
+    examples:
+        ```
+        >>> get_number_and_suffix('1khz')
+        > (1.0, 'khz')
+        ```
+
+
+    """
+    return _get_number_and_suffix(string)
+
 def _get_number_and_suffix(string):
-    """return number and suffix of a string. e.g. 1khz will return (1.0, 'khz')"""
+    """Return number and suffix of a string. e.g. 1khz will return (1.0, 'khz').
+
+    args:
+        string (str): String.
+
+    returns:
+        (tuple): number, suffix
+
+
+    """
     iteration = 0
     number = np.nan
     while np.isnan(number):
@@ -20,6 +50,18 @@ def _get_number_and_suffix(string):
             iteration+=1
             
     return number, string[-(iteration + 1):]
+
+def scientific_notation(number):
+    """Return a string of a number in scientific notation.
+
+    args:
+        number (int or float): Number
+
+    returns:
+        (str): String of number in scientific notation. 
+
+
+    """
 
 def _scientific_notation(number):
 

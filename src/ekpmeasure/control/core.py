@@ -12,6 +12,12 @@ __all__ = ('trial','experiment')
 class experiment():
 	
 	def __init__(self):
+		"""
+		Experiment class. Used to run experiments (see n_param_scan), generate data files files, and generate meta data. One must specify a run function and a terminate function. It is suggested that one overwrites the checks() method as well. The specified run_function must return 
+			```
+			((str) base_name, (dict) meta_data, (pandas.dataframe) data).
+			```
+		"""
 		return
 
 	def __repr__(self):
@@ -42,47 +48,46 @@ class experiment():
 	def config_path(self, path):
 		self.path = path
 
-	def config(self, run_function, path):
-		warnings.showwarning('config is deprecated.', DeprecationWarning, '', 0,)
-		self.run_function = run_function
-		self.path = path
-
 	def checks(self, params):
+		"""Method to perform a set of checks on params before starting a scan. Default is simple pass."""
 		pass
 	
 	def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order):
-		"""perform a scan over a set of params
-		----
-		kw_scan_params: (dict) with key and array like params to scan over
-		fixed_params: (dict) fixed params to be passed to trial each time
-		scan_param_order: (array-like) which order to scan params
+		"""Perform a measurement over a set of params and save the data/meta data. 
 
-		example: 
-
-		kw_scan_params = {
-			'frequency':['147hz', '47hz'],
-			'amplitude':['50ua','100ua', '250ua', '500ua', '750ua', '850ua','1000ua',],
-			'harmonic':[1,2]
-		}
+		args:
+			kw_scan_params (dict): Parameters to scan.
+			fixed_params (dict): Parameters to keep fixed.
+			scan_param_order (array-like): Order of scan parameters. 
 
 
-		fixed_params = {
-			'lockin':lockin,
-			'current_source':current_source,
-			'identifier':'D0',
-			'angle':20,
-			'channel_width':2,
-			'channel_length':20,
-			'bar_width':1.5,
-			'nave':5,
-			'delay':'default', 
-			'time_constant':'3s',
-			'sensitivity':'10uv/pa',
-		}
+		Examples:
+			```
+			>>> exp = experiment()
+			>>>	kw_scan_params = {
+					'frequency':['147hz', '47hz'],
+					'amplitude':['50ua','100ua', '250ua', '500ua', '750ua', '850ua','1000ua',],
+					'harmonic':[1,2]
+				}
 
-		order = ['harmonic', 'frequency', 'amplitude']
+			>>>	fixed_params = {
+					'lockin':lockin,
+					'current_source':current_source,
+					'identifier':'D0',
+					'angle':20,
+					'channel_width':2,
+					'channel_length':20,
+					'bar_width':1.5,
+					'nave':5,
+					'delay':'default', 
+					'time_constant':'3s',
+					'sensitivity':'10uv/pa',
+				}
 
-		exp.n_param_scan(kw_scan_params, fixed_params, order)
+			>>> order = ['harmonic', 'frequency', 'amplitude']
+			#Perform scan
+			>>> exp.n_param_scan(kw_scan_params, fixed_params, order)
+			```
 		"""
 		#check to make sure no errors
 		params = kw_scan_params.copy()
@@ -131,14 +136,18 @@ class experiment():
 
 def trial(run_function, run_function_args, path):
 	"""
-	A trial  for an experiment. This will save to path with a unique name
-	currently supported run_functions are (run_preset_then_2pusle_TDS620B, magnon_run_function,) more to come
+	A trial for an experiment. This will save each trial (as csv) to path with a unique name (indexed by trial if an identical basename already exists). Also creates and saves meta data to path. The specified run_function must return ((str) base_name, (dict) meta_data, (pandas.dataframe) data).
 
-	any run_function which returns ((str) base_name, (dict) meta_data, (pandas.dataframe) data) should work, but only those indicated above are known to work
-	----
-	run_function: (function) which function you wish to run i.e. nonlocal_run_function 
-	run_function_args: (dict) arguments for run_function
-	path: (str) where to save
+	args:
+		run_function (function): A run_function that returns:
+			```
+			((str) base_name, (dict) meta_data, (pandas.dataframe) data)
+			```
+		run_function_args (dict): Dict of arguments for the specified run_function
+		path (str): Save location.
+	
+
+
 	"""
 	base_name, meta_data, df = run_function(**run_function_args)
 	try:

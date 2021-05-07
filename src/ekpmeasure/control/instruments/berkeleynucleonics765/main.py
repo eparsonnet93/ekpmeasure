@@ -2,16 +2,16 @@ __all__= ('single_pulse_SCPI', 'symmetric_up_down_SCPI', 'initialize_2pulse', 'i
 
 def single_pulse_SCPI(pulsewidth, updown, high_voltage, low_voltage, channel = '1', *args, **kwargs):
 	"""
-	returns SCPI string that can be written to the pulge generator to put it in the correct state to apply a single pulse
-	----
-	pulsewidth: (str) i.e. '10ns' allowed units {ns, us, ms, s}
-	updown: (str) i.e. 'down' options {'up', 'down'} sets polarity
-	high_voltage: (str) i.e. '1000mv' allowed units {V, mv}, sets high voltage for the pulse
-	low_voltage: (str) i.e. '-1000mv' allowed units {V, mv}, sets low voltage for the pulse
+	Returns SCPI string that can be written to the pulse generator to put it in the correct state to apply a single pulse.
 
-	options
-	----
-	channel = (str) select output channel
+	args:
+		pulsewidth (str): Pulsewidth. i.e. '10ns' allowed units {ns, us, ms, s}
+		updown (str): Specify polarity. 'up' or 'down'.
+		high_voltage (str): High voltage of pulse. i.e. '1000mv' allowed units {V, mv}
+		low_voltage (str): Low voltage of pulse. i.e. '-1000mv' allowed units {V, mv}
+		channel (str): Specify the output channel. '1' or '2'
+
+
 	"""
 	if pulsewidth[-2:] not in set({'ns', 'us', 'ms',}):
 		if pulsewidth[-1] != 's':
@@ -47,18 +47,15 @@ def single_pulse_SCPI(pulsewidth, updown, high_voltage, low_voltage, channel = '
 
 def symmetric_up_down_SCPI(pulsewidth, amplitude, offset='0mv', channel = '1', *args, **kwargs):
 	"""
-	returns tuple of two SCPI strings, one up SCPI string (from single_pulse_SCPI) and one down. The strings describe symmetric pulses 
-	----
-	
-	pulsewidth: (str) allowed units {ns, us, ms, s}
-	ampitude: (str) allowed units {mv, v}
+	Return a tuple of two SCPI strings. The first, an up SCPI string (from single_pulse_SCPI) and the second down. The strings describe symmetric pulses.
 
-	options
-	----
-	offset: (str) allowed units {mv, v}
-	channel: (str) select channel for output
-	
-	example: up_down_init(pulsewidth='10ns', amplitude='1v', offset='100mv',)
+	args:
+		pulsewidth (str): Pulsewidth. allowed units {'ns', 'us', 'ms', 's'}.
+		amplitude (str): Amplitude. allowed units {mv, v}.
+		offset (str): Offset. allowed units {mv, v}.
+		channel (str): Specify channel. '1' or '2'
+
+
 	"""
 	if amplitude[-2:].lower() not in set({'mv'}):
 		if amplitude[-1].lower() != 'v':
@@ -90,10 +87,14 @@ def symmetric_up_down_SCPI(pulsewidth, amplitude, offset='0mv', channel = '1', *
 
 def initialize_pulse(inst, channel = '1', *args, **kwargs):
 	"""
-	initializes the pulse generator for application of a pulse (set trigger mode to manual, etc)
-	----
-	inst: (pyvisa.resources.gpib.GPIBInstrument)
-	channel: (str) select output channel
+	Initializes the pulse generator for application of a single pulse which will output a pulse on manual trigger. 
+
+	args:
+		inst (pyvisa.resources.ENET-Serial INSTR): Berkeley Nucleonics 765
+		channel (str): Output channel. 
+
+
+
 	"""
 	err = inst.query('syst:err:next?')
 	if err != 'Error: 0, No error\n':
@@ -122,24 +123,31 @@ def initialize_pulse(inst, channel = '1', *args, **kwargs):
 	return 
 
 def manual_trigger(pg):
-	"""trigger BN765 to apply whatever pulse configuration is set"""
+	"""Trigger BN765 to apply whatever pulse configuration is set.
+
+	args:
+		pg (pyvisa.resources.ENET-Serial INSTR): Berkeley Nucleonics 765
+
+
+	"""
 	pg.write('trig:seq:imm') #execute
 	return
 
 def initialize_2pulse(pg, channel = '1', pulsewidth = '10e-9', delay = '10e-9',
 					  low_voltage = '0', high_voltage = '4.8'):
 	"""
-	initializes BN765 for application of 2 pulse sequenc. Pulses are positive polarity, and identical (as defined by low and high voltage) with given delay between pulses.
-	----
-	pg: (pyvisa.resources.gpib.GPIBInstrument) BN765 instrument
+	Initialize BN765 for application of 2 pulse sequence. Pulses are positive polarity, and identical (as defined by low and high voltage) with given delay between pulses.
 
-	options:
-	----
-	channel: (str) select output channel
-	pulsewidth:(str) set pulsewidth example 1e-9
-	delay: (str) set delay example 1e-9
-	low_voltage: (str) set low voltage units are in volts
-	high_voltage: (str) set high voltage units are in volts
+	args:
+		pg: (pyvisa.resources.ENET-Serial INSTR): BN765
+		channel (str): Specify output channel. '1' or '2'.
+		pulsewidth (str): Pulsewidth in scientific notation.
+		delay (str): Delay between pulses in scientific notation.
+		low_voltage (str): Low voltage in units of volts.
+		high_voltage (str): High voltage in units of volts.
+
+
+
 
 	"""
 	err = ''
@@ -171,7 +179,15 @@ def initialize_2pulse(pg, channel = '1', pulsewidth = '10e-9', delay = '10e-9',
 
 #shut off
 def stop(pg,):
-	"""stop the BN765"""
+	"""Stop the BN765.
+
+	args:
+		pg (pyvisa.resources.ENET-Serial INSTR): BN765
+
+
+
+
+	"""
 	pg.write('PULSEGENControl:STOP')
 	pg.write('outp1:stat off')
 	pg.write('outp2:stat off')
@@ -180,15 +196,20 @@ def stop(pg,):
 def initialize_trig(pg, pulsen, channel = '2', pulsewidth = '10e-9', delay = '10e-9',
 					  low_voltage = '0', high_voltage = '1'):
 	"""
-	Initializes a channel for use as a trigger. This is used in conjunction with, for example, initialize_2pulse, so we can output a trigger pulse from the other channel in order to properly time the scope for acquisition. We can do this for any of the pulse n (in the case of 2 pulses one can send a trigger pulse synced to pulse 1 or 2)
-	----
-	pg: (pyvisa.resources.gpib.GPIBInstrument) BN765
-	pulsen: (int) for which pulse number to ready a trigger pulse
-	channel: (str) select channel for trigger pulse
-	pulsewidth: (str) pulsewidth of the triggr pulse. this should match your stimulus pw
-	delay: (str) should match your stimulus delay
-	low_voltage: (str) units are volts - low voltage of trigger pulse
-	high_voltage: (str) units are volts - high voltage of trigger pulse
+	Initialize a channel for use as a trigger. This is used in conjunction with, for example, initialize_2pulse, so we can output a trigger pulse from the other channel in order to properly time the scope for acquisition. We can do this for any of the pulse n (in the case of 2 pulses one can send a trigger pulse synced to pulse 1 or 2).
+
+	args:
+		pg (pyvisa.resources.ENET-Serial INSTR): BN765
+		pulsen (int): Specify which pulse number to ready a trigger pulse (1 or 2)
+		channel (str): Specify a channel for trigger output.
+		pulsewidth (str): Pulsewidth of the triggr pulse in scientific notation. This should match your stimulus pulsewidth.
+		delay (str): Delay in scientific notation. This should match your stimulus delay.
+		low_voltage (str): Low voltage of trigger pulse in Volts.
+		high_voltage (str): High voltage of trigger pulse in Volts.
+
+
+
+
 	"""
 	err = ''
 	while err != 'Error: 0, No error\n':#clear errors

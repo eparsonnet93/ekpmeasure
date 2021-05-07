@@ -5,7 +5,9 @@ nav:
   - Code Reference:
     - analysis.Dataset: analysis-dataset-reference.md
     - analysis.Data: analysis-data-reference.md
-    - Ferroelectric Switching: analysis-fe_switching-reference.md
+    - control.experiment: control-experiment-reference.md
+    - Experimental Analysis: analysis-experiments-reference.md
+    - Instruments: control-instrument-reference.md
 
 theme: readthedocs
 

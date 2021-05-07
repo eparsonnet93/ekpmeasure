@@ -42,8 +42,10 @@ def reset_time(data_dict, key = 'p1', cutoff = 0.01, grace = 10):
         cutoff (float):  A voltage value above which to call the start of the pulse
         grace (int):  How many datapoints to include before new time = 0
 
-    returns 
-        (dict) with keys 'time', 'p1' and 'p2'
+    returns:
+        (dict): Dict with keys 'time', 'p1', and 'p2'
+
+
     """
     assert set(data_dict.keys()) == set({'p1', 'p2', 'time'}), "data_dict keys ({}) do not match required keys: {}".format(set(data_dict.keys()), set({'p1', 'p2', 'time'}))
     
@@ -124,7 +126,10 @@ def get_polarization_transients_from_dps(data_dict):
         data_dict (dict): dict with keys 'time', 'dp'
 
     returns:
-        (dict): dict with keys 'intdp' and 'time'. 'intdp' is scipy.integrate.cumtrapz(dp, x = 'time')
+        (dict): dict with keys 'intdp' and 'time'. 'intdp' is 
+            ```
+            scipy.integrate.cumtrapz(dp, x = 'time')
+            ```
     """ 
     assert 'dp' in set(data_dict.keys()), "data_dict must contain key 'dp'. It does not. Keys are {}".format(data_dict.keys())
 
@@ -154,9 +159,9 @@ def smooth(data_dict, key='dp', N = 3, Wn = 0.05):
         N (int): The order of the filter
         Wn (array-like): The critical frequency or frequencies. For lowpass and highpass filters, Wn is a scalar; for bandpass and bandstop filters, Wn is a length-2 sequence. For a Butterworth filter, this is the point at which the gain drops to 1/sqrt(2) that of the passband (the “-3 dB point”). For digital filters, Wn are in the same units as fs. By default, fs is 2 half-cycles/sample, so these are normalized from 0 to 1, where 1 is the Nyquist frequency. (Wn is thus in half-cycles / sample.) For analog filters, Wn is an angular frequency (e.g. rad/s).
 
-    returns: 
+    returns:
         (dict): dict with same as original keys. 
-
+        
     """
     assert key in set(data_dict.keys()), "key {} is does not exist in data_dict".format(key)
 
@@ -187,8 +192,9 @@ def subtract_median_of_lastN(data_dict, key = 'dp', N=20):
         key (str or key): Which key to use.
         N ( int ) : The number of points to subtract median of.
 
-    returns: 
-        ( dict ): dict with same as original keys. 
+    returns:
+        (dict): Dict with same as original keys.
+
 
     """
     assert key in set(data_dict.keys()), "key {} is does not exist in data_dict".format(key)
@@ -224,8 +230,9 @@ def get_saturation_and_switching_time(data_dict, n_points_for_saturation=50,
         top_percent (int or float): The percent of saturation to use as switching completion.
         bottom_percent (int or float): The percent of saturaiton to use as switching start commencement. 
 
-    returns: 
+    returns:
         (dict): dict with keys 'saturation' and 'switching_time'
+
 
     """
 

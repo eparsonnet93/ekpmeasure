@@ -1,7 +1,17 @@
 __all__ = ('get_save_name',)
 
 def get_save_name(name, path):
-    """returns a unique name correctly indexed"""
+    """Returns a unique name correctly indexed by trial number.
+
+    args:
+        name (str): Base name of the trial
+        path (str): Save location.
+
+    returns:
+        save_name (str): A unique save name indexed by trial. 
+
+
+    """
     import os
     existing_files = os.listdir(path)
 

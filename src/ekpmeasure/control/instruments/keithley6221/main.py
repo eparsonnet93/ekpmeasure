@@ -4,15 +4,26 @@ from .. import misc
 __all__ = ('restore', 'set_output_sin', 'set_wave_on', 'set_wave_off')
 
 def restore(current_source):
-    """restore settings on current source"""
+    """Restore settings on current source.
+
+    args:
+        current_source (pyvisa.resources.gpib.GPIBInstrument): Keithley 6221
+
+    
+    """
     current_source.write("*rst")
     return
 
 def set_output_sin(current_source, frequency, amplitude, compliance = 1.1):
-    """sets the current source to output a sin waveform with specified amp and freq
-    ----
-    frequency: (str) allowed suffix: khz, hz
-    amplitude: (str) allowed suffix: ua, ma
+    """Set the current source to output a sin waveform with specified amplitude and frequency. Does not start the current source.
+
+    args:
+        current_source (pyvisa.resources.gpib.GPIBInstrument): Keithley 6221
+        frequency (str): Frequency. Allowed suffix 'khz', 'hz'.
+        amplitude (str): Amplitude. Allowed suffix 'ua', 'ma'.
+        compliance (float): Compliance in V. 
+
+
     """
     restore(current_source)
     
@@ -39,10 +50,24 @@ def set_output_sin(current_source, frequency, amplitude, compliance = 1.1):
     return
 
 def set_wave_on(current_source):
+    """Start the current source.
+
+    args:
+        current_source (pyvisa.resources.gpib.GPIBInstrument): Keithley 6221
+
+
+    """
     current_source.write("SOUR:WAVE:ARM")
     current_source.write("SOUR:WAVE:INIT")
     return
 
 def set_wave_off(current_source):
+    """Turn off the current source.
+
+    args:
+        current_source (pyvisa.resources.gpib.GPIBInstrument): Keithley 6221
+
+
+    """
     current_source.write("SOUR:WAVE:ABORT")
     return
