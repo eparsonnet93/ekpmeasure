@@ -46,3 +46,15 @@
         filters:
             - "!^_"  
             - "^__init__$" 
+
+
+## Stanford Research Instruments 830 
+::: src.ekpmeasure.control.instruments.srs830.main
+    rendering:
+        show_source: false
+        show_root_heading: yes
+        show_category_heading: no
+    selection:
+        filters:
+            - "!^_"  
+            - "^__init__$" 
