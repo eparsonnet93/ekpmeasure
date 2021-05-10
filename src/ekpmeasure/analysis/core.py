@@ -451,12 +451,13 @@ class Data(dict):
 					indices.append(index)
 		return indices
 
-	def filter(self, data_condition_function_dict, definition_condition_dict=None):
+	def filter(self, data_condition_function_dict, definition_condition_dict=None, additional_data_keys_to_filter=None):
 		"""Filter the data.
 		
 		args:
 			data_condition_function_dict (dict): a dict with one entry. key is data key, value is function which operates on a single value.
-			definition_condition_dict (dict): a dict specifying specific definition conditions, which when satisfied can allow their data to be operated on. If None, all data will be filtered
+			definition_condition_dict (dict): a dict specifying specific definition conditions, which when satisfied can allow their data to be operated on. If None, all data will be filtered.
+			additional_data_keys_to_filter (str or key or array-like): Additional data keys that you wish to filter based on data_condition_function_dict.
 
 		returns:
 			(Data): filtered Data
@@ -469,13 +470,23 @@ class Data(dict):
 		```
 		Filter data corresponding to an amplitude of '500ua' such that data key 'R' contains only values >10.
 		```
-		>>> Data.filter({'R': labmda x: x>10}, {'amplitude':'500ua'}) 
+		>>> Data.filter({'R': lambda x: x>10}, {'amplitude':'500ua'}) 
 		```
-		You may use this method to remove outliers.
+		Filter data based on 'saturation' but also filter the 'switching_time' data.
+		```
+		>>> Data.filter({'saturation': lambda x: x > .003}, additional_data_keys_to_filter='switching_time')
+		``` 
+
+		You may use this method to remove outliers, for example.
 
 		"""
 		if definition_condition_dict == None:
 			definition_condition_dict = {}
+
+		if type(additional_data_keys_to_filter) == type(None):
+			additional_data_keys_to_filter = []
+		else:
+			additional_data_keys_to_filter = np.array([additional_data_keys_to_filter]).flatten()
 		
 		assert len(data_condition_function_dict) <= 1, "more than one condition supplied in data_condition_function_dict. only one is supported at a time."
 		data_function_key = list(data_condition_function_dict)[0]
@@ -489,11 +500,22 @@ class Data(dict):
 		not_sat_indices = all_index - set(sat_indices)
 		
 		func = data_condition_function_dict[data_function_key]
+
+		keys_to_update = [key for key in additional_data_keys_to_filter]
+
+		keys_to_update.append(data_function_key)
+		keys_to_update = keys_to_update[::-1]
+
 		
 		for index in sat_indices:
-			old = self[index]['data'][data_function_key]
-			old_shape = old.shape
-			self[index]['data'].update({data_function_key:old[func(old)]})
+			checker = self[index]['data'][data_function_key]
+			for key in keys_to_update:
+				old = self[index]['data'][key]
+				old_shape = old.shape
+				#ensure that all keys in keys_to_update have the same dimensionality
+				if old_shape != checker.shape:
+					raise ValueError('data corresponding to data_key "{}" does not have the same shape as data corresponding to data_function_key "{}"'.format(key, data_function_key))
+				self[index]['data'].update({key:old[func(checker)]})
 			
 		return Data(self.to_dict())
 
