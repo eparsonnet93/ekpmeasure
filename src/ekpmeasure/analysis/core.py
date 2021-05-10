@@ -250,7 +250,49 @@ class Dataset(pd.DataFrame):
 					ignore_index = True
 				)
 
-		return new_df           
+		return new_df   
+
+	def add_calculated_column(self, column_name, how):
+		"""Add a calculated column to the Dataset.
+		
+		args:
+			column_name (str): The new column name
+			how (function): f(self) -> column data. A function which operates on self (pandas.DataFrame) and returns new column data.
+			
+		returns:
+			(Dataset): Updated Dataset.
+			
+		examples:
+			Convert 25um and 10um to measured areas. This will only work if no other diameters are present in the Dataset.
+			```
+			>>>def how(dataframe):
+					nominal_diameter_to_measured_area_dict = {'25um':190, '10um':60}
+					return [nominal_diameter_to_measured_area_dict[x] for x in dataframe['diameter'].values]
+			>>>dset.add_calculated_column('measured_area_um', how = how)
+			```
+		
+		
+		"""
+		
+		if not hasattr(how, '__call__'):
+			raise TypeError('how must be a function that operates on a DataFrame')
+			
+		new_column_data = how(pd.DataFrame(self))
+		self.add_column(column_name, new_column_data)
+		
+		return self
+	
+	def add_column(self, column_name, column_data):
+		"""Add a column to a Dataset.
+		
+		args:
+			column_name (str): The new column name.
+			column_data (array-like): The data for the column
+		
+		"""
+		path_to_index = _convert_ITP_to_path_to_index(self.index_to_path)
+		self[column_name] = column_data
+		return Dataset(path_to_index, self)        
 
 	def get_data(self, groupby=None, labelby=None,):
 		"""
