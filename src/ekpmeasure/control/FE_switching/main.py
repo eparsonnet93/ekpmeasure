@@ -95,7 +95,7 @@ def apply_preset_pulse(pg, pulsewidth, amplitude, channel = '1', wait_time = 1, 
 	return 
 
 def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, scopetype = '6604', area='fromdiameter', diameter = 'fromidentifier', 
-	preset_pulsewidth = '100ns', preset_voltage = '3000mv', test=False):
+	preset_pulsewidth = '100ns', preset_voltage = '3000mv', scope_channel = 'Ch1', test=False):
 	"""
 	Run a preset and then 2 pulse measurement using the BN765 and tektronix scope. Allowed scopes are 6604 and 620B. 6604 is preferred for fast measurements.
 
@@ -117,6 +117,9 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 	"""
 	if scopetype != '6604' and scopetype != '620B':
 		raise ValueError('scopetype must be "6604" or "620B". Recieved {}'.format(scopetype))
+
+	if scopetype == '620B':
+		warnings.warn('Using 620B as the scope will cause "scope_channel" parameter to be ignored.', UserWarning, '', 0,)
 
 	#get types correct
 	try:
@@ -187,7 +190,7 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 			pg.write('pulsegenc:stop') 
 
 			if scopetype == '6604':
-				initialize_scope_tds6604(scope, channel = 'Ch1', force_yes = True)
+				initialize_scope_tds6604(scope, channel = scope_channel, force_yes = True)
 				tdf = get_wf_tds6604(scope)
 			elif scopetype == '620B':
 				tdf = tds620B_get_wf(scope)
@@ -222,7 +225,8 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 		'delay_ns':float(save_delay[:-2].replace('x','.')),
 		'high_voltage_v':float(save_highvoltage.replace('x', '.')[:-2])/1000,
 		'preset_voltage_v':float(save_presetvoltage.replace('x', '.')[:-2])/1000,
-		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.'))
+		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.')),
+		'scope_channel':scope_channel
 	}
 	try:
 		meta_data.update({
