@@ -133,7 +133,7 @@ def manual_trigger(pg):
 	pg.write('trig:seq:imm') #execute
 	return
 
-def initialize_2pulse(pg, channel = '1', pulsewidth = '10e-9', delay = '10e-9',
+def initialize_2pulse(pg, polarity = 'up', channel = '1', pulsewidth = '10e-9', delay = '10e-9',
 					  low_voltage = '0', high_voltage = '4.8'):
 	"""
 	Initialize BN765 for application of 2 pulse sequence. Pulses are positive polarity, and identical (as defined by low and high voltage) with given delay between pulses.
@@ -154,20 +154,31 @@ def initialize_2pulse(pg, channel = '1', pulsewidth = '10e-9', delay = '10e-9',
 	while err != 'Error: 0, No error\n':#clear errors
 		err = pg.query('syst:err:next?')
 
+	polarity = polarity.lower()
+	assert polarity in set({'up', 'down'}), "polarity must be 'up' or 'down'. Recieved {}".format(polarity)
+
 	pgchannel = channel
 	pw = pulsewidth
 
 	delay1 = str(float(pw) + float(delay))
 	delay2 = str(float(delay1)*2)
 	pg.write('outp'+pgchannel+':puls:mode dou')
+	if polarity == 'down':
+		pg.write('source'+pgchannel+':inv on')
+
 	pg.write('source'+pgchannel+':pulse1:wid '+pw)
 	pg.write('source'+pgchannel+':pulse2:wid '+pw)
 
 	pg.write('source'+pgchannel+':pulse1:del '+'0')
 	pg.write('source'+pgchannel+':pulse2:del '+delay1)
 
-	pg.write('source'+pgchannel+':volt:lev:imm:low '+low_voltage)
-	pg.write('source'+pgchannel+':volt:lev:imm:high '+high_voltage)
+	if polarity == 'down':
+		pg.write('source'+pgchannel+':volt:lev:imm:high '+low_voltage)
+		pg.write('source'+pgchannel+':volt:lev:imm:low -'+high_voltage)
+	else:
+		pg.write('source'+pgchannel+':volt:lev:imm:low '+low_voltage)
+		pg.write('source'+pgchannel+':volt:lev:imm:high '+high_voltage)
+
 	pg.write('trig:seq:sour man')
 	pg.write('outp'+pgchannel+':stat on')
 	pg.write('PULSEGENControl:START')
