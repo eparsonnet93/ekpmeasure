@@ -52,13 +52,14 @@ class experiment():
 		"""Method to perform a set of checks on params before starting a scan. Default is simple pass."""
 		pass
 	
-	def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order):
+	def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order, ntrials = 1):
 		"""Perform a measurement over a set of params and save the data/meta data. 
 
 		args:
 			kw_scan_params (dict): Parameters to scan.
 			fixed_params (dict): Parameters to keep fixed.
 			scan_param_order (array-like): Order of scan parameters. 
+			ntrials (int): Number of trials to perform.
 
 
 		Examples:
@@ -121,10 +122,12 @@ class experiment():
 				kwargs = fixed_params
 				for i, key in enumerate(scan_param_order[::-1]):
 					kwargs.update({key:params[i]})
+				for count in range(ntrials):
+					trial(self.run_function, kwargs, self.path)
+					time.sleep(1)
 
-				trial(self.run_function, kwargs, self.path)
-				time.sleep(1)
 			return 
+
 		except Exception as e:
 			print(e)
 			print('terminating.')
