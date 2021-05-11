@@ -175,13 +175,16 @@ class Dataset(pd.DataFrame):
 		return self.remove_index(remove_index)
 	
 	def _construct_index_to_path(self, path, initializer):
-		"""construct index_to_path from path provided
+		"""Construct index_to_path from path provided
 		
 		args:
 			path (str or Dict): a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
 			initializer (pandas.DataFrame: meta data. one column must contain a pointer (filename) to where each the real data is stored
 
 		"""
+		if len(self) == 0:
+			warnings.showwarning("No meta data.", UserWarning, '', 0)
+			return {}
 		if type(path) != dict:
 			assert type(path) == str, "path must be dict or str"
 			#set all indices to the single path provided
