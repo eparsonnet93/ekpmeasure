@@ -727,7 +727,7 @@ class Data(dict):
 			(dict): a dict class with identical structure"""
 		return {key: self[key] for key in self.keys()}
 
-	def plot(self, x=None, y=None, ax=None):
+	def plot(self, x=None, y=None, ax=None, **kwargs):
 		"""
 		Plot the data. If ax is provided returns ax, otherwise returns fig, ax.
 
@@ -767,16 +767,16 @@ class Data(dict):
 				
 				if len(to_plot.shape) == 1: #1d data
 					if x == None:
-						ax.plot(to_plot, color = color)
+						ax.plot(to_plot, color = color, **kwargs)
 					else:
-						ax.plot(xs, to_plot, color = color)
+						ax.plot(xs, to_plot, color = color, **kwargs)
 					continue
 					
 				for i in range(to_plot.shape[0]):
 					if x == None:
-						ax.plot(to_plot[i,:], color = color)
+						ax.plot(to_plot[i,:], color = color, **kwargs)
 					else:
-						ax.plot(xs[i,:], to_plot[i,:], color = color)
+						ax.plot(xs[i,:], to_plot[i,:], color = color, **kwargs)
 
 		if return_fig:
 			return fig, ax
