@@ -161,7 +161,7 @@ class Dataset(pd.DataFrame):
 		return Dataset(path, meta_data, readfileby=self.readfileby)
 	
 	
-	def remove_nonexistant_files_from_metadata(self):
+	def remove_nonexistent_files_from_metadata(self):
 		"""
 		Remove references to files that do not exist in path.
 		"""
