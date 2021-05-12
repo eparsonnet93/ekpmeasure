@@ -326,6 +326,8 @@ class Dataset(pd.DataFrame):
 		returns:
 				(Data): the data
 		"""
+		if len(self) == 0:
+			raise ValueError('No meta data to return data for!!')
 		pointercolumn = self.pointercolumn
 		readfileby = self.readfileby
 
