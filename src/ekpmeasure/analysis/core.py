@@ -52,6 +52,23 @@ def _check_file_exists(path, filename):
 	else:
 		return False
 
+def _remove_nans_from_set(set_to_remove_from):
+	"""Remove multiple nans from a set. Sometimes in Dataset.summary, it returns many nans when it should return only one. Quick fix for that issue"""
+
+	out = set()
+	for item in set_to_remove_from:
+		try:
+			if np.isnan(item) and np.nan not in out:
+				out.update({np.nan})
+				continue
+			if np.isnan(item):
+				continue
+			out.update({item})
+		except TypeError:
+			out.update({item})
+		
+	return out
+
 class Dataset(pd.DataFrame):
 	"""Dataset class for analysis. 
 
@@ -106,7 +123,8 @@ class Dataset(pd.DataFrame):
 		for column in self.columns:
 			if column == self.pointercolumn:
 				continue
-			summary.update({column: set(self[column].values)})
+			summary.update({column: _remove_nans_from_set(set(self[column].values))})
+
 		return summary
 	
 	@construct_Dataset_from_dataframe
@@ -384,9 +402,9 @@ def _summarize_data(data):
 		defn = data[index]['definition']
 		for key in defn:
 			try:
-				out[key].update(set({value for value in defn[key]}))
+				out[key].update(_remove_nans_from_set(set({value for value in defn[key]})))
 			except KeyError:
-				out.update({key:set({value for value in defn[key]})})
+				out.update({key:_remove_nans_from_set(set({value for value in defn[key]}))})
 	return out
 		
 class iDataIndexer():
