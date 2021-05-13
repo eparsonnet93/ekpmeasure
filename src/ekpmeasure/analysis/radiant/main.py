@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-__all__ = ('load_radiant_loop_from_text_file',)
+__all__ = ('load_radiant_loop_from_text_file','convert_pCum2_to_uCcm2')
 
 def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_meta_data = False):
     """Load a radiant loop from a text file. Typically one would use 'Charge' for measured_value unless one accurately measured capacitor area and input correctly into the Radiant UI.
@@ -82,3 +82,15 @@ def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_met
         return out, meta_data
         
     return out
+
+def convert_pCum2_to_uCcm2(value):
+    """Convert from picocoulombs/um^2 to microcoulombs/cm^2. This is simply multpilying by 100, but it's a calculation I do a lot and always have to look up to make sure I'm correct.
+
+    args:
+        value (float): Value to convert.
+
+    returns:
+        (float): value*100
+
+    """
+    return value*100
