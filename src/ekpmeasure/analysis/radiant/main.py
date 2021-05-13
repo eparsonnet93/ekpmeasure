@@ -4,16 +4,18 @@ import numpy as np
 __all__ = ('load_radiant_loop_from_text_file',)
 
 def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_meta_data = False):
-    """load a radiant loop from a text file
-    
-    Returns: (pandas DataFrame) columns -> 'Time(ms)', 'DriveVoltage', 'MeasuredCharge(pC)' or 'Time(ms)', 'DriveVoltage', 'MeasuredPolarization(uC/cm2)'
-    ----
-    
-    path: str
-    return_meta_data: bool - True returns ((pandas dataframe) data, (dict) meta_data)  
-        meta_data (dict) -> {SampleName:(str)... etc}
-    measured_value: (str) either 'Charge' or 'Polarization' - typically one would use charge unless you have accurately measured capacitor area and input correctly into the radiant ui
-    
+    """Load a radiant loop from a text file. Typically one would use 'Charge' for measured_value unless one accurately measured capacitor area and input correctly into the Radiant UI.
+
+    args:
+        file (str): Filename and path. 
+        measured_value (str): 'Charge' or 'Polarization'
+        return_meta_data (bool): Return meta data (dict)
+
+    returns:
+        (pandas.DataFrame, (dict)): Data, Optional: (meta data)
+
+
+
     """
     
     if measured_value.lower() not in set({'charge', 'polarization'}):
