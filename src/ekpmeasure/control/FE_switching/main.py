@@ -52,7 +52,7 @@ def run_pund(inst, up, down, up_first = False, wait_time = 1, channel = '1'):
 	
 	return 
 
-def apply_preset_pulse(pg, pulsewidth, amplitude, channel = '1', wait_time = 1,  *args, **kwargs):
+def apply_preset_pulse(pg, pulsewidth, amplitude, pulse_polarity = 'up', channel = '1', wait_time = 1,  *args, **kwargs):
 	"""
 	apply a preset pulse and then ready for next pulse sequency by leaving the pulsegen at reset values (+-50mV). 
 	Preset is always negative 
@@ -62,15 +62,24 @@ def apply_preset_pulse(pg, pulsewidth, amplitude, channel = '1', wait_time = 1, 
 	ampitude: (str) allowed units {mv, v}
 
 	"""
+	assert pulse_polarity in set({'up', 'down'}), "pulse_polarity must be 'up' or 'down' not '{}'".format(pulse_polarity)
+
 	#initialization
 	initialize_pulse(pg, channel = channel)
 
 	#only need down (second output argument) of the following line. todo: refactor
-	up, down = symmetric_up_down_SCPI(pulsewidth = pulsewidth, 
-										 amplitude = amplitude,
-										 offset = '0v',
-										 channel=channel,
-										 *args, **kwargs)
+	up, down = symmetric_up_down_SCPI(
+		pulsewidth = pulsewidth, 
+		amplitude = amplitude,
+		offset = '0v',
+		channel=channel,
+		*args, **kwargs
+	)
+
+	if pulse_polarity == 'up':
+		to_write = up 
+	else:
+		to_write = down
 	
 	time.sleep(wait_time)
 	pg.write('outp'+channel+':stat off')
@@ -79,7 +88,7 @@ def apply_preset_pulse(pg, pulsewidth, amplitude, channel = '1', wait_time = 1, 
 	reset = ':sour1:volt:lev:imm:high 50mv;:sour1:volt:lev:imm:low -50mv;'
 	pg.write(reset)
 	time.sleep(wait_time)
-	pg.write( down)
+	pg.write(to_write)
 	time.sleep(wait_time)
 	pg.write('outp'+channel+':stat on')
 	time.sleep(wait_time)
@@ -94,8 +103,8 @@ def apply_preset_pulse(pg, pulsewidth, amplitude, channel = '1', wait_time = 1, 
 	
 	return 
 
-def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, scopetype = '6604', area='fromdiameter', diameter = 'fromidentifier', 
-	preset_pulsewidth = '100ns', preset_voltage = '3000mv', test=False):
+def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, polarity = 'up', scopetype = '6604', area='fromdiameter', diameter = 'fromidentifier', 
+	preset_pulsewidth = '100ns', preset_voltage = '3000mv', scope_channel = 'Ch1', test=False):
 	"""
 	Run a preset and then 2 pulse measurement using the BN765 and tektronix scope. Allowed scopes are 6604 and 620B. 6604 is preferred for fast measurements.
 
@@ -117,6 +126,9 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 	"""
 	if scopetype != '6604' and scopetype != '620B':
 		raise ValueError('scopetype must be "6604" or "620B". Recieved {}'.format(scopetype))
+
+	if scopetype == '620B':
+		warnings.warn('Using 620B as the scope will cause "scope_channel" parameter to be ignored.', UserWarning, '', 0,)
 
 	#get types correct
 	try:
@@ -178,16 +190,20 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 		for pulsen in [1,2]:
 			initialize_trig(pg, pulsen, pulsewidth=pulsewidth, delay=delay)
 			time.sleep(.1)
-			apply_preset_pulse(pg, preset_pulsewidth, preset_voltage)
+			if polarity == 'up':
+				preset_pulse_polarity = 'down'
+			else:
+				preset_pulse_polarity = 'up'
+			apply_preset_pulse(pg, preset_pulsewidth, preset_voltage, pulse_polarity=preset_pulse_polarity)
 			time.sleep(.8)
-			initialize_2pulse(pg, pulsewidth=pulsewidth, delay=delay, high_voltage=high_voltage)
+			initialize_2pulse(pg, polarity=polarity, pulsewidth=pulsewidth, delay=delay, high_voltage=high_voltage)
 			time.sleep(.2)
 			manual_trigger(pg)
 			time.sleep(.1)
 			pg.write('pulsegenc:stop') 
 
 			if scopetype == '6604':
-				initialize_scope_tds6604(scope, channel = 'Ch1', force_yes = True)
+				initialize_scope_tds6604(scope, channel = scope_channel, force_yes = True)
 				tdf = get_wf_tds6604(scope)
 			elif scopetype == '620B':
 				tdf = tds620B_get_wf(scope)
@@ -211,7 +227,7 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 	save_presetpulsewidth = str(float(preset_pulsewidth.replace('ns', 'e-9').replace('us','e-6').replace('ms', 'e-3').replace('s', ''))*1e9).replace('.', 'x') + 'ns'
 
 	save_base_name = identifier + '_'
-	for namer in [save_pulsewidth, save_delay, save_highvoltage, save_presetvoltage, save_presetpulsewidth]:
+	for namer in [save_pulsewidth, save_delay, save_highvoltage, save_presetvoltage, save_presetpulsewidth, scope_channel, polarity]:
 		save_base_name += namer + '_'
 	save_base_name = save_base_name[:-1] #remove final '_'
 
@@ -222,7 +238,9 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 		'delay_ns':float(save_delay[:-2].replace('x','.')),
 		'high_voltage_v':float(save_highvoltage.replace('x', '.')[:-2])/1000,
 		'preset_voltage_v':float(save_presetvoltage.replace('x', '.')[:-2])/1000,
-		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.'))
+		'preset_pulsewidth_ns':float(save_presetpulsewidth[:-2].replace('x','.')),
+		'scope_channel':scope_channel,
+		'polarity':polarity,
 	}
 	try:
 		meta_data.update({

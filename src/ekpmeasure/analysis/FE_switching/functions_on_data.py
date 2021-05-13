@@ -164,23 +164,19 @@ def smooth(data_dict, key='dp', N = 3, Wn = 0.05):
         
     """
     assert key in set(data_dict.keys()), "key {} is does not exist in data_dict".format(key)
-
-    to_smooth = _fod_dimensionality_fixer(data_dict, check_key = key, keys_to_fix = [key])
-    
-    to_smooth = np.nan_to_num(to_smooth, 0)
-        
-    ndims = to_smooth.shape[0]
     out = data_dict.copy()
+
+    to_smooth = iterable_data_array(data_dict, key)
+
+    for_out = data_array_builder()
     
-    for d in range(ndims):
+    for X in to_smooth:
+        X = np.nan_to_num(X, 0)
         b, a = signal.butter(N, Wn)
-        X = to_smooth[d, :]
         sig = signal.filtfilt(b, a, X)
-        try:
-            for_out = np.vstack((for_out, sig))
-        except NameError:
-            for_out = sig.copy()
-    out.update({key:for_out})
+        for_out.append(sig)
+
+    out.update({key:for_out.build()})
     return out
 
 def subtract_median_of_lastN(data_dict, key = 'dp', N=20):

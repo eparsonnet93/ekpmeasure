@@ -52,6 +52,23 @@ def _check_file_exists(path, filename):
 	else:
 		return False
 
+def _remove_nans_from_set(set_to_remove_from):
+	"""Remove multiple nans from a set. Sometimes in Dataset.summary, it returns many nans when it should return only one. Quick fix for that issue"""
+
+	out = set()
+	for item in set_to_remove_from:
+		try:
+			if np.isnan(item) and np.nan not in out:
+				out.update({np.nan})
+				continue
+			if np.isnan(item):
+				continue
+			out.update({item})
+		except TypeError:
+			out.update({item})
+		
+	return out
+
 class Dataset(pd.DataFrame):
 	"""Dataset class for analysis. 
 
@@ -106,7 +123,8 @@ class Dataset(pd.DataFrame):
 		for column in self.columns:
 			if column == self.pointercolumn:
 				continue
-			summary.update({column: set(self[column].values)})
+			summary.update({column: _remove_nans_from_set(set(self[column].values))})
+
 		return summary
 	
 	@construct_Dataset_from_dataframe
@@ -161,7 +179,7 @@ class Dataset(pd.DataFrame):
 		return Dataset(path, meta_data, readfileby=self.readfileby)
 	
 	
-	def remove_nonexistant_files_from_metadata(self):
+	def remove_nonexistent_files_from_metadata(self):
 		"""
 		Remove references to files that do not exist in path.
 		"""
@@ -175,13 +193,16 @@ class Dataset(pd.DataFrame):
 		return self.remove_index(remove_index)
 	
 	def _construct_index_to_path(self, path, initializer):
-		"""construct index_to_path from path provided
+		"""Construct index_to_path from path provided
 		
 		args:
 			path (str or Dict): a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
 			initializer (pandas.DataFrame: meta data. one column must contain a pointer (filename) to where each the real data is stored
 
 		"""
+		if len(self) == 0:
+			warnings.showwarning("No meta data.", UserWarning, '', 0)
+			return {}
 		if type(path) != dict:
 			assert type(path) == str, "path must be dict or str"
 			#set all indices to the single path provided
@@ -250,7 +271,49 @@ class Dataset(pd.DataFrame):
 					ignore_index = True
 				)
 
-		return new_df           
+		return new_df   
+
+	def add_calculated_column(self, column_name, how):
+		"""Add a calculated column to the Dataset.
+		
+		args:
+			column_name (str): The new column name
+			how (function): f(self) -> column data. A function which operates on self (pandas.DataFrame) and returns new column data.
+			
+		returns:
+			(Dataset): Updated Dataset.
+			
+		examples:
+			Convert 25um and 10um to measured areas. This will only work if no other diameters are present in the Dataset.
+			```
+			>>>def how(dataframe):
+					nominal_diameter_to_measured_area_dict = {'25um':190, '10um':60}
+					return [nominal_diameter_to_measured_area_dict[x] for x in dataframe['diameter'].values]
+			>>>dset.add_calculated_column('measured_area_um', how = how)
+			```
+		
+		
+		"""
+		
+		if not hasattr(how, '__call__'):
+			raise TypeError('how must be a function that operates on a DataFrame')
+			
+		new_column_data = how(pd.DataFrame(self))
+		self.add_column(column_name, new_column_data)
+		
+		return self
+	
+	def add_column(self, column_name, column_data):
+		"""Add a column to a Dataset.
+		
+		args:
+			column_name (str): The new column name.
+			column_data (array-like): The data for the column
+		
+		"""
+		path_to_index = _convert_ITP_to_path_to_index(self.index_to_path)
+		self[column_name] = column_data
+		return Dataset(path_to_index, self)        
 
 	def get_data(self, groupby=None, labelby=None,):
 		"""
@@ -263,6 +326,8 @@ class Dataset(pd.DataFrame):
 		returns:
 				(Data): the data
 		"""
+		if len(self) == 0:
+			raise ValueError('No meta data to return data for!!')
 		pointercolumn = self.pointercolumn
 		readfileby = self.readfileby
 
@@ -339,9 +404,9 @@ def _summarize_data(data):
 		defn = data[index]['definition']
 		for key in defn:
 			try:
-				out[key].update(set({value for value in defn[key]}))
+				out[key].update(_remove_nans_from_set(set({value for value in defn[key]})))
 			except KeyError:
-				out.update({key:set({value for value in defn[key]})})
+				out.update({key:_remove_nans_from_set(set({value for value in defn[key]}))})
 	return out
 		
 class iDataIndexer():
@@ -451,12 +516,13 @@ class Data(dict):
 					indices.append(index)
 		return indices
 
-	def filter(self, data_condition_function_dict, definition_condition_dict=None):
+	def filter(self, data_condition_function_dict, definition_condition_dict=None, additional_data_keys_to_filter=None):
 		"""Filter the data.
 		
 		args:
 			data_condition_function_dict (dict): a dict with one entry. key is data key, value is function which operates on a single value.
-			definition_condition_dict (dict): a dict specifying specific definition conditions, which when satisfied can allow their data to be operated on. If None, all data will be filtered
+			definition_condition_dict (dict): a dict specifying specific definition conditions, which when satisfied can allow their data to be operated on. If None, all data will be filtered.
+			additional_data_keys_to_filter (str or key or array-like): Additional data keys that you wish to filter based on data_condition_function_dict.
 
 		returns:
 			(Data): filtered Data
@@ -469,13 +535,23 @@ class Data(dict):
 		```
 		Filter data corresponding to an amplitude of '500ua' such that data key 'R' contains only values >10.
 		```
-		>>> Data.filter({'R': labmda x: x>10}, {'amplitude':'500ua'}) 
+		>>> Data.filter({'R': lambda x: x>10}, {'amplitude':'500ua'}) 
 		```
-		You may use this method to remove outliers.
+		Filter data based on 'saturation' but also filter the 'switching_time' data.
+		```
+		>>> Data.filter({'saturation': lambda x: x > .003}, additional_data_keys_to_filter='switching_time')
+		``` 
+
+		You may use this method to remove outliers, for example.
 
 		"""
 		if definition_condition_dict == None:
 			definition_condition_dict = {}
+
+		if type(additional_data_keys_to_filter) == type(None):
+			additional_data_keys_to_filter = []
+		else:
+			additional_data_keys_to_filter = np.array([additional_data_keys_to_filter]).flatten()
 		
 		assert len(data_condition_function_dict) <= 1, "more than one condition supplied in data_condition_function_dict. only one is supported at a time."
 		data_function_key = list(data_condition_function_dict)[0]
@@ -489,11 +565,22 @@ class Data(dict):
 		not_sat_indices = all_index - set(sat_indices)
 		
 		func = data_condition_function_dict[data_function_key]
+
+		keys_to_update = [key for key in additional_data_keys_to_filter]
+
+		keys_to_update.append(data_function_key)
+		keys_to_update = keys_to_update[::-1]
+
 		
 		for index in sat_indices:
-			old = self[index]['data'][data_function_key]
-			old_shape = old.shape
-			self[index]['data'].update({data_function_key:old[func(old)]})
+			checker = self[index]['data'][data_function_key]
+			for key in keys_to_update:
+				old = self[index]['data'][key]
+				old_shape = old.shape
+				#ensure that all keys in keys_to_update have the same dimensionality
+				if old_shape != checker.shape:
+					raise ValueError('data corresponding to data_key "{}" does not have the same shape as data corresponding to data_function_key "{}"'.format(key, data_function_key))
+				self[index]['data'].update({key:old[func(checker)]})
 			
 		return Data(self.to_dict())
 
@@ -663,7 +750,7 @@ class Data(dict):
 			(dict): a dict class with identical structure"""
 		return {key: self[key] for key in self.keys()}
 
-	def plot(self, x=None, y=None, ax=None):
+	def plot(self, x=None, y=None, ax=None, **kwargs):
 		"""
 		Plot the data. If ax is provided returns ax, otherwise returns fig, ax.
 
@@ -703,16 +790,16 @@ class Data(dict):
 				
 				if len(to_plot.shape) == 1: #1d data
 					if x == None:
-						ax.plot(to_plot, color = color)
+						ax.plot(to_plot, color = color, **kwargs)
 					else:
-						ax.plot(xs, to_plot, color = color)
+						ax.plot(xs, to_plot, color = color, **kwargs)
 					continue
 					
 				for i in range(to_plot.shape[0]):
 					if x == None:
-						ax.plot(to_plot[i,:], color = color)
+						ax.plot(to_plot[i,:], color = color, **kwargs)
 					else:
-						ax.plot(xs[i,:], to_plot[i,:], color = color)
+						ax.plot(xs[i,:], to_plot[i,:], color = color, **kwargs)
 
 		if return_fig:
 			return fig, ax

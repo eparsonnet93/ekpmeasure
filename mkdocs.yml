@@ -8,7 +8,6 @@ nav:
     - Experimental Analysis: analysis-experiments-reference.md
     - control.experiment: control-experiment-reference.md
     - Instruments: control-instrument-reference.md
-    - Experiments: control-experiments-reference.md
 
 theme: readthedocs
 
