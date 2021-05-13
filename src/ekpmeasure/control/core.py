@@ -129,13 +129,12 @@ class experiment():
 			return 
 
 		except Exception as e:
-			print(e)
 			print('terminating.')
+			raise e
 		finally:
 			self.terminate()
 			print('done.')
-			return
-
+		
 
 def trial(run_function, run_function_args, path):
 	"""
