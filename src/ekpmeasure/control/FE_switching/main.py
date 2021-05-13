@@ -128,7 +128,7 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 		raise ValueError('scopetype must be "6604" or "620B". Recieved {}'.format(scopetype))
 
 	if scopetype == '620B':
-		warnings.warn('Using 620B as the scope will cause "scope_channel" parameter to be ignored.', UserWarning, '', 0,)
+		warnings.showwarning('Using 620B as the scope will cause "scope_channel" parameter to be ignored.', UserWarning, '', 0,)
 
 	#get types correct
 	try:
