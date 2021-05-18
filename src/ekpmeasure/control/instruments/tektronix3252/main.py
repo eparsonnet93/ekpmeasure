@@ -1,12 +1,55 @@
 from ..misc import _get_number_and_suffix
+import numpy as np
 
 
 __all__ = ('start_pulse_gen', 'stop_pulse_gen', 'trigger', 'set_function_to_pulse',
     'set_run_mode_to_burst', 'set_ncylces_for_burst_mode', 'set_offset', 'set_low_voltage', 
-    'set_high_voltage', 'set_pulsewidth','set_polarity')
+    'set_high_voltage', 'set_pulsewidth','set_polarity', 'set_frequency', 'set_pulse_delay',
+    'frequency_from_delay',)
 
 time_suffix_to_scientific_dict = {'ms':'e-3', 's':'e0', 'us':'e-6', 'ns':'e-9'}
 voltage_suffix_to_scientific_dict = {'mv':'e-3', 'v':'e0'}
+frequency_suffix_to_scientific_dict = {'hz':'e0', 'khz':'e3', 'mhz':'e6'}
+
+def frequency_from_delay(delay):
+    """Determine what frequency to use to match a specified delay time.
+
+    args:
+        delay (str): Delay time. Example '1us'
+
+    returns:
+        frequency (float): Frequency in Hz.
+
+    """
+    d_number, d_suffix = _get_number_and_suffix(delay)
+    float_delay = float(str(d_number) + time_suffix_to_scientific_dict[d_suffix])
+
+    frequency = np.round(1/float_delay, 0)
+
+    return frequency
+
+def set_pulse_delay(pulse_gen, delay, channel = 1, both = False):
+    """Specify the delay for channel in pulse mode.
+
+    args:
+        pulse_gen (pyvisa.resources.gpib.GPIBInstrument): Tektronix AFG 3252
+        delay (str): Delay. Example '1us'
+        channel (int): Which channel.
+        both (bool): Set for both channels. 
+
+    """   
+
+    f = delay.lower()
+    f_number, f_suffix = _get_number_and_suffix(f) 
+    f = str(f_number) + time_suffix_to_scientific_dict[f_suffix]
+
+    if both:
+        pulse_gen.write('SOURce1:PULSe:DELay {}'.format(f))
+        pulse_gen.write('SOURce2:PULSe:DELay {}'.format(f))
+    else:
+        pulse_gen.write('SOURce{}:PULSe:DELay {}'.format(channel, f))
+
+    return
 
 def start_pulse_gen(pulse_gen, channel = 1, both = False):
     """
@@ -118,6 +161,30 @@ def set_pulsewidth(pulse_gen, pw, channel = 1, both = False):
         pulse_gen.write('SOURce{}:PULSe:WIDTh {}'.format(channel, pw))
 
     return
+
+def set_frequency(pulse_gen, frequency, channel = 1, both = False):
+    """Specify the frequency.
+
+    args:
+        pulse_gen (pyvisa.resources.gpib.GPIBInstrument): Tektronix AFG 3252
+        frequency (str): Pulsewidth. Example '100khz'
+        channel (int): Which channel.
+        both (bool): Set for both channels. 
+
+    """   
+
+    f = frequency.lower()
+    f_number, f_suffix = _get_number_and_suffix(f) 
+    f = str(f_number) + frequency_suffix_to_scientific_dict[f_suffix]
+
+    if both:
+        pulse_gen.write('SOURce1:FREQuency {}'.format(f))
+        pulse_gen.write('SOURce2:FREQuency {}'.format(f))
+    else:
+        pulse_gen.write('SOURce{}:FREQuency {}'.format(channel, f))
+
+    return
+
 
 def trigger(pulse_gen,):
     """Manual trigger for the 3252.
