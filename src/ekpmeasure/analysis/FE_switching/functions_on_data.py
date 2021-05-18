@@ -269,4 +269,37 @@ def get_saturation_and_switching_time(data_dict, n_points_for_saturation=50,
     return out
 
 
+def invert(data_dict, keys = 'all'):
+    """
+    Invert data. If keys set to 'all', all keys will be inverted except 'time'.
+    
+    args:
+        keys (str or array-like): Which keys to invert. If 'all', all will invert except 'time'.
+        
+    returns:
+        (dict): Inverted data.
+    """
+    if keys.lower() == 'all':
+        to_fix_keys = set(data_dict.keys()) - set({'time'})
+        
+    else:
+        to_fix_keys = np.array([keys]).flatten()
+        
+    out = data_dict.copy()
+    tmp = dict()
+    
+    for key in to_fix_keys:
+        tmp.update({key:data_array_builder()})
+    
+    for key in to_fix_keys:
+        ida = iterable_data_array(out, key)
+        for x in ida:
+            tmp[key].append(-1*x)
+            
+    for key in to_fix_keys:
+        out.update({key:tmp[key].build()})
+    
+    return out 
+
+
 ####### deprecated below
