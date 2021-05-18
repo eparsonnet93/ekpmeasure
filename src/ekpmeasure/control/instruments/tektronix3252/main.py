@@ -79,7 +79,7 @@ def set_high_voltage(pulse_gen, high_v, channel = 1, both = False):
         pulse_gen (pyvisa.resources.gpib.GPIBInstrument): Tektronix AFG 3252
         high_v (str): High voltage. Example '1V'
         channel (int): Which channel.
-        both (bool): Set high voltage and pulsewidth for both channels. 
+        both (bool): Set high voltage for both channels. 
 
     """
     stop_pulse_gen(pulse_gen, channel = channel, both = both)
@@ -103,7 +103,7 @@ def set_pulsewidth(pulse_gen, pw, channel = 1, both = False):
         pulse_gen (pyvisa.resources.gpib.GPIBInstrument): Tektronix AFG 3252
         pw (str): Pulsewidth. Example '1ms'
         channel (int): Which channel.
-        both (bool): Set high voltage and pulsewidth for both channels. 
+        both (bool): Set pulsewidth for both channels. 
 
     """   
 
@@ -111,7 +111,7 @@ def set_pulsewidth(pulse_gen, pw, channel = 1, both = False):
     pw_number, pw_suffix = _get_number_and_suffix(pw) 
     pw = str(pw_number) + time_suffix_to_scientific_dict[pw_suffix]
 
-    if not both:
+    if both:
         pulse_gen.write('SOURce1:PULSe:WIDTh {}'.format(pw))
         pulse_gen.write('SOURce2:PULSe:WIDTh {}'.format(pw))
     else:
