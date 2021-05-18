@@ -662,13 +662,13 @@ class Data(dict):
 				self[key].update({'data':mean_data})
 			return Data(self)
 
-	def apply(self, data_function, kwargs_for_function=None, inplace = False):
-		"""Apply data_function to the data in each index.
+	def apply(self, function_on_data, pass_defn = False, **kwargs):
+		"""Apply data_function to the data in each index. **kwargs will be passed to data_function.
 
 		args:
-			data_function (function or array-like(function, )): f(dict) -> dict. function operates is passed the data_dict (corresponding to self[index]['data']). if array-like, functions will be applied sequentially
-			kwargs_for_function (dict or array-like(dict, )): kwargs for data_function in order to pass additional arguments to the functions being applied. 
-			inplace (bool): operate in place
+			function_on_data (function): f(dict) -> dict. Function is passed the data_dict (corresponding to self[index]['data']).
+			pass_defn (bool): Whether or not to pass the definition to function_on_data. If True, will be passed with other kwargs. 
+			kwargs (**kwargs): Additional arguments for function_on_data. 
 
 		returns:
 				(Data): the new data after operating on it
@@ -713,32 +713,31 @@ class Data(dict):
 				'data': {'raw_data': array([1, 4, 9], dtype=int64)}}}
 		```
 		"""
-		data_functions = np.array([data_function]).flatten()
-		if type(kwargs_for_function) == type(None):
-			kwargs_for_functions = [{} for ijk in range(len(data_functions))]
-		else:
-			kwargs_for_functions = np.array([kwargs_for_function]).flatten()
-
-		if len(kwargs_for_functions) != len(data_functions):
-			raise ValueError('kwargs_for_function does not match in count to the number of data_functions supplied')
-
+		data_function = function_on_data
 		tmp_out = self.to_dict().copy()
 
-		for data_function, kwargs_for in zip(data_functions, kwargs_for_functions):
-			for key in tmp_out.keys():
-				try:
+		for key in tmp_out.keys():
+			try:
+
+				if pass_defn:
+					to_pass = tmp_out[key]['definition'].copy()
+					for key in kwargs:
+						to_pass.update({key:kwargs})
 					internal_out = {
 						'definition':tmp_out[key]['definition'],
-						'data':data_function(tmp_out[key]['data'].copy(), **kwargs_for)
+						'data':data_function(tmp_out[key]['data'].copy(), defn = tmp_out[key]['definition'], **to_pass)
 					}
-					tmp_out.update({key:internal_out})
-				except Exception as e:
-					print('Error in data_function: {} \n{}'.format(data_function.__name__, e))
-					print('Skipping data key: {} with defintion: \n{}'.format(key, tmp_out[key]['definition']))
+				else:
+					internal_out = {
+						'definition':tmp_out[key]['definition'],
+						'data':data_function(tmp_out[key]['data'].copy(), **kwargs)
+					}
 
-		if inplace:
-			self.__init__(tmp_out)
-			return
+				tmp_out.update({key:internal_out})
+			except Exception as e:
+				print('Error in data_function: {} \n{}'.format(data_function.__name__, e))
+				print('Skipping data key: {} with defintion: \n{}'.format(key, tmp_out[key]['definition']))
+
 		return Data(tmp_out)
 
 	def to_dict(self):
