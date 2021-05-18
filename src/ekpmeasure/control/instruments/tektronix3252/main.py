@@ -64,7 +64,7 @@ def set_low_voltage(pulse_gen, low_v, channel = 1, both = False):
     v_number, v_suffix = _get_number_and_suffix(low_v)
     low_v = str(v_number) + voltage_suffix_to_scientific_dict[v_suffix]
 
-    if not both:
+    if both:
         pulse_gen.write('SOURce1:VOLTage:LEVel:IMMediate:low {}'.format(low_v))
         pulse_gen.write('SOURce2:VOLTage:LEVel:IMMediate:low {}'.format(low_v))
     else:
@@ -88,7 +88,7 @@ def set_high_voltage(pulse_gen, high_v, channel = 1, both = False):
     v_number, v_suffix = _get_number_and_suffix(high_v)
     high_v = str(v_number) + voltage_suffix_to_scientific_dict[v_suffix]
 
-    if not both:
+    if both:
         pulse_gen.write('SOURce1:VOLTage:LEVel:IMMediate:high {}'.format(high_v))
         pulse_gen.write('SOURce2:VOLTage:LEVel:IMMediate:high {}'.format(high_v))
     else:
