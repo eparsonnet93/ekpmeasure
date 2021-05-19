@@ -749,7 +749,7 @@ class Data(dict):
 			(dict): a dict class with identical structure"""
 		return {key: self[key] for key in self.keys()}
 
-	def plot(self, x=None, y=None, ax=None, **kwargs):
+	def plot(self, x=None, y=None, ax=None, color = None, **kwargs):
 		"""
 		Plot the data. If ax is provided returns ax, otherwise returns fig, ax.
 
@@ -768,8 +768,10 @@ class Data(dict):
 		else:
 			return_fig = False
 
-		
-		colors = [cm.viridis(x) for x in np.linspace(0, 1, len(self.keys()))]
+		if color == None:
+			colors = [cm.viridis(x) for x in np.linspace(0, 1, len(self.keys()))]
+		else: 
+			colors = [color for i in range(len(self.keys()))]
 
 		for color, index in zip(colors, self.keys()):
 			if x == None:
