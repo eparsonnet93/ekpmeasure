@@ -758,6 +758,7 @@ class Data(dict):
 			y (key or array-like): data dict key for y axis
 			ax (matplotlib.axis): axis to plot on 
 			color (str): Color of plot. (Override colormap)
+			cmap (str): Color map. See matplotlib.cm.cmaps_listed for allowed colormaps.
 
 		returns:
 			fig (matplotlib.figure): figure of plot
