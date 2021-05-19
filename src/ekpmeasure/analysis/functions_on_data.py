@@ -32,6 +32,12 @@ class iterable_data_array():
         array = data_dict[key]
         self.array = array
         self.count = array.shape[0]
+
+    def __str__(self):
+        return self.array.__str__()
+
+    def __repr__(self):
+        return self.array.__repr__()
         
     def __iter__(self,):
         self.index = 0
@@ -68,11 +74,60 @@ class iterable_data_array():
 class data_array_builder(list):
     
     def __init__(self,):
-        """Class for building data arrays. Subclass of list"""
+        """Class for building data arrays.
+
+        examples:
+            Square data for different trials: 
+            ```
+            >>> data
+            > {0: 
+                {'definition': {
+                    'param1': {'10V'},
+                    'param2': {'100ns', '10ns'},
+                    'param3': {'1mv'}
+                    },
+                'data': {
+                    'raw_data': array([[1, 2, 3],[1, 2, 3]], dtype=int64)
+                    }
+                }
+            }
+
+            >>> data_dict = data[0]['data']
+            >>> data_dict
+            > {'raw_data': array([[1, 2, 3],
+                [1, 2, 3]], dtype=int64)}
+
+            >>> ida = iterable_data_array(data_dict, 'raw_data')
+            >>> out = data_array_builder()
+            >>> for d in ida:
+                ... #square each measurement
+                ... out.append(d**2)
+            >>> out.build()
+            > array([[1, 4, 9],[1, 4, 9]], dtype=int64)
+
+            >>> data_dict.update({'raw_data':out.build()})
+            >>> data
+            > {0: 
+                {'definition': 
+                    {'param1': {'10V'},
+                    'param2': {'100ns', '10ns'},
+                    'param3': {'1mv'}
+                },
+                'data': {'raw_data': array([[1, 4, 9], [1, 4, 9]], dtype=int64)}
+                }
+            }
+            ```
+
+        """
         super().__init__()
     
     def build(self,):
-        """Build the final array (numpy.vstack)"""
+        """Build the final array (create a numpy.vstack).
+
+        returns:
+            (numpy.vstack): VStacks all items in the data_array_builder.
+
+        """
         for thing in self:
             try:
                 out = np.vstack((out, thing))

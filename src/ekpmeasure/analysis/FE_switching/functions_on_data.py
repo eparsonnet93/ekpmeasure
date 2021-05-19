@@ -14,7 +14,10 @@ __all__ = (
 	'get_polarization_transients_from_dps', 
 	'get_saturation_and_switching_time',
 	'smooth', 
-	'subtract_median_of_lastN'
+	'subtract_median_of_lastN',
+    'invert',
+    'integrate',
+    'get_pol_trans_from_dps'
 	)
 
 def _get_startarg_1d(p, cutoff = 0.01):
@@ -100,7 +103,7 @@ def reset_time(data_dict, key = 'p1', cutoff = 0.01, grace = 10):
 
     return {key: out[key].build() for key in out}
 
-def get_dps(data_dict):
+def get_dps(data_dict, R = 50):
     """Calculate the difference between data keys 'p1' and 'p2'
 
     args:
@@ -114,39 +117,9 @@ def get_dps(data_dict):
     worker = data_array_builder()
     
     for p1, p2 in zip(p1_ida, p2_ida):
-        worker.append(p1 - p2)   
+        worker.append((p1 - p2)/R)   
         
     return {'time':data_dict['time'], 'dp':worker.build()}
-
-def get_polarization_transients_from_dps(data_dict):
-    """
-    Integrate dps.
-
-    args:
-        data_dict (dict): dict with keys 'time', 'dp'
-
-    returns:
-        (dict): dict with keys 'intdp' and 'time'. 'intdp' is 
-            ```
-            scipy.integrate.cumtrapz(dp, x = 'time')
-            ```
-    """ 
-    assert 'dp' in set(data_dict.keys()), "data_dict must contain key 'dp'. It does not. Keys are {}".format(data_dict.keys())
-
-    dp_ida = iterable_data_array(data_dict, 'dp')
-    time_ida = iterable_data_array(data_dict, 'time')
-
-    out = {'time':data_array_builder(), 'intdp':data_array_builder()}
-
-    for dp, time in zip(dp_ida, time_ida):
-        dp = np.nan_to_num(dp, 0)
-        time = np.nan_to_num(time, 0)
-        intdp = cumtrapz(dp, x = time)
-        intdp = np.concatenate((np.array([0]), intdp))
-        out['time'].append(time)
-        out['intdp'].append(intdp)
-
-    return {key: out[key].build() for key in out}
 
 
 def smooth(data_dict, key='dp', N = 3, Wn = 0.05):
@@ -214,8 +187,8 @@ def subtract_median_of_lastN(data_dict, key = 'dp', N=20):
     out.update({key:for_out})
     return out
 
-def get_saturation_and_switching_time(data_dict, n_points_for_saturation=50, 
-                                      top_percent = 90, bottom_percent = 10):
+def get_saturation_and_switching_time(data_dict, key = 'int', n_points_for_saturation=50, 
+                                      top_percent = 90, bottom_percent = 10, ):
 
     """
     Get the saturation and switching time for data. Calculates saturation value as average of n points (n_points_for_saturation) at the end of the data. Calculates switching time as time between bottom_percent and top_percent, both calcuated as percentages of saturation.
@@ -232,10 +205,10 @@ def get_saturation_and_switching_time(data_dict, n_points_for_saturation=50,
 
     """
 
-    assert 'intdp' in set(data_dict.keys()), '"intdp" does not exist in data_dict'
+    assert key in set(data_dict.keys()), '"{}" does not exist in data_dict'.format(key)
     assert 'time' in set(data_dict.keys()), "'time' does not exist in data_dict"
 
-    intdp, time = _fod_dimensionality_fixer(data_dict, check_key = 'intdp', keys_to_fix = ['intdp', 'time'])
+    intdp, time = _fod_dimensionality_fixer(data_dict, check_key = key, keys_to_fix = [key, 'time'])
     
     ndims = intdp.shape[0]
     out = {}
@@ -269,4 +242,157 @@ def get_saturation_and_switching_time(data_dict, n_points_for_saturation=50,
     return out
 
 
+def invert(data_dict, keys = 'all'):
+    """
+    Invert data. If keys set to 'all', all keys will be inverted except 'time'.
+    
+    args:
+        keys (str or array-like): Which keys to invert. If 'all', all will invert except 'time'.
+        
+    returns:
+        (dict): Inverted data.
+    """
+    if keys.lower() == 'all':
+        to_fix_keys = set(data_dict.keys()) - set({'time'})
+        
+    else:
+        to_fix_keys = np.array([keys]).flatten()
+        
+    out = data_dict.copy()
+    tmp = dict()
+    
+    for key in to_fix_keys:
+        tmp.update({key:data_array_builder()})
+    
+    for key in to_fix_keys:
+        ida = iterable_data_array(out, key)
+        for x in ida:
+            tmp[key].append(-1*x)
+            
+    for key in to_fix_keys:
+        out.update({key:tmp[key].build()})
+    
+    return out 
+
+
+def integrate(data_dict, key = 'dp'):
+    """
+    Integrate dps.
+
+    args:
+        data_dict (dict): Data. Data must contain key 'time'.
+
+    returns:
+        (dict): dict with keys 'int' and 'time'. 'int' is 
+            ```
+            scipy.integrate.cumtrapz(key, x = 'time')
+            ```
+    """ 
+
+    assert 'time' in set(data_dict.keys()), "data_dict must contain key 'time'. It does not. Keys are {}".format(data_dict.keys())
+
+    dp_ida = iterable_data_array(data_dict, key)
+    time_ida = iterable_data_array(data_dict, 'time')
+
+    out = {'time':data_array_builder(), 'int':data_array_builder()}
+
+    for dp, time in zip(dp_ida, time_ida):
+        dp = np.nan_to_num(dp, 0)
+        time = np.nan_to_num(time, 0)
+        intdp = cumtrapz(dp, x = time)
+        intdp = np.concatenate((np.array([0]), intdp))
+        out['time'].append(time)
+        out['int'].append(intdp)
+
+    return {key: out[key].build() for key in out}
+
+
+def get_pol_trans_from_dps(data_dict, area='from diameter', diameter=None, time_unit = 'ns', **kwargs):
+    """
+    Get polarization transient. Data must contain keys 'time' and 'dp'. Area is supplied in um^2
+
+    args:
+        data_dict (dict): dict with keys 'time', 'dp'.
+        area (float): Area in square microns. If 'from diameter', area = pi*(diameter/2)^2
+        diameter (float): Diameter in microns. If None, must supply area.
+
+    returns:
+        (dict): dict with keys 'polarization' and 'time'. 'polarization' is 
+            ```
+            scipy.integrate.cumtrapz(dp, x = 'time')
+            ```
+    """ 
+    assert time_unit in set({'ns', 'us'}), "time_unit {} not allowed. Allowed time_unit(s) are 'us' and 'ns'".format(time_unit)
+    assert 'dp' in set(data_dict.keys()), "data_dict must contain key 'dp'. It does not. Keys are {}".format(data_dict.keys())
+    assert 'time' in set(data_dict.keys()), "data_dict must contain key 'time'. It does not. Keys are {}".format(data_dict.keys())
+    try:
+        if len(area) == 1:
+            area = float(np.array(list(area)).flatten()[0])
+        elif len(area) > 1:
+            raise ValueError('More than one area supplied!!! This is likely because you passed the definition as area and the data is not grouped by a single area capacitor size.')
+    except AttributeError:
+        pass
+
+    if area == 'from diameter' and type(diameter) == type(None):
+        raise ValueError("Neither area nor diameter was supplied.")
+
+    try:
+        area = float(area)
+    except:
+        area = float(list(area)[0])
+        pass
+
+    if area == 'from diameter':
+        area = float(np.pi*(diameter/2)**2)
+
+    dp_ida = iterable_data_array(data_dict, 'dp')
+    time_ida = iterable_data_array(data_dict, 'time')
+
+    out = {'time':data_array_builder(), 'polarization':data_array_builder()}
+    #1ns*amp is .001uC, 1 us*amp is 1uC
+    time_unit_multiplier = {'ns':.001, 'us':1}
+
+    for dp, time in zip(dp_ida, time_ida):
+        dp = np.nan_to_num(dp, 0)
+        time = np.nan_to_num(time, 0)
+        #1uC/micron^2 is 1e8uC/cm^2
+        intdp = (cumtrapz(dp, x = time)*time_unit_multiplier[time_unit]/area)*1e8
+        intdp = np.concatenate((np.array([0]), intdp))
+        out['time'].append(time)
+        out['polarization'].append(intdp)
+
+    return {key: out[key].build() for key in out}
+
+
 ####### deprecated below
+
+def get_polarization_transients_from_dps(data_dict):
+    """
+    Integrate dps.
+
+    args:
+        data_dict (dict): dict with keys 'time', 'dp'
+
+    returns:
+        (dict): dict with keys 'intdp' and 'time'. 'intdp' is 
+            ```
+            scipy.integrate.cumtrapz(dp, x = 'time')
+            ```
+    """ 
+    warnings.showwarning('get_polarization_transients_from_dps is deprecated. See integrate() instead. Consider using get_pol_trans_from_dps()', DeprecationWarning, '', 0,)
+    assert 'dp' in set(data_dict.keys()), "data_dict must contain key 'dp'. It does not. Keys are {}".format(data_dict.keys())
+
+    dp_ida = iterable_data_array(data_dict, 'dp')
+    time_ida = iterable_data_array(data_dict, 'time')
+
+    out = {'time':data_array_builder(), 'intdp':data_array_builder()}
+
+    for dp, time in zip(dp_ida, time_ida):
+        dp = np.nan_to_num(dp, 0)
+        time = np.nan_to_num(time, 0)
+        intdp = cumtrapz(dp, x = time)
+        intdp = np.concatenate((np.array([0]), intdp))
+        out['time'].append(time)
+        out['intdp'].append(intdp)
+
+    return {key: out[key].build() for key in out}

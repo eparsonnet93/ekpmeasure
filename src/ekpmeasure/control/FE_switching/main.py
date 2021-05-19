@@ -127,9 +127,6 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 	if scopetype != '6604' and scopetype != '620B':
 		raise ValueError('scopetype must be "6604" or "620B". Recieved {}'.format(scopetype))
 
-	if scopetype == '620B':
-		warnings.warn('Using 620B as the scope will cause "scope_channel" parameter to be ignored.', UserWarning, '', 0,)
-
 	#get types correct
 	try:
 		float(pulsewidth)
@@ -206,7 +203,7 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 				initialize_scope_tds6604(scope, channel = scope_channel, force_yes = True)
 				tdf = get_wf_tds6604(scope)
 			elif scopetype == '620B':
-				tdf = tds620B_get_wf(scope)
+				tdf = tds620B_get_wf(scope, channel = scope_channel.lower())
 			else:
 				raise ValueError('Please check scopetype. Set to {}, which is not allowed'.format(scopetype))
 

@@ -129,15 +129,14 @@ class experiment():
 			return 
 
 		except Exception as e:
-			print(e)
 			print('terminating.')
+			raise e
 		finally:
 			self.terminate()
 			print('done.')
-			return
+		
 
-
-def trial(run_function, run_function_args, path):
+def trial(run_function, run_function_args, path, return_df = False):
 	"""
 	A trial for an experiment. This will save each trial (as csv) to path with a unique name (indexed by trial if an identical basename already exists). Also creates and saves meta data to path. The specified run_function must return ((str) base_name, (dict) meta_data, (pandas.dataframe) data).
 
@@ -178,5 +177,5 @@ def trial(run_function, run_function_args, path):
 		out = meta_data.copy()
 
 	out.to_pickle(path + 'meta_data')
-
-	return
+	if return_df:
+		return df
