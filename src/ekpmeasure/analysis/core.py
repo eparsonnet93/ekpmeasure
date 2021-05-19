@@ -749,7 +749,7 @@ class Data(dict):
 			(dict): a dict class with identical structure"""
 		return {key: self[key] for key in self.keys()}
 
-	def plot(self, x=None, y=None, ax=None, color = None, **kwargs):
+	def plot(self, x=None, y=None, ax=None, color = None, cmap = 'viridis', **kwargs):
 		"""
 		Plot the data. If ax is provided returns ax, otherwise returns fig, ax.
 
@@ -757,6 +757,7 @@ class Data(dict):
 			x (key): data dict key for x axis.
 			y (key or array-like): data dict key for y axis
 			ax (matplotlib.axis): axis to plot on 
+			color (str): Color of plot. (Override colormap)
 
 		returns:
 			fig (matplotlib.figure): figure of plot
@@ -768,8 +769,11 @@ class Data(dict):
 		else:
 			return_fig = False
 
+		if cmap not in set(cm.cmaps_listed.keys()):
+			raise KeyError('cmap {} not supported. Supported colormaps are {}'.format(cm.cmaps_listed.keys()))	
+
 		if color == None:
-			colors = [cm.viridis(x) for x in np.linspace(0, 1, len(self.keys()))]
+			colors = [cm.cmaps_listed[cmap](x) for x in np.linspace(0, 1, len(self.keys()))]
 		else: 
 			colors = [color for i in range(len(self.keys()))]
 
