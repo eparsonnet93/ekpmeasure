@@ -662,7 +662,7 @@ class Data(dict):
 				self[key].update({'data':mean_data})
 			return Data(self)
 
-	def apply(self, function_on_data, pass_defn = False, **kwargs):
+	def apply(self, function_on_data, pass_defn = False, kwargs_for_function=None,**kwargs):
 		"""Apply data_function to the data in each index. **kwargs will be passed to data_function.
 
 		args:
@@ -713,6 +713,12 @@ class Data(dict):
 				'data': {'raw_data': array([1, 4, 9], dtype=int64)}}}
 		```
 		"""
+		if type(kwargs_for_function) != type(None):
+			raise ValueError("kwargs_for_function argument is no longer supported as of version 0.0.7. Pass kwargs for the apply function simply as kwargs in .apply()")
+
+		#TODO delete kwargs_for_function argument
+
+
 		data_function = function_on_data
 		tmp_out = self.to_dict().copy()
 
