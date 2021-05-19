@@ -151,11 +151,12 @@ class Dataset(pd.DataFrame):
 	def select_index(self, index):
 		"""Return dataset with single index specified.
 
-		parameters:	
+		args:
 			index (int or index): Index to select
 
 		returns:
 			(Dataset): Single row dataset.
+
 
 		"""
 		return pd.DataFrame(self.iloc[index]).T.reset_index(drop = True)
