@@ -749,7 +749,7 @@ class Data(dict):
 			(dict): a dict class with identical structure"""
 		return {key: self[key] for key in self.keys()}
 
-	def plot(self, x=None, y=None, ax=None, color = None, cmap = 'viridis', **kwargs):
+	def plot(self, x=None, y=None, ax=None, color = None, cmap = 'viridis', labelby = None, **kwargs):
 		"""
 		Plot the data. If ax is provided returns ax, otherwise returns fig, ax.
 
@@ -759,6 +759,7 @@ class Data(dict):
 			ax (matplotlib.axis): axis to plot on 
 			color (str): Color of plot. (Override colormap)
 			cmap (str): Color map. See matplotlib.cm.cmaps_listed for allowed colormaps.
+			labelby (str): Definition key to use for plot legend.
 
 		returns:
 			fig (matplotlib.figure): figure of plot
@@ -771,7 +772,7 @@ class Data(dict):
 			return_fig = False
 
 		if cmap not in set(cm.cmaps_listed.keys()):
-			raise KeyError('cmap {} not supported. Supported colormaps are {}'.format(cm.cmaps_listed.keys()))	
+			raise KeyError('cmap "{}" not supported. Supported colormaps are {}'.format(cmap, cm.cmaps_listed.keys()))	
 
 		if color == None:
 			colors = [cm.cmaps_listed[cmap](x) for x in np.linspace(0, 1, len(self.keys()))]
@@ -785,6 +786,11 @@ class Data(dict):
 				xs = self[index]['data'][x]
 				data_keys_to_plot = set(self[index]['data'].keys()) - set({x})
 
+			if labelby == None:
+				label = None
+			else:
+				label = self[index]['definition'][labelby]
+
 			if type(y) == type(None):
 				pass
 			else:
@@ -796,85 +802,27 @@ class Data(dict):
 				
 				if len(to_plot.shape) == 1: #1d data
 					if x == None:
-						ax.plot(to_plot, color = color, **kwargs)
+						ax.plot(to_plot, color = color, label = label, **kwargs)
 					else:
-						ax.plot(xs, to_plot, color = color, **kwargs)
+						ax.plot(xs, to_plot, color = color, label = label, **kwargs)
 					continue
 					
 				for i in range(to_plot.shape[0]):
-					if x == None:
-						ax.plot(to_plot[i,:], color = color, **kwargs)
+					if i == 0: #label only the first becuase we don't want a big legend with many trials
+						if x == None:
+							ax.plot(to_plot[i,:], color = color, label = label, **kwargs)
+						else:
+							ax.plot(xs[i,:], to_plot[i,:], color = color, label = label, **kwargs)
 					else:
-						ax.plot(xs[i,:], to_plot[i,:], color = color, **kwargs)
+						if x == None:
+							ax.plot(to_plot[i,:], color = color, **kwargs)
+						else:
+							ax.plot(xs[i,:], to_plot[i,:], color = color, **kwargs)
+
+		if labelby != None:
+			ax.legend()
 
 		if return_fig:
 			return fig, ax
 		else:
 			return ax
-
-class dataset(Dataset):
-	"""
-	subclass of Dataset - used to initialize/read from a specific folder. dataset, unlike Dataset will search a folder for meta_data and help create it if it does not exist
-	----
-	path: (str or dict) a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
-	initializer: (pandas.DataFrame) meta_data. one column must contain a pointer (filename) to where each the real data is stored
-
-	"""
-
-	def __init__(self, path, meta_data = None):
-		"""
-		subclass of Dataset - used to initialize/read from a specific folder
-		"""
-		warnings.showwarning('dataset class is deprecated. use load_Dataset() instead', DeprecationWarning, '', 0,)
-		tmp_df = self._build_df(path, meta_data)
-		super().__init__(path, tmp_df)
-
-	def _build_df(self, path, meta_data):
-		if type(meta_data) == type(None):
-			try:
-				return pd.read_pickle(path + 'meta_data')
-			except FileNotFoundError:
-				print('meta_data does not exist in path {} you may want to create it with .generate_meta_data()'.format(path))
-				return pd.DataFrame()
-		else:
-			return meta_data
-
-	def generate_meta_data(self, mapper):
-		"""
-		generate meta_data from a Dataset
-		----
-
-		mapper: (function: filename (str) -> dict) operates on a single file name in order to get the columns (dict key) and values (dict value) for meta_data of that file 
-		"""
-		if not self._is_empty:
-			yn = input('this Dataset already has meta_data, do you wish to recreate it? (y/n)')
-			if yn.lower() != 'y':
-				return
-
-		for file in os.listdir(self.path):
-			try:
-				meta_data = pd.DataFrame(mapper(file), index = [0])
-			except Exception as e:
-				print('unable to process file: {} \nError: {}'.format(file, e))
-				continue
-			try:
-				existing_meta_data = pd.concat([existing_meta_data, meta_data], ignore_index = True)
-			except NameError:
-				existing_meta_data = meta_data.copy()
-
-		if self.pointercolumn not in set(existing_meta_data.columns): 
-			warnings.showwarning('there is no map to key "{}" in mapping function "{}" provided\nEnsure self.pointercolumn property has been set appropriately or else you will be unable to retrieve data'.format(self.pointercolumn, mapper.__name__), SyntaxWarning, '', 0,)
-
-		existing_meta_data.to_pickle(self.path+'meta_data')
-		self.__init__(path = self.path, meta_data = existing_meta_data)
-		return
-
-
-	def print_file_name(self):
-		"""use this function if you wish to print an example file for help building a mapping function for generate_met_data()"""
-		for fname in os.listdir(self.path):
-			if fname == 'meta_data' or fname == '.ipynb_checkpoints':
-				continue
-			else:
-				print(fname)
-				break
