@@ -669,6 +669,7 @@ class Data(dict):
 			function_on_data (function): f(dict) -> dict. Function is passed the data_dict (corresponding to self[index]['data']).
 			pass_defn (bool): Whether or not to pass the definition to function_on_data. If True, will be passed with other kwargs. 
 			kwargs (**kwargs): Additional arguments for function_on_data. 
+			kwargs_for_function (dict): Carryover from an older version. This serves as a error catch to help users convert older code. This argument is not supported.
 
 		returns:
 				(Data): the new data after operating on it
