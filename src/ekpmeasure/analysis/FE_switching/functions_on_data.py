@@ -325,25 +325,23 @@ def get_pol_trans_from_dps(data_dict, area='from diameter', diameter=None, time_
     assert time_unit in set({'ns', 'us'}), "time_unit {} not allowed. Allowed time_unit(s) are 'us' and 'ns'".format(time_unit)
     assert 'dp' in set(data_dict.keys()), "data_dict must contain key 'dp'. It does not. Keys are {}".format(data_dict.keys())
     assert 'time' in set(data_dict.keys()), "data_dict must contain key 'time'. It does not. Keys are {}".format(data_dict.keys())
-    try:
-        if len(area) == 1:
-            area = float(np.array(list(area)).flatten()[0])
-        elif len(area) > 1:
+
+    if type(area) == str:
+        if area == 'from diameter' and type(diameter) == type(None):
+            raise ValueError("Neither area nor diameter was supplied. Did you forget to pass the data definition?")
+        elif area != 'from diameter':
+            raise ValueError("'{}' not allowed for area. Must be float, int, or 'from diameter'".format(area))
+        else:
+            area = float(np.pi*(diameter/2)**2)
+    elif type(area) == set:
+        area = np.array(list(area)).flatten()
+        if len(area) > 1:
             raise ValueError('More than one area supplied!!! This is likely because you passed the definition as area and the data is not grouped by a single area capacitor size.')
-    except AttributeError:
-        pass
-
-    if area == 'from diameter' and type(diameter) == type(None):
-        raise ValueError("Neither area nor diameter was supplied.")
-
-    try:
+        else:
+            area = float(area[0])
+    else:
         area = float(area)
-    except:
-        area = float(list(area)[0])
-        pass
 
-    if area == 'from diameter':
-        area = float(np.pi*(diameter/2)**2)
 
     dp_ida = iterable_data_array(data_dict, 'dp')
     time_ida = iterable_data_array(data_dict, 'time')

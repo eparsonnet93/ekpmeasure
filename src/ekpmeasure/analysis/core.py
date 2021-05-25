@@ -656,13 +656,6 @@ class Data(dict):
 				tmp_out[key].update({'data':mean_data})
 			return Data(tmp_out)
 
-		else:
-			for key in self:
-				data = self[key]['data']
-				mean_data = {k:np.mean(data[k], axis = 0) for k in data}
-				self[key].update({'data':mean_data})
-			return Data(self)
-
 	def apply(self, function_on_data, pass_defn = False, kwargs_for_function=None,**kwargs):
 		"""Apply data_function to the data in each index. **kwargs will be passed to data_function.
 
@@ -720,6 +713,8 @@ class Data(dict):
 
 		#TODO delete kwargs_for_function argument
 
+			
+
 
 		data_function = function_on_data
 		tmp_out = self.to_dict().copy()
@@ -728,6 +723,11 @@ class Data(dict):
 			try:
 
 				if pass_defn:
+					#ensure no overlap between passed arguments and definition arguments:
+					overlap = set(kwargs.keys()).intersection(set(tmp_out[key]['definition'].keys()))
+					if len(overlap) != 0:
+						raise ValueError('kwargs passed in both definition and as kwargs in .apply(). Overlapping keys are "{}"'.format(overlap))
+
 					to_pass = tmp_out[key]['definition'].copy()
 					for key in kwargs:
 						to_pass.update({key:kwargs})
