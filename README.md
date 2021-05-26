@@ -7,7 +7,7 @@
 [![PyPi Downloads](http://pepy.tech/badge/ekpmeasure)](http://pepy.tech/project/ekpmeasure)
 
 
-Repository of computer control code for various experiments as well as analysis code. 
+Repository of analysis and computer control code for various experiments. 
 
 
 ## Overview
