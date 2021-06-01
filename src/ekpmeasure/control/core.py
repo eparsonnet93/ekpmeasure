@@ -47,7 +47,7 @@ class experiment():
 		return
 
 	def config_path(self, path, directory_delimiter = '/'):
-		"""Config the path to save data.
+		"""Config the path to save data. If path does not exist, user will be prompted to create. 
 
 		args:
 			path (str): Path
