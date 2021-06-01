@@ -45,7 +45,49 @@ class experiment():
 		print(self.run_function.__code__.co_varnames)
 		return
 
-	def config_path(self, path):
+	def config_path(self, path, directory_delimiter = '/'):
+		"""Config the path to save data.
+
+		args:
+			path (str): Path
+			directory_delimiter (str): Delimiter between directories in path. Sometimes it may be '\' for Windows OS, for example.
+
+		"""
+		if path[-1] != directory_delimiter:
+			raise ValueError('must specify a directory. "{}" does not specify a directory'.format(path))
+
+		success = False
+		original_path = path
+
+		try:
+			os.listdir(path)
+			yn = 'n'
+		except FileNotFoundError:
+			yn = input("Path '{}' does not exist. Do you wish to create it? (y/n)".format(path))
+			yn = yn.lower()
+
+		if yn == 'y':
+			to_create = []
+
+			while success == False:
+				try:
+					os.listdir(path)
+					success = True
+				except FileNotFoundError:
+					path_spl = path.split(directory_delimiter)
+					to_create.append(path_spl[-2])
+					path = ''
+					for spl in path_spl[:-2]:
+						path+=spl + '/'
+
+			to_create = to_create[::-1]
+			for directory in to_create:
+				os.mkdir(path + directory + directory_delimiter)
+				path += directory + directory_delimiter
+				print('creating dir "{}"'.format(path))
+				
+		else:
+			pass
 		self.path = path
 
 	def checks(self, params):
