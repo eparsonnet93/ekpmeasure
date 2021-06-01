@@ -4,6 +4,7 @@ import time
 import itertools
 import warnings
 import pyvisa
+import os
 
 from .misc import get_save_name
 
