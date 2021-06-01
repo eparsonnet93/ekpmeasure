@@ -21,16 +21,18 @@ def plot_pfm(imgdata_dict, meta_data, cmap='viridis', figsize = (20,10)):
         
     return fig, axs
 
-def load_image_from_binary(path, return_meta_data = False):
+
+def load_image_from_binary(path, return_meta_data = True):
     """
-    loads data from binary file (from asylum research) into a numpy array
-    
-    Returns: pandas.DataFrame({'label':(numpy array) imgdata})
-    ----
-    
-    path: str
-    return_meta_data: bool - True returns (dict({'label':(numpy array) imgdata}, meta_data)  
-        meta_data (dict) -> {ScanLines:(str)... etc}
+    Loads data from binary file (from asylum research) into a dict of numpy arrays.
+
+    args:
+        path (str): Path to the data.
+        return_meta_data (bool): Return meta data, i.e. scan size etc.
+
+    returns:
+        (dict): Key labels image type, value is numpy array of img data.
+
     
     """
     
