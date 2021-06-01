@@ -51,7 +51,7 @@ class experiment():
 
 		args:
 			path (str): Path
-			directory_delimiter (str): Delimiter between directories in path. Sometimes it may be '\' for Windows OS, for example.
+			directory_delimiter (str): Delimiter between directories in path. Sometimes it may be '\\' for Windows OS, for example.
 
 		"""
 		if path[-1] != directory_delimiter:
