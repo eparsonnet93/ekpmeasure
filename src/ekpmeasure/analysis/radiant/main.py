@@ -3,7 +3,7 @@ import numpy as np
 
 __all__ = ('load_radiant_loop_from_text_file','convert_pCum2_to_uCcm2')
 
-def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_meta_data = False):
+def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_meta_data = False, delimiter = ','):
     """Load a radiant loop from a text file. Typically one would use 'Charge' for measured_value unless one accurately measured capacitor area and input correctly into the Radiant UI.
 
     args:
@@ -53,7 +53,7 @@ def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_met
 
     pointer_dict = dict() #holds which column index points to which column name
     for row in data:
-        spl = row.split(',')
+        spl = row.split(delimiter)
         if len(spl)<=1: #there are some rows in here which are not data and they are therefor not comma sep
             continue
 
@@ -68,9 +68,12 @@ def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_met
                 out[pointer_dict[ijk]].append(float(a))
         except ValueError: #could not convert to float (i.e. nonnumeric data)
             continue
-
+        
     out = pd.DataFrame(out)
+    if len(out) == 0:
+        raise ValueError('No data. Is your delimiter correct?')
     out.drop(columns = ['Point'], inplace = True)
+
     
     if measured_value.lower() == 'charge':
         out['MeasuredPolarization'] = out['MeasuredPolarization']*float(meta_data['SampleArea(cm2)'])*1e6 #to convert from uC to pC
@@ -82,7 +85,7 @@ def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_met
         return out, meta_data
         
     return out
-
+    
 def convert_pCum2_to_uCcm2(value):
     """Convert from picocoulombs/um^2 to microcoulombs/cm^2. This is simply multpilying by 100, but it's a calculation I do a lot and always have to look up to make sure I'm correct.
 

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-__all__ = ('add_legend_element')
+__all__ = ('add_legend_element', 'format_legend')
 
 
 def add_legend_element(ax, label, color, **kwargs):
@@ -35,4 +35,22 @@ def add_legend_element(ax, label, color, **kwargs):
     elements.append(Line2D([0], [0], label=label, color = color, **kwargs))
 
     ax.legend(handles = elements)
+    return ax
+
+def format_legend(ax, **kwargs):
+    #get legend:
+    legend = ax.get_legend()
+    if type(legend) == type(None):
+        elements = []
+    else:
+        #get elements (patches and lines)
+        lines = legend.get_lines()
+        patches = legend.get_patches()
+        if len(patches) != 0:
+            raise ValueError('only lines are supported in add_legend_element. Existing legend contains Patches as well.')
+
+        #todo, update to include patches.
+        elements = lines
+
+    ax.legend(handles = elements, **kwargs)
     return ax
