@@ -30,7 +30,7 @@ def _build_df(path, meta_data):
 	else:
 		return meta_data
 
-def generate_meta_data(path, mapper, pointercolumn = 'filename', overwrite = False):
+def generate_meta_data(path, mapper, pass_path = False, pointercolumn = 'filename', overwrite = False):
 	"""
 	Generate meta_data from a path for a given mapper function. 
 
@@ -51,7 +51,10 @@ def generate_meta_data(path, mapper, pointercolumn = 'filename', overwrite = Fal
 
 	for file in os.listdir(path):
 		try:
-			meta_data = pd.DataFrame(mapper(file), index = [0])
+			if pass_path:
+				meta_data = pd.DataFrame(mapper(file, path = path), index = [0])
+			else:
+				meta_data = pd.DataFrame(mapper(file), index = [0])
 		except Exception as e:
 			print('unable to process file: {} \nError: {}'.format(file, e))
 			continue
