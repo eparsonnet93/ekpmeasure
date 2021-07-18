@@ -834,3 +834,81 @@ class Data(dict):
 			return fig, ax
 		else:
 			return ax
+
+	def scatter(self, x=None, y=None, ax=None, color = None, cmap = 'viridis', labelby = None, **kwargs):
+		"""
+		Scatter plot the data. If ax is provided returns ax, otherwise returns fig, ax.
+
+		args:
+			x (key): data dict key for x axis.
+			y (key or array-like): data dict key for y axis
+			ax (matplotlib.axis): axis to plot on 
+			color (str): Color of plot. (Override colormap)
+			cmap (str): Color map. See matplotlib.cm.cmaps_listed for allowed colormaps.
+			labelby (str): Definition key to use for plot legend.
+
+		returns:
+			fig (matplotlib.figure): figure of plot
+			ax (matplotlib.axis): axis of plot. if ax is provided as an argument, only returns ax.
+		"""
+		if ax == None:
+			fig, ax = plt.subplots()
+			return_fig = True
+		else:
+			return_fig = False
+
+		if cmap not in set(cm.cmaps_listed.keys()):
+			raise KeyError('cmap "{}" not supported. Supported colormaps are {}'.format(cmap, cm.cmaps_listed.keys()))	
+
+		if color == None:
+			colors = [cm.cmaps_listed[cmap](x) for x in np.linspace(0, 1, len(self.keys()))]
+		else: 
+			colors = [color for i in range(len(self.keys()))]
+
+		for color, index in zip(colors, self.keys()):
+			if x == None:
+				data_keys_to_plot = list(self[index]['data'].keys())
+			else:
+				xs = self[index]['data'][x]
+				data_keys_to_plot = set(self[index]['data'].keys()) - set({x})
+
+			if labelby == None:
+				label = None
+			else:
+				label = self[index]['definition'][labelby]
+
+			if type(y) == type(None):
+				pass
+			else:
+				data_keys_to_plot = set(np.array([y]).flatten())
+				
+
+			for plotkey in data_keys_to_plot:
+				to_plot = self[index]['data'][plotkey]
+				
+				if len(to_plot.shape) == 1: #1d data
+					if x == None:
+						ax.scatter(to_plot, color = color, label = label, **kwargs)
+					else:
+						ax.scatter(xs, to_plot, color = color, label = label, **kwargs)
+					continue
+					
+				for i in range(to_plot.shape[0]):
+					if i == 0: #label only the first becuase we don't want a big legend with many trials
+						if x == None:
+							ax.scatter(to_plot[i,:], color = color, label = label, **kwargs)
+						else:
+							ax.scatter(xs[i,:], to_plot[i,:], color = color, label = label, **kwargs)
+					else:
+						if x == None:
+							ax.scatter(to_plot[i,:], color = color, **kwargs)
+						else:
+							ax.scatter(xs[i,:], to_plot[i,:], color = color, **kwargs)
+
+		if labelby != None:
+			ax.legend()
+
+		if return_fig:
+			return fig, ax
+		else:
+			return ax
