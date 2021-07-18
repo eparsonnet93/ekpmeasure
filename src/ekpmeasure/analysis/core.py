@@ -499,6 +499,16 @@ class Data(dict):
 		"""
 		return _summarize_data(self.to_dict().copy())
 
+	@property
+	def data_keys(self):
+		"""
+		Return a list of keys corresponding to data. 
+
+		returns:
+			(list): data keys
+		"""
+		return list(self[0]['data'].keys())
+
 	def _get_indices_satisfying_definition_condtion(self, condition):
 		"""need docstring"""
 		for key in condition:
