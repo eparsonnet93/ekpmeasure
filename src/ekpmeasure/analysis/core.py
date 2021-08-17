@@ -69,11 +69,254 @@ def _remove_nans_from_set(set_to_remove_from):
 		
 	return out
 
-class Dataset():
-	"""test"""
+class Dataset(pd.DataFrame):
+	"""Dataset class for analysis. 
 
-	def __init__(self):
-		return
+	Dataset is a subclass of pandas.DataFrame. Used to manipulate meta data while keeping track of location for the real data, which can be retrieved when necessary.
+
+	Args:
+		path (str or dict): a path to where the real data lives. if dict, form is 
+
+				{path: [indices of initializer for this path]} 
+
+		initializer (pandas.DataFrame):  the meta data. one column must contain a pointer (i.e. filename) to where the real data is stored
+		readfileby (function): how to read the data. default of None corresponds to 
+
+				pandas.read_csv()
+
+	"""
+
+	def __init__(self, path, initializer, readfileby=None):
+		super().__init__(initializer)
+		self.attrs['path'] = path
+		self.attrs['index_to_path'] = self._construct_index_to_path(path, initializer)
+		self.pointercolumn = 'filename'
+		if readfileby == None:
+			self.readfileby = lambda file: pd.read_csv(file)
+		else:
+			self.readfileby = readfileby
+
+	@property  
+	def _is_empty(self):
+		if len(self) == 0 and len(self.columns) == 0:
+			return True
+		else:
+			return False
+
+	@property
+	def path(self):
+		"""Return path to data."""
+		return self.attrs['path']
+
+	@property
+	def index_to_path(self):
+		"""Return Dict of index and corresponding path"""
+		return self.attrs['index_to_path']
+
+	@property
+	def summary(self):
+		"""Return a brief summary of the data in your Dataset. 
+
+		Returns:
+			(Dict): a summary of the Dataset"""
+		summary = dict()
+		for column in self.columns:
+			if column == self.pointercolumn:
+				continue
+			summary.update({column: _remove_nans_from_set(set(self[column].values))})
+
+		return summary
+	
+	@construct_Dataset_from_dataframe
+	def query(*args, **kwargs):
+		"""Query the columns of a Dataset with a boolean expression.
+
+		Parameters:
+			expr (str): The query string to evaluate. You can refer to variables in the environment by prefixing them with an ‘@’ character like @a + b. You can refer to column names that are not valid Python variable names by surrounding them in backticks. Thus, column names containing spaces or punctuations (besides underscores) or starting with digits must be surrounded by backticks. (For example, a column named “Area (cm^2) would be referenced as Area (cm^2)). Column names which are Python keywords (like “list”, “for”, “import”, etc) cannot be used. For example, if one of your columns is called a a and you want to sum it with b, your query should be `a a` + b.
+		
+		Returns:
+			(Dataset): the result of the query
+		"""
+		return pd.DataFrame.query(*args, **kwargs)
+
+	@construct_Dataset_from_dataframe
+	def head(*args, **kwargs):
+		return pd.DataFrame.head(*args, **kwargs)
+
+	@construct_Dataset_from_dataframe
+	def filter_on_column(self, column, function, **kwargs_for_function):
+		return self[self[column].apply(function, **kwargs_for_function).values].reset_index(drop = True)
+
+	@construct_Dataset_from_dataframe
+	def select_index(self, index):
+		"""Return dataset with single index specified.
+
+		args:
+			index (int or index): Index to select
+
+		returns:
+			(Dataset): Single row dataset.
+
+
+		"""
+		return pd.DataFrame(self.iloc[index]).T.reset_index(drop = True)
+
+	def remove_index(self, index):
+		"""
+		Remove an index or array-like of indices.
+
+		args:
+			index (index or array-like): index to be removed
+
+		returns:
+			(Dataset): updated Dataset
+
+		"""
+		index = np.array([index]).flatten()
+		
+		#adjust index_to_path and convert to path_to_index
+		path = _convert_ITP_to_path_to_index(self.index_to_path.drop(index = index).reset_index(drop = True))
+		meta_data = self.drop(index = index).reset_index(drop = True)
+		return Dataset(path, meta_data, readfileby=self.readfileby)
+	
+	
+	def remove_nonexistent_files_from_metadata(self):
+		"""
+		Remove references to files that do not exist in path.
+		"""
+		remove_index = []
+		for ind, path in enumerate(self.index_to_path):
+			if _check_file_exists(path, self[self.pointercolumn].iloc[ind]):
+				continue
+			else:
+				remove_index.append(ind)
+		
+		return self.remove_index(remove_index)
+	
+	def _construct_index_to_path(self, path, initializer):
+		"""Construct index_to_path from path provided
+		
+		args:
+			path (str or Dict): a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
+			initializer (pandas.DataFrame: meta data. one column must contain a pointer (filename) to where each the real data is stored
+
+		"""
+		if len(self) == 0:
+			warnings.showwarning("No meta data.", UserWarning, '', 0)
+			return {}
+		if type(path) != dict:
+			assert type(path) == str, "path must be dict or str"
+			#set all indices to the single path provided
+			index_to_path = pd.Series({i:path for i in range(len(initializer))}, dtype = 'object')
+		else:
+			for l, key in enumerate(path):
+				#path is {path:[indices]}, need inverse
+				if l == 0:
+					index_to_path = pd.Series(
+						{
+							i:key for i in path[key]
+						}
+					)
+				else:
+					#do not ignore index
+					index_to_path = pd.concat(
+						(
+							index_to_path,
+							pd.Series({i:key for i in path[key]})
+						)
+					)
+		#check for duplicate indices:
+		if len(index_to_path) != len(set(index_to_path.index)):
+			raise ValueError('Duplicate indices provided in path dict!')
+			
+		return index_to_path
+
+
+	def _group(self, by):
+		"""Group data by 'by' and return a pandas dataframe. makes use of pandas.groupby
+
+		args:
+			by (str, int, label or array-like of): on what to group. 
+		"""
+		groups = self.groupby(by = by).groups
+		for ijk, key in enumerate(groups):
+			original_dataset_indices = groups[key]
+			new_row = None
+			for index in original_dataset_indices:
+				original_row = self.loc[index] #this is a pandas series of a row from the original dataset
+				#columns in this row
+				if type(new_row) == type(None):
+					#import pdb; pdb.set_trace()
+					new_row = {col:dict({index:original_row[col]}) for col in original_row.index}
+				else:
+					for col in new_row:
+						#import pdb; pdb.set_trace()
+						new_row[col].update(dict({index:original_row[col]}))
+
+			for col in new_row:
+				if col != self.pointercolumn:
+					new_row[col] = set(list([new_row[col][x] for x in new_row[col].keys()]))
+
+			if ijk == 0:
+				new_df = pd.DataFrame(
+					{key:[new_row[key]] for key in new_row}
+				)
+			else:
+				new_df = pd.concat(
+					(
+						new_df, 
+						pd.DataFrame(
+							{key:[new_row[key]] for key in new_row}
+						)
+					),
+					ignore_index = True
+				)
+
+		return new_df   
+
+	def add_calculated_column(self, column_name, how):
+		"""Add a calculated column to the Dataset.
+		
+		args:
+			column_name (str): The new column name
+			how (function): f(self) -> column data. A function which operates on self (pandas.DataFrame) and returns new column data.
+			
+		returns:
+			(Dataset): Updated Dataset.
+			
+		examples:
+			Convert 25um and 10um to measured areas. This will only work if no other diameters are present in the Dataset.
+			```
+			>>>def how(dataframe):
+					nominal_diameter_to_measured_area_dict = {'25um':190, '10um':60}
+					return [nominal_diameter_to_measured_area_dict[x] for x in dataframe['diameter'].values]
+			>>>dset.add_calculated_column('measured_area_um', how = how)
+			```
+		
+		
+		"""
+		
+		if not hasattr(how, '__call__'):
+			raise TypeError('how must be a function that operates on a DataFrame')
+			
+		new_column_data = how(pd.DataFrame(self))
+		self.add_column(column_name, new_column_data)
+		
+		return self
+	
+	def add_column(self, column_name, column_data):
+		"""Add a column to a Dataset.
+		
+		args:
+			column_name (str): The new column name.
+			column_data (array-like): The data for the column
+		
+		"""
+		path_to_index = _convert_ITP_to_path_to_index(self.index_to_path)
+		self[column_name] = column_data
+		return Dataset(path_to_index, self)        
+
+	
 
 def _check_definition_contains_or(definition_dict, key, values):
 		"""need docstring"""
