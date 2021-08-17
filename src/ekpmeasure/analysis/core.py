@@ -70,9 +70,8 @@ def _remove_nans_from_set(set_to_remove_from):
 	return out
 
 class Dataset(pd.DataFrame):
-
 	def __init__(self):
-		return		
+		return	
 
 
 def _check_definition_contains_or(definition_dict, key, values):
