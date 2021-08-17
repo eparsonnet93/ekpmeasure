@@ -361,7 +361,36 @@ class Dataset(pd.DataFrame):
 						}
 					)
 
-				
+				else:
+					try: #catch ValueError if the concatenation fails for having different lengths. Allows us to merge data of different lengths
+						for col in columns_set:
+							internal_out['data'].update({col: np.vstack((internal_out['data'][col], tdf[col].values))})
+					except ValueError as e:
+						if 'all the input array dimensions for the concatenation axis must match exactly' in str(e):
+							for col in columns_set:
+								current_stack = internal_out['data'][col]
+								if len(current_stack.shape) != 2: 
+									if len(current_stack.shape) == 1:
+										current_stack = np.reshape(current_stack, (1, len(current_stack)))
+									else:
+										raise ValueError('Current vstack is not 2 dimensional, meaning each row contains at least 2D data. Merging non-matching shapes is not allowed at higher dimensionality.')
+								current_nrows = current_stack.shape[0]
+								current_len = current_stack.shape[1]
+								new_len = max((current_len, len(tdf[col].values)))
+								for index in range(current_nrows):
+									row = current_stack[index, :]
+									n_nans_to_add = new_len - len(row)
+									row = np.concatenate((row, np.array([np.nan for i in range(n_nans_to_add)])))
+									if index == 0:
+										new_stack = row
+									else:
+										new_stack = np.vstack((new_stack, row))
+
+								new_data = tdf[col].values
+								to_stack_on_end = np.concatenate((new_data, np.array([np.nan for i in range(new_len - len(new_data))])))
+								internal_out['data'].update({col:np.vstack((new_stack,to_stack_on_end))})
+						else:
+							raise(e)
 					
 
 			out.update({counter:internal_out})
