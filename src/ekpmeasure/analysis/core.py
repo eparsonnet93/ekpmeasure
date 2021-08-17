@@ -354,12 +354,11 @@ class Dataset(pd.DataFrame):
 					raise ValueError('not all data in this Dataset has the same columns!')
 
 				if k == 0: #build the internal data out
-					internal_out = (
-						{
-							'definition': {col: data_to_retrieve.at[i, col] for col in self.columns},
-							'data': {col: tdf[col].values for col in tdf.columns}
-						}
-					)
+					internal_out = {
+						'definition': {col: data_to_retrieve.at[i, col] for col in self.columns},
+						'data': {col: tdf[col].values for col in tdf.columns}
+					}
+
 
 				else:
 					try: #catch ValueError if the concatenation fails for having different lengths. Allows us to merge data of different lengths
