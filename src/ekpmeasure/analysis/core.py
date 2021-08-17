@@ -70,6 +70,7 @@ def _remove_nans_from_set(set_to_remove_from):
 	return out
 
 class Dataset(pd.DataFrame):
+	"""here is a doc string"""
 	def __init__(self):
 		return	
 
