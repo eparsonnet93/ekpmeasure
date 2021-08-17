@@ -74,20 +74,7 @@ class Dataset(pd.DataFrame):
 
 	def __init__(self, path, initializer, readfileby=None):
 		super().__init__(initializer)
-		self.attrs['path'] = path
-		self.attrs['index_to_path'] = self._construct_index_to_path(path, initializer)
-		self.pointercolumn = 'filename'
-		if readfileby == None:
-			self.readfileby = lambda file: pd.read_csv(file)
-		else:
-			self.readfileby = readfileby
-
-	@property  
-	def _is_empty(self):
-		if len(self) == 0 and len(self.columns) == 0:
-			return True
-		else:
-			return False
+		
 
 
 def _check_definition_contains_or(definition_dict, key, values):
