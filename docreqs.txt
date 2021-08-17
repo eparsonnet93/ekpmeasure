@@ -1,8 +1,7 @@
 mkdocstrings==0.15.0
-mkdocs-autorefs==0.1.1
+mkdocs-autorefs==0.3.0
 pandas
 numpy
 matplotlib
 scipy
 pyvisa
-functools
