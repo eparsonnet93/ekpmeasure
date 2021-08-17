@@ -1,5 +1,5 @@
-mkdocstrings==0.15.0
-mkdocs-autorefs==0.3.0
+mkdocstrings
+mkdocs-autorefs
 pandas
 numpy
 matplotlib
