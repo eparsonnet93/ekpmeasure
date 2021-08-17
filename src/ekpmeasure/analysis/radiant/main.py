@@ -8,7 +8,7 @@ def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_met
 
     args:
         file (str): Filename and path. 
-        measured_value (str): 'Charge' or 'Polarization'
+        measured_value (str): 'Charge' or 'Polarization' or 'Current'. Current is returned in mA
         return_meta_data (bool): Return meta data (dict)
 
     returns:
@@ -18,7 +18,7 @@ def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_met
 
     """
     
-    if measured_value.lower() not in set({'charge', 'polarization'}):
+    if measured_value.lower() not in set({'charge', 'polarization', 'current'}):
         raise ValueError('measured_value {} not supported. must be either "charge" or "polarization"'.format(measured_value))
         
         
@@ -73,14 +73,12 @@ def load_radiant_loop_from_text_file(file, measured_value = 'Charge', return_met
     if len(out) == 0:
         raise ValueError('No data. Is your delimiter correct?')
     out.drop(columns = ['Point'], inplace = True)
-
     
     if measured_value.lower() == 'charge':
         out['MeasuredPolarization'] = out['MeasuredPolarization']*float(meta_data['SampleArea(cm2)'])*1e6 #to convert from uC to pC
         out.rename(columns = {'MeasuredPolarization':'MeasuredCharge(pC)'}, inplace = True)
     elif measured_value.lower() == 'polarization':
         out.rename(columns = {'MeasuredPolarization':'MeasuredPolarization(uC/cm2)'}, inplace = True)
-        
     if return_meta_data:
         return out, meta_data
         

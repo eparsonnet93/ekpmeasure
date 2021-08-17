@@ -362,7 +362,36 @@ class Dataset(pd.DataFrame):
 					)
 
 				else:
-					internal_out['data'].update({col: np.vstack((internal_out['data'][col], tdf[col].values)) for col in columns_set})
+					try: #catch ValueError if the concatenation fails for having different lengths. Allows us to merge data of different lengths
+						for col in columns_set:
+							internal_out['data'].update({col: np.vstack((internal_out['data'][col], tdf[col].values))})
+					except ValueError as e:
+						if 'all the input array dimensions for the concatenation axis must match exactly' in str(e):
+							for col in columns_set:
+								current_stack = internal_out['data'][col]
+								if len(current_stack.shape) != 2: 
+									if len(current_stack.shape) == 1:
+										current_stack = np.reshape(current_stack, (1, len(current_stack)))
+									else:
+										raise ValueError('Current vstack is not 2 dimensional, meaning each row contains at least 2D data. Merging non-matching shapes is not allowed at higher dimensionality.')
+								current_nrows = current_stack.shape[0]
+								current_len = current_stack.shape[1]
+								new_len = max((current_len, len(tdf[col].values)))
+								for index in range(current_nrows):
+									row = current_stack[index, :]
+									n_nans_to_add = new_len - len(row)
+									row = np.concatenate((row, np.array([np.nan for i in range(n_nans_to_add)])))
+									if index == 0:
+										new_stack = row
+									else:
+										new_stack = np.vstack((new_stack, row))
+
+								new_data = tdf[col].values
+								to_stack_on_end = np.concatenate((new_data, np.array([np.nan for i in range(new_len - len(new_data))])))
+								internal_out['data'].update({col:np.vstack((new_stack,to_stack_on_end))})
+						else:
+							raise(e)
+					
 
 			out.update({counter:internal_out})
 
@@ -498,6 +527,16 @@ class Data(dict):
 
 		"""
 		return _summarize_data(self.to_dict().copy())
+
+	@property
+	def data_keys(self):
+		"""
+		Return a list of keys corresponding to data. 
+
+		returns:
+			(list): data keys
+		"""
+		return list(self[0]['data'].keys())
 
 	def _get_indices_satisfying_definition_condtion(self, condition):
 		"""need docstring"""
@@ -826,6 +865,84 @@ class Data(dict):
 							ax.plot(to_plot[i,:], color = color, **kwargs)
 						else:
 							ax.plot(xs[i,:], to_plot[i,:], color = color, **kwargs)
+
+		if labelby != None:
+			ax.legend()
+
+		if return_fig:
+			return fig, ax
+		else:
+			return ax
+
+	def scatter(self, x=None, y=None, ax=None, color = None, cmap = 'viridis', labelby = None, **kwargs):
+		"""
+		Scatter plot the data. If ax is provided returns ax, otherwise returns fig, ax.
+
+		args:
+			x (key): data dict key for x axis.
+			y (key or array-like): data dict key for y axis
+			ax (matplotlib.axis): axis to plot on 
+			color (str): Color of plot. (Override colormap)
+			cmap (str): Color map. See matplotlib.cm.cmaps_listed for allowed colormaps.
+			labelby (str): Definition key to use for plot legend.
+
+		returns:
+			fig (matplotlib.figure): figure of plot
+			ax (matplotlib.axis): axis of plot. if ax is provided as an argument, only returns ax.
+		"""
+		if ax == None:
+			fig, ax = plt.subplots()
+			return_fig = True
+		else:
+			return_fig = False
+
+		if cmap not in set(cm.cmaps_listed.keys()):
+			raise KeyError('cmap "{}" not supported. Supported colormaps are {}'.format(cmap, cm.cmaps_listed.keys()))	
+
+		if color == None:
+			colors = [cm.cmaps_listed[cmap](x) for x in np.linspace(0, 1, len(self.keys()))]
+		else: 
+			colors = [color for i in range(len(self.keys()))]
+
+		for color, index in zip(colors, self.keys()):
+			if x == None:
+				data_keys_to_plot = list(self[index]['data'].keys())
+			else:
+				xs = self[index]['data'][x]
+				data_keys_to_plot = set(self[index]['data'].keys()) - set({x})
+
+			if labelby == None:
+				label = None
+			else:
+				label = self[index]['definition'][labelby]
+
+			if type(y) == type(None):
+				pass
+			else:
+				data_keys_to_plot = set(np.array([y]).flatten())
+				
+
+			for plotkey in data_keys_to_plot:
+				to_plot = self[index]['data'][plotkey]
+				
+				if len(to_plot.shape) == 1: #1d data
+					if x == None:
+						ax.scatter(to_plot, color = color, label = label, **kwargs)
+					else:
+						ax.scatter(xs, to_plot, color = color, label = label, **kwargs)
+					continue
+					
+				for i in range(to_plot.shape[0]):
+					if i == 0: #label only the first becuase we don't want a big legend with many trials
+						if x == None:
+							ax.scatter(to_plot[i,:], color = color, label = label, **kwargs)
+						else:
+							ax.scatter(xs[i,:], to_plot[i,:], color = color, label = label, **kwargs)
+					else:
+						if x == None:
+							ax.scatter(to_plot[i,:], color = color, **kwargs)
+						else:
+							ax.scatter(xs[i,:], to_plot[i,:], color = color, **kwargs)
 
 		if labelby != None:
 			ax.legend()
