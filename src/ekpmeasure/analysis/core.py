@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os 
 import pandas as pd
 import numpy as np
@@ -7,8 +9,6 @@ import warnings
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from functools import wraps
-
-from __future__ import annotations
 
 
 __all__ = ('Dataset', 'Data',)
