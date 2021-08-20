@@ -70,21 +70,8 @@ def _remove_nans_from_set(set_to_remove_from):
 	return out
 
 class Dataset(pd.DataFrame):
-	"""Dataset class for analysis. 
-
-	Dataset is a subclass of pandas.DataFrame. Used to manipulate meta data while keeping track of location for the real data, which can be retrieved when necessary.
-
-	Args:
-		path (str or dict): a path to where the real data lives. if dict, form is 
-
-				{path: [indices of initializer for this path]} 
-
-		initializer (pandas.DataFrame):  the meta data. one column must contain a pointer (i.e. filename) to where the real data is stored
-		readfileby (function): how to read the data. default of None corresponds to 
-
-				pandas.read_csv()
-
-	"""
+	def __init__(self):
+		return
 
 def _check_definition_contains_or(definition_dict, key, values):
 		"""need docstring"""
