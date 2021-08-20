@@ -88,6 +88,10 @@ def _summarize_data(data):
 			except KeyError:
 				out.update({key:_remove_nans_from_set(set({value for value in defn[key]}))})
 	return out
+
+class Dataset():
+	def __init__(self):
+		return
 		
 class iDataIndexer():
 	
