@@ -4,20 +4,12 @@ import os
 import pandas as pd
 import numpy as np
 from pandas import DataFrame
-from typing import TYPE_CHECKING, TypeVar, Generic
 
 import warnings
 
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from functools import wraps
-
-### for Docs ###
-_T = TypeVar("_T")
-if TYPE_CHECKING:
-    class _MyDataFrame(DataFrame[_T]): pass
-else:
-    class _MyDataFrame(Generic[_T], DataFrame): pass
 
 
 __all__ = ('Dataset', 'Data',)
@@ -100,7 +92,7 @@ def _summarize_data(data):
 				out.update({key:_remove_nans_from_set(set({value for value in defn[key]}))})
 	return out
 
-class Dataset(_MyDataFrame):
+class Dataset(DataFrame):
 
 	def __init__(self):
 		super().__init__()
