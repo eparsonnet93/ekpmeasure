@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import numpy as np
 from pandas import DataFrame
+from typing import TYPE_CHECKING
 
 import warnings
 
