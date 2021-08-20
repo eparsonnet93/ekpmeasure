@@ -92,7 +92,7 @@ def _summarize_data(data):
 				out.update({key:_remove_nans_from_set(set({value for value in defn[key]}))})
 	return out
 
-class Dataset():
+class Dataset(DataFrame):
 
 	def __init__(self):
 		super().__init__()
