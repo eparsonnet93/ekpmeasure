@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from functools import wraps
 
+from __future__ import annotations
+
 
 __all__ = ('Dataset', 'Data',)
 
@@ -89,14 +91,12 @@ def _summarize_data(data):
 				out.update({key:_remove_nans_from_set(set({value for value in defn[key]}))})
 	return out
 
-class Dataset(Dataset2):
+class Dataset(pd.DataFrame):
+
 	def __init__(self):
 		super().__init__()
 
-class Dataset2(pd.DataFrame):
-	def __init__(self):
-		return
-		
+
 class iDataIndexer():
 	
 	def __init__(self, initializer):
