@@ -3,12 +3,19 @@ from __future__ import annotations
 import os 
 import pandas as pd
 import numpy as np
+from pandas import DataFrame
 
 import warnings
 
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from functools import wraps
+
+### for Docs ###
+if TYPE_CHECKING:
+    BaseDataFrame = DataFrame[str]  # this is only processed by mypy
+else:
+    BaseDataFrame = DataFrame  # this is not seen by mypy but will be executed at runtime
 
 
 __all__ = ('Dataset', 'Data',)
@@ -91,7 +98,7 @@ def _summarize_data(data):
 				out.update({key:_remove_nans_from_set(set({value for value in defn[key]}))})
 	return out
 
-class Dataset(pd.DataFrame):
+class Dataset(BaseDataFrame):
 
 	def __init__(self):
 		super().__init__()
