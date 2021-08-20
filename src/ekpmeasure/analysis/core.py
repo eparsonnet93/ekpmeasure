@@ -69,7 +69,7 @@ def _remove_nans_from_set(set_to_remove_from):
 		
 	return out
 
-class Dataset(pd.DataFrame):
+class Dataset():
 	"""Dataset class for analysis. 
 
 	Dataset is a subclass of pandas.DataFrame. Used to manipulate meta data while keeping track of location for the real data, which can be retrieved when necessary.
