@@ -13,10 +13,11 @@ from matplotlib import cm
 from functools import wraps
 
 ### for Docs ###
+_T = TypeVar("_T")
 if TYPE_CHECKING:
-    BaseDataFrame = DataFrame[str]  # this is only processed by mypy
+    class _MyDataFrame(DataFrame[_T]): pass
 else:
-    BaseDataFrame = DataFrame  # this is not seen by mypy but will be executed at runtime
+    class _MyDataFrame(Generic[_T], DataFrame): pass
 
 
 __all__ = ('Dataset', 'Data',)
@@ -99,7 +100,7 @@ def _summarize_data(data):
 				out.update({key:_remove_nans_from_set(set({value for value in defn[key]}))})
 	return out
 
-class Dataset(BaseDataFrame):
+class Dataset(_MyDataFrame):
 
 	def __init__(self):
 		super().__init__()
