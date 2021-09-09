@@ -293,10 +293,10 @@ def set_offset(pulse_gen, offset = '0e0', channel = 1, both = False):
         raise TypeError('channel must be type int. Recieved type: {}'.format(type(channel)))
 
     if both:
-        pulse_gen.write('source1:votage:level:IMMediate:offset {}'.format(offset))
-        pulse_gen.write('source2:votage:level:IMMediate:offset {}'.format(offset))
+        pulse_gen.write('source1:voltage:level:IMMediate:offset {}'.format(offset))
+        pulse_gen.write('source2:voltage:level:IMMediate:offset {}'.format(offset))
     else:
-        pulse_gen.write('source{}:votage:level:IMMediate:offset {}'.format(channel, offset))
+        pulse_gen.write('source{}:voltage:level:IMMediate:offset {}'.format(channel, offset))
     return
 
 def set_polarity(pulse_gen, inverted = False, channel = 1, both = False):
