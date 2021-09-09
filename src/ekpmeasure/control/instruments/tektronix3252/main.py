@@ -5,7 +5,7 @@ import numpy as np
 __all__ = ('start_pulse_gen', 'stop_pulse_gen', 'trigger', 'set_function_to_pulse',
     'set_run_mode_to_burst', 'set_ncylces_for_burst_mode', 'set_offset', 'set_low_voltage', 
     'set_high_voltage', 'set_pulsewidth','set_polarity', 'set_frequency', 'set_pulse_delay',
-    'frequency_from_delay',)
+    'frequency_from_delay', 'set_function_to_ramp', 'voltage_suffix_to_scientific_dict')
 
 time_suffix_to_scientific_dict = {'ms':'e-3', 's':'e0', 'us':'e-6', 'ns':'e-9'}
 voltage_suffix_to_scientific_dict = {'mv':'e-3', 'v':'e0'}
@@ -256,6 +256,26 @@ def set_function_to_pulse(pulse_gen, channel = 1, both = False):
         pulse_gen.write('source2:function:shape pulse')
     else:
         pulse_gen.write('source{}:function:shape pulse'.format(channel))
+    return
+
+def set_function_to_ramp(pulse_gen, channel = 1, both = False):
+    """
+    Set the pulse generator to output a ramp (triangle wave)
+
+    args:
+        pulse_gen (pyvisa.resources.gpib.GPIBInstrument): Tektronix AFG 3252
+        channel (int): 1 or 2. Which channel
+        both (bool): Set both channels
+
+    """
+    if type(channel) != int:
+        raise TypeError('channel must be type int. Recieved type: {}'.format(type(channel)))
+
+    if both:
+        pulse_gen.write('source1:function:shape ramp')
+        pulse_gen.write('source2:function:shape ramp')
+    else:
+        pulse_gen.write('source{}:function:shape ramp'.format(channel))
     return
 
 def set_offset(pulse_gen, offset = '0e0', channel = 1, both = False):
