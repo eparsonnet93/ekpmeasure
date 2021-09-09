@@ -278,7 +278,7 @@ def set_function_to_ramp(pulse_gen, channel = 1, both = False):
         pulse_gen.write('source{}:function:shape ramp'.format(channel))
     return
 
-def set_offset(pulse_gen, offset = '0e0', channel = 1, both = False):
+def set_offset(pulse_gen, offset = '0 mV', channel = 1, both = False):
     """
     Set offset. 
 
