@@ -5,7 +5,8 @@ import numpy as np
 __all__ = ('start_pulse_gen', 'stop_pulse_gen', 'trigger', 'set_function_to_pulse',
     'set_run_mode_to_burst', 'set_ncylces_for_burst_mode', 'set_offset', 'set_low_voltage', 
     'set_high_voltage', 'set_pulsewidth','set_polarity', 'set_frequency', 'set_pulse_delay',
-    'frequency_from_delay', 'set_function_to_ramp', 'voltage_suffix_to_scientific_dict')
+    'frequency_from_delay', 'set_function_to_ramp', 'voltage_suffix_to_scientific_dict',
+    'time_suffix_to_scientific_dict')
 
 time_suffix_to_scientific_dict = {'ms':'e-3', 's':'e0', 'us':'e-6', 'ns':'e-9'}
 voltage_suffix_to_scientific_dict = {'mv':'e-3', 'v':'e0'}
