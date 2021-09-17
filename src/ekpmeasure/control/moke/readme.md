@@ -1,6 +1,9 @@
-# Example of how to run MOKE experiment. This was written before I had standardized experimental control code
+# Example of how to run MOKE experiment. 
 
 This operates on a USB_1208HS_4AO daq. 
+
+This was written before I had standardized experimental control code, though hopefully people will still find it useful. I will continue to update this when I have time, including improving documentation. The following should help you get started. 
+
 
 ```python
 #imports
