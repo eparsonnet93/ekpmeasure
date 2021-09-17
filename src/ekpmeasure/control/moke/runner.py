@@ -16,7 +16,7 @@ import os
 
 class daqqer():
     """
-    class defining measurement computing USB-1208HS-4AO daq device
+    Class defining measurement computing USB-1208HS-4AO daq device
     """
     
     def __init__(self,):
