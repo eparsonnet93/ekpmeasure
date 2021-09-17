@@ -38,16 +38,22 @@ class daqqer():
 class run():
     
     def __init__(self, daq):
+        """Class defining a run
+
+        args:
+            daq (daqqer): daqqer class for USB_1208HS_4AO
+
+        """
         self.daq = daq.configure()
         self.board_num = daq.board_num
         self.ul_range = daq.ul_range
         return
     
     def load_waveform(self,wvfrm_vstack):
-        """load a waveform for daq
-        ----
-        
-        wvfrm_stack: numpy.vstack        
+        """Load a waveform stack for the daq. Properly serialize a numpy.vstack of waveforms for usage in the daq.
+
+        args:
+            wvfrm_stack (numpy.vstack): Stack of waveforms 1d waveforms. The number of stacked waveforms should match the number of channels used (out_channel_end - out_channel_in) in .config().      
         """
         wf_1d, nzeros_front, nzeros_back = waveforms_to_1d_array(wvfrm_vstack)
         self.wf_1d = wf_1d
@@ -56,13 +62,14 @@ class run():
         self.input_wfm_df = pd.DataFrame({i:wvfrm_vstack[i,:] for i in range(wvfrm_vstack.shape[0])})
         
     def config(self, out_channel_start,out_channel_end,in_channel_start,in_channel_end,nave,quiet = False):
-        """configure run
-        ----
-        
-        out_channel_start: int, specify which start channel to output waveform
-        out_channel_end: int
-        in_channel_start: int
-        in_channel_end: int
+        """
+        Configure run. All waveforms are serialized into 1d arrays, if you wish to output waveform A on channel 1 and waveform B on channel 2, you should set out_channel_start to 1 and out_channel_end to 2. Then you should load the waveform using .load_waveform() which will properly serialize a waveform stack. 
+
+        args:
+            out_channel_start (int): Specify which start channel to use when outputting the waveform. 
+            out_channel_end (int): Specify which end channel to use when outputting waveform. 
+            in_channel_start (int): Specify which start channel to use when listening and collecting incoming waveform.
+            in_channel_end (int): Specify which end channel to use when listening and collecting incoming waveform.
         """
         self.out_channel_end = out_channel_end
         self.out_channel_start = out_channel_start
@@ -72,7 +79,7 @@ class run():
         self.quiet = quiet
         
     def go(self):
-        """start the run"""
+        """Start the run."""
         to_average = []
         #stop old processes in case
         ul.stop_background(self.board_num, FunctionType.AOFUNCTION)
@@ -112,7 +119,7 @@ class run():
         return
     
     def plot(self,**kwargs):
-        """plot waveform_collected"""
+        """Plot collected waveform (self.waveform_collected)"""
         if not hasattr(self, 'time'):
             raise AttributeError('no data has been collected, suggest self.go()')
             return
@@ -124,7 +131,7 @@ class run():
         return fig, ax
 
     def get_df(self):
-        """return pandas dataframe of waveform_collected"""
+        """Create new self attribute 'data' which is a pandas.DataFrame of the collected data."""
         if not hasattr(self, 'waveform_collected'):
             raise AttributeError('no data has been collected, suggest self.go()')
 
@@ -151,7 +158,7 @@ class run():
         return
 
     def save(self, path, name):
-        """save waveform_collected too file"""
+        """Save waveform to file. Saves self.waveform_collected to file."""
         if not hasattr(self, 'data'):
             self.get_df(self)
             
