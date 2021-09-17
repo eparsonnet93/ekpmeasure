@@ -7,10 +7,17 @@ import ctypes
 
 import numpy as np
 
+__all__ = ('waveforms_to_1d_array', 'waveform_1d_to_array', 'apply_and_listen')
+
 def waveforms_to_1d_array(waveforms):
-    """waveforms must be ndarray of shape (n_waveforms, count)
-    
-    returns 1d serialized waveform and how many zeros are on the front and back
+    """Serialize stack of 1d waveforms. Waveforms must have shape = (n_waveforms, 1d_wvf_len). Pads on front and back with zeros. 
+
+    args:
+        waveforms (numpy.ndarray): Typically a vstack of 1d waveforms, must have shape = (n_waveforms, 1d_wvf_len)
+
+    returns:
+        (serialized, nzeros_front, nzeros_back): serialized waveform, number of zeros in front, number of zeros in back 
+
     """
     out = []
     
@@ -37,7 +44,27 @@ def apply_and_listen(waveform_1d, nzeros_front, nzeros_back,
                      out_channel_start = 0, out_channel_end = 0, 
                      rate = 1000000, board_number = 0, 
                      ul_range = ULRange.BIP10VOLTS, quiet = False):
-    """waveform_1d should be serialized into 1d for all channels
+    """
+    Apply a waveform and listen to collect data. Simultaneous output and collection of data. 
+
+    args:
+        waveform_1d (numpy.array): Serialized waveform
+        nzeros_front (int): Number of zeros padding front of waveform
+        nzeros_back (int): Number of zeros padding back of waveform
+        in_channel_start (int= 0): Specify which start channel to use when listening and collecting incoming waveform.
+        in_channel_end (int= 0): Specify which end channel to use when listening and collecting incoming waveform.
+        out_channel_start (int= 0): Specify which start channel to use when outputting the waveform. 
+        out_channel_end (int = 0): Specify which end channel to use when outputting waveform. 
+        rate (int = 1000000): Rate for daq
+        board_number (int = 0): 
+        ul_range (ULRange): Range for daq
+        quiet (bool): Specify verbosity
+
+    returns:
+        (memhandle_in, memhandle_out, data_array_in, data_array_out, count_in, time)
+
+
+    waveform_1d should be serialized into 1d for all channels
     
     output comes on channels continuous from out_channel_start to out_channel_end
     
@@ -101,7 +128,14 @@ def apply_and_listen(waveform_1d, nzeros_front, nzeros_back,
 
 def waveform_1d_to_array(waveform_1d, nchannels_in = 1):
     """    
-    returns un- serialized waveform 
+    Return a de-serialized waveform stack
+
+    args:
+        waveform_1d (numpy.array): Serialized waveform
+        nchannels_in (int = 1): Specify the number of channels from which the data was collected. 
+
+    returns:
+        (numpy.vstack): Waveform stack. 
     """
     out = np.zeros((int(nchannels_in), int(len(waveform_1d)/nchannels_in)))
     
@@ -109,41 +143,3 @@ def waveform_1d_to_array(waveform_1d, nchannels_in = 1):
         out[int(np.mod(k, nchannels_in)), int(k/nchannels_in)] = pt
     
     return out
-
-def run(wf_1d, nzeros_front, nzeros_back, in_channel_start, in_channel_end, out_channel_start, out_channel_end, nave = 1, board_num = 0):
-	
-	to_average = []
-
-	#stop old processes in case
-	ul.stop_background(0, FunctionType.AOFUNCTION)
-	ul.stop_background(0, FunctionType.AIFUNCTION)
-
-	nchannels_out = out_channel_end - out_channel_start + 1
-
-	for i in range(nave):    
-	    returned = apply_and_listen(wf_1d, nzeros_front, nzeros_back, 
-	                                in_channel_start=in_channel_start, in_channel_end=in_channel_end, 
-	                                out_channel_start=out_channel_start, out_channel_end=out_channel_end)
-	    memhandle_in, memhandle_out, data_array_in, data_array_out, count_in, time = returned
-	    
-	    # Free the buffer and set the data_array to None
-	    ul.win_buf_free(memhandle_out)
-	    data_array_out = None
-
-	    #now that it is done convert from data_array back to numpy data:
-	    out = []
-	    for i in range(0, count_in):
-	        out.append(ul.to_eng_units(board_num, ul_range, data_array_in[i]))
-	    out = np.array(out)
-
-	    #clear memory
-	    ul.win_buf_free(memhandle_in)
-	    data_array_in = None
-	    
-	    #append data
-	    to_average.append(out)
-
-	data = np.array(to_average)
-	means = np.mean(data, axis = 0)
-	out = waveform_1d_to_array(means, nchannels_in=nchannels_out)
-	return out, time

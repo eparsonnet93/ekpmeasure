@@ -1,5 +1,5 @@
 from mcculw import ul
-from control import apply_and_listen, waveforms_to_1d_array, waveform_1d_to_array
+from .control import apply_and_listen, waveforms_to_1d_array, waveform_1d_to_array
 from mcculw.enums import ULRange, InfoType, AnalogInputMode
 from mcculw.enums import ScanOptions, BoardInfo, TriggerEvent, TrigType, FunctionType
 from mcculw.ul import ULError
