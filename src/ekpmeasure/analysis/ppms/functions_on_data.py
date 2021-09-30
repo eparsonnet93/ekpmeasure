@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from scipy.optimize import curve_fit
 
-__all__ = ('window', 'fit_sine', 'center_yaxis', 'shift')
+__all__ = ('window', 'fit_sine', 'center_yaxis', 'shift', 'scale', 'invert', 'average_over_same_angle')
 
 def window(data_dict, key = 'Y', window_size = 5, interval = [0,270]):
 	"""
