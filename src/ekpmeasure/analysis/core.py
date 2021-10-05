@@ -536,7 +536,7 @@ class Data(dict):
 		returns:
 			(list): data keys
 		"""
-		return list(self[0]['data'].keys())
+		return list(self[list(self.keys())[0]]['data'].keys())
 
 	def _get_indices_satisfying_definition_condtion(self, condition):
 		"""need docstring"""
