@@ -109,20 +109,20 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 	Run a preset and then 2 pulse measurement using the BN765 and tektronix scope. Allowed scopes are 6604 and 620B. 6604 is preferred for fast measurements.
 
 	args:
-	pg (pyvisa.resources.gpib.GPIBInstrument): Pulse generator berkeley nucleonics 765
-	scope (pyvisa.resources.gpib.GPIBInstrument): tektronix scope (either 6604 or 620B)
-	identifier (str): some indentifier for the capacitor or sample you are studying
-	pulsewidth (str): which pulsewidth to use on 2 pulse. example '500ns'
-	delay (str): Example '10ns' delay between the two pulses (delay after preset is set at approximately 1s)
-	high_voltage (str): Example '100mV' allowed units are V and mv. This parameter sets the amplitude of the two pulse.
-	scopetype (str): Either '6604' or '620B' the scope you are using
-	area ('fromdiameter' or float): Area of sample, if 'fromdiameter' will use pi*R^2 from diameter
-	diameter ('fromidentifier' or float): Diameter of capacitor. If 'fromidentifier' will split identifier by 'um' and retrieve diameter that way. Example: 4um1 will give 4 as diameter. Arbitrary identifier will not work.
-	preset_pulsewidth (str): Example '100ns' sets the pulsewidth of the preset
-	preset_voltage (str): Example '10mv' sets the amplitude of the preset
+		pg (pyvisa.resources.gpib.GPIBInstrument): Pulse generator berkeley nucleonics 765
+		scope (pyvisa.resources.gpib.GPIBInstrument): Tektronix scope (either 6604 or 620B)
+		identifier (str): some indentifier for the capacitor or sample you are studying
+		pulsewidth (str): which pulsewidth to use on 2 pulse. example ``'500ns'``
+		delay (str): Example ``'10ns'`` delay between the two pulses (delay after preset is set at approximately 1s)
+		high_voltage (str): Example ``'100mV'`` allowed units are V and mv. This parameter sets the amplitude of the two pulse.
+		scopetype (str): Either ``'6604'`` or ``'620B'`` the scope you are using
+		area ('fromdiameter' or float): Area of sample, if 'fromdiameter' will use ``pi*R^2`` from diameter
+		diameter ('fromidentifier' or float): Diameter of capacitor. If 'fromidentifier' will split identifier by ``'um'`` and retrieve diameter that way. Example: 4um1 will give 4 as diameter. Arbitrary identifier will not work.
+		preset_pulsewidth (str): Example ``'100ns'`` sets the pulsewidth of the preset
+		preset_voltage (str): Example ``'10mv'`` sets the amplitude of the preset
 
 	returns:
-	out (tuple): save_base_name, meta_data, data_df
+		out (tuple): save_base_name, meta_data, data_df
 	"""
 	if scopetype != '6604' and scopetype != '620B':
 		raise ValueError('scopetype must be "6604" or "620B". Recieved {}'.format(scopetype))
@@ -256,7 +256,18 @@ def preset_run_function(pg, scope, identifier, pulsewidth, delay, high_voltage, 
 
 
 class FE(core.experiment):
-	"""need docstring"""
+	"""Experiment class for running pulsed Ferroelectric switching experiments like those shown `here <https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.125.067601>`_ 
+
+	args:
+		pg (pyvisa.resources.gpib.GPIBInstrument): Berkeley Nucleonics 765
+		scope (pyvisa.resources.gpib.GPIBInstrument): Tektronix TDS620B or Tektronix TDS6604
+		scopetype (str): Specify scope. Only Tektronix TDS620B (``'620B'``) or Tektronix TDS6604 (``'6604'``) are supported
+		run_function (function): Run function.
+
+	returns:
+		(FE): Experiment
+
+	"""
 
 	def __init__(self, pg, scope, scopetype = '6604',run_function = preset_run_function):
 		super().__init__()
@@ -270,7 +281,7 @@ class FE(core.experiment):
 		return
 
 	def checks(self, params):
-		"""to be checked by """
+		"""Checks during initialization."""
 		if self.pg != params['pg']:
 			try:
 				raise ValueError('pg provided in initialization ({}) does not match that provided as an argument for run_function ({})'.format(self.pg, params['pg']))
@@ -297,7 +308,7 @@ class FE(core.experiment):
 				raise ValueError('check scopetype. If you think this is done correctly, please specify explicitly scopetype in params.')
 		
 	def terminate(self):
-		"""to perform at end"""
+		"""Termination."""
 		stop(self.pg)
 		return
 

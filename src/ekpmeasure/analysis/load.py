@@ -9,7 +9,10 @@ from .core import Dataset
 __all__ = ('load_Dataset', 'generate_meta_data')
 
 def load_Dataset(path, meta_data = None):
-	"""Load a dataset from path. Path must contain pickle file 'meta_data'. 
+	"""
+	.. _load_Dataset:
+
+	Load a dataset from path. Path must contain pickle file 'meta_data'. 
 
 	args:
 		path (str): Path to data
