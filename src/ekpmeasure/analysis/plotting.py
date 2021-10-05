@@ -6,7 +6,7 @@ __all__ = ('add_legend_element', 'format_legend')
 
 def add_legend_element(ax, label, color, **kwargs):
     """
-    Add element to legend for matplotlib.axis. For **kwargs see matplotlib.lines.line2D (https://matplotlib.org/stable/api/_as_gen/matplotlib.lines.Line2D.html)
+    Add element to legend for matplotlib.axis. For ``**kwargs`` see `matplotlib.lines.line2D <https://matplotlib.org/stable/api/_as_gen/matplotlib.lines.Line2D.html>`_
 
     args:
         ax (matplotlib.axis): Axis to add legend element.
