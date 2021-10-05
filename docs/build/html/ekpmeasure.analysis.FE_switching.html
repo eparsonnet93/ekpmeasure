@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ekpmeasure.analysis.FE_switching package &mdash; ekpmeasure v0.0.10 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ekpmeasure.analysis.asylum package" href="ekpmeasure.analysis.asylum.html" />
+    <link rel="prev" title="ekpmeasure.analysis package" href="ekpmeasure.analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> ekpmeasure
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="start.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Source Code</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ekpmeasure.html">ekpmeasure package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="ekpmeasure.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="ekpmeasure.analysis.html">ekpmeasure.analysis package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ekpmeasure.control.html">ekpmeasure.control package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ekpmeasure.html#module-ekpmeasure">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ekpmeasure</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">Source Code</a> &raquo;</li>
+          <li><a href="ekpmeasure.html">ekpmeasure package</a> &raquo;</li>
+          <li><a href="ekpmeasure.analysis.html">ekpmeasure.analysis package</a> &raquo;</li>
+      <li>ekpmeasure.analysis.FE_switching package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ekpmeasure.analysis.FE_switching.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ekpmeasure-analysis-fe-switching-package">
+<h1>ekpmeasure.analysis.FE_switching package<a class="headerlink" href="#ekpmeasure-analysis-fe-switching-package" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-ekpmeasure.analysis.FE_switching.functions_on_data">
+<span id="ekpmeasure-analysis-fe-switching-functions-on-data-module"></span><h2>ekpmeasure.analysis.FE_switching.functions_on_data module<a class="headerlink" href="#module-ekpmeasure.analysis.FE_switching.functions_on_data" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ekpmeasure.analysis.FE_switching.functions_on_data.get_dps">
+<code class="sig-prename descclassname"><span class="pre">ekpmeasure.analysis.FE_switching.functions_on_data.</span></code><code class="sig-name descname"><span class="pre">get_dps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ekpmeasure.analysis.FE_switching.functions_on_data.get_dps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the difference between data keys ‘p1’ and ‘p2’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_dict</strong> (<em>dict</em>) – dict with keys ‘time’, ‘p1’, ‘p2’</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dict with keys ‘dp’ and ‘time’. Key ‘dp’ corresponds to ‘p1’ - ‘p2’ for each timestep.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ekpmeasure.analysis.FE_switching.functions_on_data.get_pol_trans_from_dps">
+<code class="sig-prename descclassname"><span class="pre">ekpmeasure.analysis.FE_switching.functions_on_data.</span></code><code class="sig-name descname"><span class="pre">get_pol_trans_from_dps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'from</span> <span class="pre">diameter'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ns'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ekpmeasure.analysis.FE_switching.functions_on_data.get_pol_trans_from_dps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get polarization transient. Data must contain keys ‘time’ and ‘dp’. Area is supplied in um^2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dict</strong> (<em>dict</em>) – dict with keys ‘time’, ‘dp’.</p></li>
+<li><p><strong>area</strong> (<em>float</em>) – Area in square microns. If ‘from diameter’, area = pi*(diameter/2)^2</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – Diameter in microns. If None, must supply area.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dict with keys ‘polarization’ and ‘time’. ‘polarization’ is</dt><dd><p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">scipy.integrate.cumtrapz(dp,</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">'time')</span>
+<span class="pre">`</span></code></p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ekpmeasure.analysis.FE_switching.functions_on_data.get_polarization_transients_from_dps">
+<code class="sig-prename descclassname"><span class="pre">ekpmeasure.analysis.FE_switching.functions_on_data.</span></code><code class="sig-name descname"><span class="pre">get_polarization_transients_from_dps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ekpmeasure.analysis.FE_switching.functions_on_data.get_polarization_transients_from_dps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate dps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_dict</strong> (<em>dict</em>) – dict with keys ‘time’, ‘dp’</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dict with keys ‘intdp’ and ‘time’. ‘intdp’ is</dt><dd><p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">scipy.integrate.cumtrapz(dp,</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">'time')</span>
+<span class="pre">`</span></code></p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ekpmeasure.analysis.FE_switching.functions_on_data.get_saturation_and_switching_time">
+<code class="sig-prename descclassname"><span class="pre">ekpmeasure.analysis.FE_switching.functions_on_data.</span></code><code class="sig-name descname"><span class="pre">get_saturation_and_switching_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'int'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points_for_saturation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottom_percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ekpmeasure.analysis.FE_switching.functions_on_data.get_saturation_and_switching_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the saturation and switching time for data. Calculates saturation value as average of n points (n_points_for_saturation) at the end of the data. Calculates switching time as time between bottom_percent and top_percent, both calcuated as percentages of saturation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dict</strong> (<em>dict</em>) – Data</p></li>
+<li><p><strong>n_points_for_saturation</strong> (<em>int</em>) – The number of points to use at the end of the data to calculate the saturation value (mean).</p></li>
+<li><p><strong>top_percent</strong> (<em>int</em><em> or </em><em>float</em>) – The percent of saturation to use as switching completion.</p></li>
+<li><p><strong>bottom_percent</strong> (<em>int</em><em> or </em><em>float</em>) – The percent of saturaiton to use as switching start commencement.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dict with keys ‘saturation’ and ‘switching_time’</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ekpmeasure.analysis.FE_switching.functions_on_data.integrate">
+<code class="sig-prename descclassname"><span class="pre">ekpmeasure.analysis.FE_switching.functions_on_data.</span></code><code class="sig-name descname"><span class="pre">integrate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dp'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ekpmeasure.analysis.FE_switching.functions_on_data.integrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate dps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_dict</strong> (<em>dict</em>) – Data. Data must contain key ‘time’.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>dict with keys ‘int’ and ‘time’. ‘int’ is</dt><dd><p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">scipy.integrate.cumtrapz(key,</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">'time')</span>
+<span class="pre">`</span></code></p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ekpmeasure.analysis.FE_switching.functions_on_data.invert">
+<code class="sig-prename descclassname"><span class="pre">ekpmeasure.analysis.FE_switching.functions_on_data.</span></code><code class="sig-name descname"><span class="pre">invert</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ekpmeasure.analysis.FE_switching.functions_on_data.invert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invert data. If keys set to ‘all’, all keys will be inverted except ‘time’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>keys</strong> (<em>str</em><em> or </em><em>array-like</em>) – Which keys to invert. If ‘all’, all will invert except ‘time’.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Inverted data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ekpmeasure.analysis.FE_switching.functions_on_data.reset_time">
+<code class="sig-prename descclassname"><span class="pre">ekpmeasure.analysis.FE_switching.functions_on_data.</span></code><code class="sig-name descname"><span class="pre">reset_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'p1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ekpmeasure.analysis.FE_switching.functions_on_data.reset_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the start of the data (defined as first time data[key]&gt;cutoff) and resets it to zero time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dict</strong> (<em>dict</em>) – data dict.</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – key of data_dict to find where first above cutoff</p></li>
+<li><p><strong>cutoff</strong> (<em>float</em>) – A voltage value above which to call the start of the pulse</p></li>
+<li><p><strong>grace</strong> (<em>int</em>) – How many datapoints to include before new time = 0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dict with keys ‘time’, ‘p1’, and ‘p2’</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ekpmeasure.analysis.FE_switching.functions_on_data.smooth">
+<code class="sig-prename descclassname"><span class="pre">ekpmeasure.analysis.FE_switching.functions_on_data.</span></code><code class="sig-name descname"><span class="pre">smooth</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Wn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ekpmeasure.analysis.FE_switching.functions_on_data.smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply butterworth filter (scipy.signal.butter) to specified key of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dict</strong> (<em>dict</em>) – Data</p></li>
+<li><p><strong>key</strong> (<em>str</em><em> or </em><em>key</em>) – Specify the key to apply filter to</p></li>
+<li><p><strong>N</strong> (<em>int</em>) – The order of the filter</p></li>
+<li><p><strong>Wn</strong> (<em>array-like</em>) – The critical frequency or frequencies. For lowpass and highpass filters, Wn is a scalar; for bandpass and bandstop filters, Wn is a length-2 sequence. For a Butterworth filter, this is the point at which the gain drops to 1/sqrt(2) that of the passband (the “-3 dB point”). For digital filters, Wn are in the same units as fs. By default, fs is 2 half-cycles/sample, so these are normalized from 0 to 1, where 1 is the Nyquist frequency. (Wn is thus in half-cycles / sample.) For analog filters, Wn is an angular frequency (e.g. rad/s).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dict with same as original keys.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ekpmeasure.analysis.FE_switching.functions_on_data.subtract_median_of_lastN">
+<code class="sig-prename descclassname"><span class="pre">ekpmeasure.analysis.FE_switching.functions_on_data.</span></code><code class="sig-name descname"><span class="pre">subtract_median_of_lastN</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ekpmeasure.analysis.FE_switching.functions_on_data.subtract_median_of_lastN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract the median of the last N samples. This may be used to account for constant offsets in the noise floor, for example.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dict</strong> (<em>dict</em>) – Data</p></li>
+<li><p><strong>key</strong> (<em>str</em><em> or </em><em>key</em>) – Which key to use.</p></li>
+<li><p><strong>N</strong> (<em>int</em>) – The number of points to subtract median of.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dict with same as original keys.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-ekpmeasure.analysis.FE_switching.main">
+<span id="ekpmeasure-analysis-fe-switching-main-module"></span><h2>ekpmeasure.analysis.FE_switching.main module<a class="headerlink" href="#module-ekpmeasure.analysis.FE_switching.main" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ekpmeasure.analysis.FE_switching.main.common_name_mapper">
+<code class="sig-prename descclassname"><span class="pre">ekpmeasure.analysis.FE_switching.main.</span></code><code class="sig-name descname"><span class="pre">common_name_mapper</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ekpmeasure.analysis.FE_switching.main.common_name_mapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Common name mapper used in our experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fname</strong> (<em>str</em>) – Filename</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Out</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(dict)</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="go">&gt;&gt;&gt;fname = &#39;5um3_50e-9_1e-9_0x5V_500mv_10000ns_1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">common_name_mapper</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+<span class="go">&gt; {</span>
+<span class="go">        &#39;identifier&#39;:5um3,</span>
+<span class="go">        &#39;pulsewidth_ns&#39;:50,</span>
+<span class="go">        &#39;delay_ns&#39;:1,</span>
+<span class="go">        &#39;high_voltage_v&#39;:0.5,</span>
+<span class="go">        &#39;preset_voltage_v&#39;:0.5,</span>
+<span class="go">        &#39;preset_pulsewidth_ns&#39;:10000,</span>
+<span class="go">        &#39;filename&#39;:&#39;5um3_50e-9_1e-9_0x5V_500mv_10000ns_1&#39;,</span>
+<span class="go">        &#39;trial&#39;:1</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-ekpmeasure.analysis.FE_switching">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ekpmeasure.analysis.FE_switching" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ekpmeasure.analysis.html" class="btn btn-neutral float-left" title="ekpmeasure.analysis package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ekpmeasure.analysis.asylum.html" class="btn btn-neutral float-right" title="ekpmeasure.analysis.asylum package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Eric Parsonnet.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview &mdash; ekpmeasure v0.0.10 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Source Code" href="modules.html" />
+    <link rel="prev" title="Welcome to ekpmeasure!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> ekpmeasure
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#analysis">Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dataset-class">Dataset Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-dataset">Load Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data">Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#control">Control</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#n-param-scan">n_param_scan</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Source Code</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ekpmeasure</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Overview</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/start.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<section id="analysis">
+<h2>Analysis<a class="headerlink" href="#analysis" title="Permalink to this headline">¶</a></h2>
+<section id="dataset-class">
+<h3>Dataset Class<a class="headerlink" href="#dataset-class" title="Permalink to this headline">¶</a></h3>
+<p>The Dataset class can be used broadly as a means to manipulate meta data and quickly retrieve true data. It is datatype agnostic and allows for merging of datasets from different locations on disk.</p>
+<p>Often I find that I have large amounts of data in stored in different locations and it is difficult to group data and or compare across a set of experimental parameters by leveraging data from multiple locations. Often this ends up being a manual and arduous process. Take for example the following tree of data:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">data</span>
+<span class="go">│</span>
+<span class="go">└───folder1</span>
+<span class="go">│       │       10V_100ns_1mv.csv</span>
+<span class="go">│       │       10V_10ns_1mv.csv</span>
+<span class="go">│</span>
+<span class="go">└───folder2</span>
+<span class="go">        │       5V_100ns_1mv.csv</span>
+<span class="go">        │       10V_100ns_1mv.csv</span>
+<span class="go">        │       10V_50ns_2mv.csv</span>
+</pre></div>
+</div>
+<p>Further, for example purposes lets assume each file has the identical data namely each csv contains a single column of data:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">raw_data</span>
+<span class="go">1</span>
+<span class="go">2</span>
+<span class="go">3</span>
+</pre></div>
+</div>
+<p>Each of the files (e.g. 5V_100ns_1mv.csv) is a data file, and the file name encodes the meta data. In this case the meta_data consists of three parameters (voltage, time, voltage). If I want to average all trials in data that correspond to (10V, 100ns, 1mv) I will need to retrieve data from folder1 and folder2  and then average the two together. If I wanted to compare all data that corresponds to 10V as the first parameter and 1mv as the second parameter with the second parameter  being the independent variable I would need to retrieve</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">folder1/10V_100ns_1mv.csv</span>
+<span class="go">folder2/10V_100ns_1mv.csv</span>
+<span class="go">folder1/10V_10ns_1mv.csv</span>
+</pre></div>
+</div>
+<p>Dataset aims to simplify this process. Dataset is a subclass of <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html">pandas.DataFrame</a>. Dataset takes as parameters a path (where the true data is stored) and an initializer (meta_data) for example in the example above we might define two Datasets (one for each of folder1 and folder2) as</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;./data/folder1/&#39;</span>
+<span class="n">meta_data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span>
+                <span class="s1">&#39;param1&#39;</span><span class="p">:[</span><span class="s1">&#39;10V&#39;</span><span class="p">,</span> <span class="s1">&#39;10V&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;param2&#39;</span><span class="p">:[</span><span class="s1">&#39;100ns&#39;</span><span class="p">,</span> <span class="s1">&#39;10ns&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;param3&#39;</span><span class="p">:[</span><span class="s1">&#39;1mv&#39;</span><span class="p">,</span> <span class="s1">&#39;1mv&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;filename&#39;</span><span class="p">:[</span><span class="s1">&#39;10V_100ns_1mv.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;10V_10ns_1mv.csv&#39;</span><span class="p">],</span>
+        <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">dset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">meta_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>to assist in generating such meta data you may wish to use <a class="reference internal" href="ekpmeasure.analysis.html#ekpmeasure.analysis.load.load_Dataset" title="ekpmeasure.analysis.load.load_Dataset"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_Dataset</span></code></a> method which searches a folder for you and allows you to automatically create meta data. Once a Dataset is created, you can retrieve the data easily:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dset</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This returns a <a class="reference internal" href="ekpmeasure.analysis.html#ekpmeasure.analysis.core.Data" title="ekpmeasure.analysis.core.Data"><code class="xref py py-func docutils literal notranslate"><span class="pre">Data</span></code></a> class. As a brief example of how to use the Dataset class, consider one the problems stated above of wanting to compare all data that corresponds to 10V as the first parameter and 1mv as the second parameter with the second parameter. This is done in a straightforward way using Datasets.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ekpmeasure</span> <span class="kn">import</span> <span class="n">analysis</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path1</span> <span class="o">=</span> <span class="s1">&#39;./data/folder1/&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path2</span> <span class="o">=</span> <span class="s1">&#39;./data/folder2/&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dset1</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">load_Dataset</span><span class="p">(</span><span class="n">path1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dset2</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">load_Dataset</span><span class="p">(</span><span class="n">path2</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dset</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">merge</span><span class="p">((</span><span class="n">dset1</span><span class="p">,</span> <span class="n">dset2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dset</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;param1 == &#39;10V&#39; and param3 == &#39;1mv&#39;&quot;</span><span class="p">)</span>
+<span class="go">&gt;</span>
+<span class="go">  param1 param2 param3           filename</span>
+<span class="go">0    10V  100ns    1mv  10V_100ns_1mv.csv</span>
+<span class="go">1    10V   10ns    1mv   10V_10ns_1mv.csv</span>
+<span class="go">2    10V  100ns    1mv  10V_100ns_1mv.csv</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dset</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;param1 == &#39;10V&#39; and param3 == &#39;1mv&#39;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+<span class="go">&gt;</span>
+<span class="go">{</span>
+<span class="go">        0: {&#39;definition&#39;: {&#39;param1&#39;: {&#39;10V&#39;}, &#39;param2&#39;: {&#39;100ns&#39;}, &#39;param3&#39;: {&#39;1mv&#39;}},</span>
+<span class="go">                &#39;data&#39;: {&#39;raw_data&#39;: array([[1, 2, 3],</span>
+<span class="go">              [1, 2, 3]], dtype=int64)}},</span>
+<span class="go">        1: {&#39;definition&#39;: {&#39;param1&#39;: {&#39;10V&#39;}, &#39;param2&#39;: {&#39;10ns&#39;}, &#39;param3&#39;: {&#39;1mv&#39;}},</span>
+<span class="go">                &#39;data&#39;: {&#39;raw_data&#39;: array([1, 2, 3], dtype=int64)}}</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+</section>
+<section id="load-dataset">
+<h3>Load Dataset<a class="headerlink" href="#load-dataset" title="Permalink to this headline">¶</a></h3>
+<p>One can load a Dataset, using <a class="reference internal" href="ekpmeasure.analysis.html#ekpmeasure.analysis.load.load_Dataset" title="ekpmeasure.analysis.load.load_Dataset"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_Dataset</span></code></a>,  from a path. This method earches a folder for a pickle file (.pkl) of name ‘meta_data’ or will inform the user that none exists.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">load_Dataset</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If no meta_data exists, one can use the generate_meta_data method. mapper is a function of a single filename that returns a dict of parameters for meta_data. For example, in the example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">mapper</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+    <span class="n">spl</span> <span class="o">=</span> <span class="n">fname</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;param1&#39;</span><span class="p">:</span><span class="n">spl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s1">&#39;param2&#39;</span><span class="p">:</span><span class="n">spl</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="s1">&#39;param3&#39;</span><span class="p">:</span><span class="n">spl</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="s1">&#39;filename&#39;</span><span class="p">:</span><span class="n">fname</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">mapper</span><span class="p">(</span><span class="s1">&#39;10V_100ns_1mv.csv&#39;</span><span class="p">)</span>
+<span class="o">&gt;</span>
+<span class="p">{</span>
+        <span class="s1">&#39;param1&#39;</span><span class="p">:</span><span class="s1">&#39;10V&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;param2&#39;</span><span class="p">:</span><span class="s1">&#39;100ns&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;param3&#39;</span><span class="p">:</span><span class="s1">&#39;1mv&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;filename&#39;</span><span class="p">:</span><span class="s1">&#39;10V_100ns_1mv.csv&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>then one might use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">analysis</span><span class="o">.</span><span class="n">generate_meta_data</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mapper</span><span class="p">)</span>
+<span class="n">dset</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">load_Dataset</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference internal" href="ekpmeasure.analysis.html#ekpmeasure.analysis.core.Data" title="ekpmeasure.analysis.core.Data"><code class="xref py py-func docutils literal notranslate"><span class="pre">Data</span></code></a></p>
+<p>Data is a subclass of Dict. The Data class holds real data. It allows for operations to be done on all data simultaneously by</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">some_data</span> <span class="o">=</span> <span class="n">dset</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">groupby</span><span class="o">=</span><span class="s1">&#39;param1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">some_data</span>
+<span class="go">&gt;</span>
+<span class="go">{</span>
+<span class="go">        0: {&#39;definition&#39;: {&#39;param1&#39;: {&#39;10V&#39;},</span>
+<span class="go">                &#39;param2&#39;: {&#39;100ns&#39;, &#39;10ns&#39;, &#39;50ns&#39;},</span>
+<span class="go">                &#39;param3&#39;: {&#39;1mv&#39;, &#39;2mv&#39;}},</span>
+<span class="go">                &#39;data&#39;: {&#39;raw_data&#39;: array([[1, 2, 3],</span>
+<span class="go">                  [1, 2, 3],</span>
+<span class="go">                  [1, 2, 3],</span>
+<span class="go">                  [1, 2, 3]], dtype=int64)}},</span>
+<span class="go">        1: {&#39;definition&#39;: {&#39;param1&#39;: {&#39;5V&#39;}, &#39;param2&#39;: {&#39;100ns&#39;}, &#39;param3&#39;: {&#39;1mv&#39;}},</span>
+<span class="go">                &#39;data&#39;: {&#39;raw_data&#39;: array([1, 2, 3], dtype=int64)}}</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#some function will square the data</span>
+
+<span class="k">def</span> <span class="nf">some_function</span><span class="p">(</span><span class="n">data_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;a function which operates on the data dict and returns a data dict&quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span><span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">some_data</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">some_function</span><span class="p">)</span>
+<span class="go">&gt;</span>
+<span class="go">{</span>
+<span class="go">        0: {&#39;definition&#39;: {&#39;param1&#39;: {&#39;10V&#39;},</span>
+<span class="go">                &#39;param2&#39;: {&#39;100ns&#39;, &#39;10ns&#39;, &#39;50ns&#39;},</span>
+<span class="go">                &#39;param3&#39;: {&#39;1mv&#39;, &#39;2mv&#39;}},</span>
+<span class="go">                &#39;data&#39;: {&#39;raw_data&#39;: array([[1, 4, 9],</span>
+<span class="go">          [1, 4, 9],</span>
+<span class="go">          [1, 4, 9],</span>
+<span class="go">          [1, 4, 9]], dtype=int64)}},</span>
+<span class="go">        1: {&#39;definition&#39;: {&#39;param1&#39;: {&#39;5V&#39;}, &#39;param2&#39;: {&#39;100ns&#39;}, &#39;param3&#39;: {&#39;1mv&#39;}},</span>
+<span class="go">                &#39;data&#39;: {&#39;raw_data&#39;: array([1, 4, 9], dtype=int64)}}}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="control">
+<h2>Control<a class="headerlink" href="#control" title="Permalink to this headline">¶</a></h2>
+<p>Control is a repository of instrument control code in addition to experimental control (often making use of one or more instruments). Experimental data obtained by using the <a class="reference internal" href="ekpmeasure.control.html#ekpmeasure.control.core.experiment" title="ekpmeasure.control.core.experiment"><code class="xref py py-func docutils literal notranslate"><span class="pre">experiment</span></code></a> class will automatically generate meta_data for usage in analysis.</p>
+<p>experiment
+The experiment base class serves to manage scans over desired parameters via the <a class="reference internal" href="ekpmeasure.control.html#ekpmeasure.control.core.experiment.n_param_scan" title="ekpmeasure.control.core.experiment.n_param_scan"><code class="xref py py-func docutils literal notranslate"><span class="pre">n_param_scan</span></code></a> method and properly save + generate meta_data for usage in <a class="reference internal" href="ekpmeasure.analysis.html#module-ekpmeasure.analysis" title="ekpmeasure.analysis"><code class="xref py py-func docutils literal notranslate"><span class="pre">analysis</span></code></a></p>
+<section id="n-param-scan">
+<h3>n_param_scan<a class="headerlink" href="#n-param-scan" title="Permalink to this headline">¶</a></h3>
+<p>n_param_scan can be used to scan over a set of parameters in an experiment</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#set up the experiment class</span>
+<span class="c1">#magnon.Magnon is a subclass of experiment</span>
+<span class="n">exp</span> <span class="o">=</span> <span class="n">magnon</span><span class="o">.</span><span class="n">Magnon</span><span class="p">(</span><span class="n">lockin</span><span class="o">=</span><span class="n">lockin</span><span class="p">,</span>
+        <span class="n">run_function</span><span class="o">=</span><span class="n">magnon</span><span class="o">.</span><span class="n">magnon_run_function</span>
+<span class="p">)</span>
+
+<span class="n">exp</span><span class="o">.</span><span class="n">config_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>now you can configure your n_param_scan</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#parameters to scan over</span>
+<span class="n">kw_scan_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;frequency&#39;</span><span class="p">:[</span><span class="s1">&#39;147hz&#39;</span><span class="p">,],</span>
+    <span class="s1">&#39;amplitude&#39;</span><span class="p">:[</span><span class="s1">&#39;200mv&#39;</span><span class="p">,</span> <span class="s1">&#39;500mv&#39;</span><span class="p">,</span> <span class="s1">&#39;1000mv&#39;</span><span class="p">,</span> <span class="s1">&#39;1500mv&#39;</span><span class="p">,</span><span class="s1">&#39;2000mv&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;harmonic&#39;</span><span class="p">:[</span><span class="mi">1</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="c1">#fixed params for each scan</span>
+<span class="n">fixed_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;lockin&#39;</span><span class="p">:</span><span class="n">lockin</span><span class="p">,</span>
+    <span class="s1">&#39;identifier&#39;</span><span class="p">:</span><span class="s1">&#39;D19&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;angle&#39;</span><span class="p">:</span><span class="mi">40</span><span class="p">,</span>
+    <span class="s1">&#39;channel_width&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;channel_length&#39;</span><span class="p">:</span><span class="mi">20</span><span class="p">,</span>
+    <span class="s1">&#39;bar_width&#39;</span><span class="p">:</span><span class="mf">1.5</span><span class="p">,</span>
+    <span class="s1">&#39;nave&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span>
+    <span class="s1">&#39;delay&#39;</span><span class="p">:</span><span class="s1">&#39;default&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;time_constant&#39;</span><span class="p">:</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;sensitivity&#39;</span><span class="p">:</span><span class="s1">&#39;10uv/pa&#39;</span>
+<span class="p">}</span>
+
+<span class="c1">#order of keys for scan params</span>
+<span class="n">order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;harmonic&#39;</span><span class="p">,</span> <span class="s1">&#39;frequency&#39;</span><span class="p">,</span> <span class="s1">&#39;amplitude&#39;</span><span class="p">]</span>
+
+<span class="n">exp</span><span class="o">.</span><span class="n">n_param_scan</span><span class="p">(</span><span class="n">kw_scan_params</span><span class="p">,</span> <span class="n">fixed_params</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to ekpmeasure!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral float-right" title="Source Code" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Eric Parsonnet.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
