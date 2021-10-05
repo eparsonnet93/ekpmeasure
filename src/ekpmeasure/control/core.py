@@ -107,7 +107,7 @@ class experiment():
 
 
 		Examples:
-			```
+			
 			>>> exp = experiment()
 			>>>	kw_scan_params = {
 					'frequency':['147hz', '47hz'],
@@ -132,7 +132,9 @@ class experiment():
 			>>> order = ['harmonic', 'frequency', 'amplitude']
 			#Perform scan
 			>>> exp.n_param_scan(kw_scan_params, fixed_params, order)
-			```
+			
+
+
 		"""
 		#check to make sure no errors
 		params = kw_scan_params.copy()

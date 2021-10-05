@@ -4,17 +4,16 @@ __all__ = ('_fod_dimensionality_fixer', 'iterable_data_array', 'data_array_build
 
 
 class iterable_data_array():
-    
-    def __init__(self, data_dict, key):
-        """
-        Iterable for usage building functions on data. 
+    """
+    Iterable for usage building functions on data. 
 
-        args:
-            data_dict (dict): data
-            key (str or key): Key for which to return iterable data array.
+    args:
+        data_dict (dict): data
+        key (str or key): Key for which to return iterable data array.
 
-        Examples:
-            ```
+    Examples:
+        .. code-block:: python
+            
             >>> data
             >   {0: 
                     {'defintion': {'test': {1}}}
@@ -26,8 +25,10 @@ class iterable_data_array():
 
             > [1,2,3]
             [1,2,3]
-            ```
-        """
+        
+    """
+    def __init__(self, data_dict, key):
+        
         data_dict = self._data_dimensionality_fixer(data_dict)
         array = data_dict[key]
         self.array = array
@@ -72,53 +73,56 @@ class iterable_data_array():
 
 
 class data_array_builder(list):
-    
-    def __init__(self,):
-        """Class for building data arrays.
+
+    """Class for building data arrays.
 
         examples:
+
             Square data for different trials: 
-            ```
-            >>> data
-            > {0: 
-                {'definition': {
-                    'param1': {'10V'},
-                    'param2': {'100ns', '10ns'},
-                    'param3': {'1mv'}
-                    },
-                'data': {
-                    'raw_data': array([[1, 2, 3],[1, 2, 3]], dtype=int64)
+            
+            .. code-block:: python
+               
+                >>> data
+                > {0: 
+                    {'definition': {
+                        'param1': {'10V'},
+                        'param2': {'100ns', '10ns'},
+                        'param3': {'1mv'}
+                        },
+                    'data': {
+                        'raw_data': array([[1, 2, 3],[1, 2, 3]], dtype=int64)
+                        }
                     }
                 }
-            }
 
-            >>> data_dict = data[0]['data']
-            >>> data_dict
-            > {'raw_data': array([[1, 2, 3],
-                [1, 2, 3]], dtype=int64)}
+                >>> data_dict = data[0]['data']
+                >>> data_dict
+                > {'raw_data': array([[1, 2, 3],
+                    [1, 2, 3]], dtype=int64)}
 
-            >>> ida = iterable_data_array(data_dict, 'raw_data')
-            >>> out = data_array_builder()
-            >>> for d in ida:
-                ... #square each measurement
-                ... out.append(d**2)
-            >>> out.build()
-            > array([[1, 4, 9],[1, 4, 9]], dtype=int64)
+                >>> ida = iterable_data_array(data_dict, 'raw_data')
+                >>> out = data_array_builder()
+                >>> for d in ida:
+                    ... #square each measurement
+                    ... out.append(d**2)
+                >>> out.build()
+                > array([[1, 4, 9],[1, 4, 9]], dtype=int64)
 
-            >>> data_dict.update({'raw_data':out.build()})
-            >>> data
-            > {0: 
-                {'definition': 
-                    {'param1': {'10V'},
-                    'param2': {'100ns', '10ns'},
-                    'param3': {'1mv'}
-                },
-                'data': {'raw_data': array([[1, 4, 9], [1, 4, 9]], dtype=int64)}
+                >>> data_dict.update({'raw_data':out.build()})
+                >>> data
+                > {0: 
+                    {'definition': 
+                        {'param1': {'10V'},
+                        'param2': {'100ns', '10ns'},
+                        'param3': {'1mv'}
+                    },
+                    'data': {'raw_data': array([[1, 4, 9], [1, 4, 9]], dtype=int64)}
+                    }
                 }
-            }
-            ```
 
         """
+    
+    def __init__(self,):
         super().__init__()
     
     def build(self,):

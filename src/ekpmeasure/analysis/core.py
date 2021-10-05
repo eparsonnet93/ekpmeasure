@@ -285,13 +285,16 @@ class Dataset():
 			(Dataset): Updated Dataset.
 			
 		examples:
+			
 			Convert 25um and 10um to measured areas. This will only work if no other diameters are present in the Dataset.
-			```
-			>>>def how(dataframe):
-					nominal_diameter_to_measured_area_dict = {'25um':190, '10um':60}
-					return [nominal_diameter_to_measured_area_dict[x] for x in dataframe['diameter'].values]
-			>>>dset.add_calculated_column('measured_area_um', how = how)
-			```
+			
+			.. code-block:: python
+
+				>>>def how(dataframe):
+						nominal_diameter_to_measured_area_dict = {'25um':190, '10um':60}
+						return [nominal_diameter_to_measured_area_dict[x] for x in dataframe['diameter'].values]
+				>>>dset.add_calculated_column('measured_area_um', how = how)
+
 		
 		
 		"""
@@ -454,47 +457,39 @@ class iDataIndexer():
 		return Data({index: self.indexed_dict[index]})
 
 class Data(dict):
-	"""Data class for maintaining and manipulating the real data. Typically retrieved via Dataset.get_data()
+	"""Data class for maintaining and manipulating the real data. Typically retrieved via ``Dataset.get_data()``
+
 
 	args:
 		dict (Dict): a dict (with form shown below) of the data. 
 
 
-	The real data. Subclass of dict. Each piece of data (may be grouped) is given a numerical index and structure as follows: 
+	Examples:
 
-	```
-	{index:
-		{
-		'data':dict({'key':np.array(the real data)}), 
-		'definition':dict(describing which data is contained)
-		}
-	}
-	```
-	for example, an instance of the Data class corresponding to an experiment may be:
-	
-	```
-	{0: {
-		'definition': {'frequency': {'1067hz'},
-					   'amplitude': {'500ua'},
-					   'nave': {5},
-					   'low_current': {-2.5},
-					   'high_current': {2.5},
-					   'delay': {1},
-					   'time_constant': {'30ms'},
-					   'ramp_rate': {0.05},
-					   'ramp_up_first': {True},
-					   'identifier': {'B1'},
-					   'sensitivity': {'50mv/na'},
-					   'trial': {0}},
-		'data': {'H_mean': array([-403.524  , -407.18   , -395.602  , -382.146  , -367.444  , ... ]),
-			   'H_std': array([10.39320663,  4.7261697 ,  5.3691951 ,  5.71281577,  5.9829578 , ... ]),
-			   'R_mean': array([0.0324881 , 0.03248582, 0.03248772, 0.03248544, 0.03248354, ... ]),
-			   'R_std': array([1.69941166e-06, 1.42182981e-06, 1.42182981e-06, 3.31276320e-06, ...]),
-			   'Theta_mean': array([0.0324881 , 0.03248582, 0.03248772, 0.03248544, 0.03248354, ...]),
-			   'Theta_std': array([0.    , 0.    , 0.    , 0.    , 0.    , 0.    , 0.    , 0.    , ...])}
-		}
-	}
-	```
+		.. code-block:: python
+
+			>>> data
+			> {0: {
+				'definition': {'frequency': {'1067hz'},
+							   'amplitude': {'500ua'},
+							   'nave': {5},
+							   'low_current': {-2.5},
+							   'high_current': {2.5},
+							   'delay': {1},
+							   'time_constant': {'30ms'},
+							   'ramp_rate': {0.05},
+							   'ramp_up_first': {True},
+							   'identifier': {'B1'},
+							   'sensitivity': {'50mv/na'},
+							   'trial': {0}},
+				'data': {'H_mean': array([-403.524  , -407.18   , -395.602  , -382.146  , -367.444  , ... ]),
+					   'H_std': array([10.39320663,  4.7261697 ,  5.3691951 ,  5.71281577,  5.9829578 , ... ]),
+					   'R_mean': array([0.0324881 , 0.03248582, 0.03248772, 0.03248544, 0.03248354, ... ]),
+					   'R_std': array([1.69941166e-06, 1.42182981e-06, 1.42182981e-06, 3.31276320e-06, ...]),
+					   'Theta_mean': array([0.0324881 , 0.03248582, 0.03248772, 0.03248544, 0.03248354, ...]),
+					   'Theta_std': array([0.    , 0.    , 0.    , 0.    , 0.    , 0.    , 0.    , 0.    , ...])}
+				}
+			}
 
 
 	"""
@@ -512,9 +507,10 @@ class Data(dict):
 
 		example:
 
-			```
-			>>> Data.iloc[0]
-			```
+			.. code-block:: python
+				
+				>>> Data.iloc[0]
+			
 		"""
 		return iDataIndexer(self.to_dict().copy())
 
@@ -567,22 +563,30 @@ class Data(dict):
 		returns:
 			(Data): filtered Data
 
-		Example:
+		Examples:
 
-		Filter the data such that the data key 'R' only contains values >10. This leaves all other data keys unchanged.
-		```
-		>>> Data.filter({'R': lambda x: x>10}) 
-		```
-		Filter data corresponding to an amplitude of '500ua' such that data key 'R' contains only values >10.
-		```
-		>>> Data.filter({'R': lambda x: x>10}, {'amplitude':'500ua'}) 
-		```
-		Filter data based on 'saturation' but also filter the 'switching_time' data.
-		```
-		>>> Data.filter({'saturation': lambda x: x > .003}, additional_data_keys_to_filter='switching_time')
-		``` 
+			Filter the data such that the data key 'R' only contains values >10. This leaves all other data keys unchanged.
+			
+			.. code-block:: python
 
-		You may use this method to remove outliers, for example.
+				>>> Data.filter({'R': lambda x: x>10}) 
+			
+
+
+			Filter data corresponding to an amplitude of '500ua' such that data key 'R' contains only values >10.
+			
+			.. code-block:: python
+
+				>>> Data.filter({'R': lambda x: x>10}, {'amplitude':'500ua'}) 
+	
+			Filter data based on 'saturation' but also filter the 'switching_time' data.
+		
+			.. code-block:: python
+
+				>>> Data.filter({'saturation': lambda x: x > .003}, additional_data_keys_to_filter='switching_time')
+	
+
+			You may use this method to remove outliers, for example.
 
 		"""
 		if definition_condition_dict == None:
@@ -633,19 +637,19 @@ class Data(dict):
 		returns:
 			(Data): data satisfying condition 
 		
-		example:
+		examples:
 
-		Providing multiple values will be joined by logical or, i.e.
-		```
-		Data.contains({'high_voltage_v':{'100mv', '200mv'}})
-		```
-		will search for all data with '100mv' OR '200mv' for high_voltage_v. 
+			.. code-block:: python
+				
+				#Providing multiple values will be joined by logical or, i.e.
+				Data.contains({'high_voltage_v':{'100mv', '200mv'}})
+				#will search for all data with '100mv' OR '200mv' for high_voltage_v. 
 
-		Multiple keys provided will be joined with logical AND. i.e. 
-		```
-		Data.contains({'x':1, 'y':2})
-		``` 
-		will search for x = 1 AND y = 2.
+				#Multiple keys provided will be joined with logical AND. i.e. 
+				Data.contains({'x':1, 'y':2})
+				#will search for x = 1 AND y = 2.
+
+
 	
 		"""
 		indices = self._get_indices_satisfying_definition_condtion(condition)
@@ -696,56 +700,56 @@ class Data(dict):
 			return Data(tmp_out)
 
 	def apply(self, function_on_data, pass_defn = False, kwargs_for_function=None,**kwargs):
-		"""Apply data_function to the data in each index. **kwargs will be passed to data_function.
+		"""Apply data_function to the data in each index. ``**kwargs`` will be passed to data_function.
 
 		args:
 			function_on_data (function): f(dict) -> dict. Function is passed the data_dict (corresponding to self[index]['data']).
 			pass_defn (bool): Whether or not to pass the definition to function_on_data. If True, will be passed with other kwargs. 
-			kwargs (**kwargs): Additional arguments for function_on_data. 
 			kwargs_for_function (dict): Carryover from an older version. This serves as a error catch to help users convert older code. This argument is not supported.
 
 		returns:
 				(Data): the new data after operating on it
 
-		example:
+		examples:
 
-		```
-		>>> some_data
-		>
-		{
-			0: {'definition': {'param1': {'10V'},
-				'param2': {'100ns', '10ns', '50ns'},
-				'param3': {'1mv', '2mv'}},
-				'data': {'raw_data': array([[1, 2, 3],
-					  [1, 2, 3],
-					  [1, 2, 3],
-					  [1, 2, 3]], dtype=int64)}},
-			1: {'definition': {'param1': {'5V'}, 'param2': {'100ns'}, 'param3': {'1mv'}},
-				'data': {'raw_data': array([1, 2, 3], dtype=int64)}}
-		}
+			.. code-block:: python
+				
+				>>> some_data
+				>
+				{
+					0: {'definition': {'param1': {'10V'},
+						'param2': {'100ns', '10ns', '50ns'},
+						'param3': {'1mv', '2mv'}},
+						'data': {'raw_data': array([[1, 2, 3],
+							  [1, 2, 3],
+							  [1, 2, 3],
+							  [1, 2, 3]], dtype=int64)}},
+					1: {'definition': {'param1': {'5V'}, 'param2': {'100ns'}, 'param3': {'1mv'}},
+						'data': {'raw_data': array([1, 2, 3], dtype=int64)}}
+				}
 
-		#some function will square the data
+				#some function will square the data
 
-		def some_function(data_dict):
-			"a function which operates on the data dict and returns a data dict"
-			out = dict()
-			for key in data_dict:
-				out.update({key:data_dict[key]**2})
-			return out
+				def some_function(data_dict):
+					"a function which operates on the data dict and returns a data dict"
+					out = dict()
+					for key in data_dict:
+						out.update({key:data_dict[key]**2})
+					return out
 
-		>>> some_data.apply(some_function)
-		>
-		{
-			0: {'definition': {'param1': {'10V'},
-				'param2': {'100ns', '10ns', '50ns'},
-				'param3': {'1mv', '2mv'}},
-				'data': {'raw_data': array([[1, 4, 9],
-				  [1, 4, 9],
-				  [1, 4, 9],
-				  [1, 4, 9]], dtype=int64)}},
-			1: {'definition': {'param1': {'5V'}, 'param2': {'100ns'}, 'param3': {'1mv'}},
-				'data': {'raw_data': array([1, 4, 9], dtype=int64)}}}
-		```
+				>>> some_data.apply(some_function)
+				>
+				{
+					0: {'definition': {'param1': {'10V'},
+						'param2': {'100ns', '10ns', '50ns'},
+						'param3': {'1mv', '2mv'}},
+						'data': {'raw_data': array([[1, 4, 9],
+						  [1, 4, 9],
+						  [1, 4, 9],
+						  [1, 4, 9]], dtype=int64)}},
+					1: {'definition': {'param1': {'5V'}, 'param2': {'100ns'}, 'param3': {'1mv'}},
+						'data': {'raw_data': array([1, 4, 9], dtype=int64)}}}
+
 		"""
 		if type(kwargs_for_function) != type(None):
 			raise ValueError("kwargs_for_function argument is no longer supported as of version 0.0.7. Pass kwargs for the apply function simply as kwargs in .apply()")

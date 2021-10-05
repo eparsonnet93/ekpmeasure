@@ -13,42 +13,43 @@ def get_vals_by_definition(data, definition_key, data_key):
 		out (dict): Values by definition dict.
 
 	Examples:
-		```
-		>>> data
-		> {{0: {'definition': {'type': {'preset2pulse'},
-		   'identifier': {'125um2'},
-		   'pulsewidth_ns': {500.0},
-		   'delay_ns': {100000000.0},
-		   'high_voltage_v': {1.0},
-		   'preset_voltage_v': {1.0},
-		   'preset_pulsewidth_ns': {1000.0},
-		   'diameter': {12.5},
-		   'area': {122.7184630308513},
-		   'trial': {0}},
-		  'data': {'p1': array([-0.003, -0.003, -0.001, ..., -0.003, -0.003, -0.001]),
-		   'time': array([0.0000e+00, 4.0000e-02, 8.0000e-02, ..., 1.9988e+02, 1.9992e+02,
-		          1.9996e+02]),
-		   'p2': array([-0.001, -0.003, -0.005, ..., -0.003,  0.001,  0.003])}},
-		 1: {'definition': {'type': {'preset2pulse'},
-		   'identifier': {'125um2'},
-		   'pulsewidth_ns': {500.0},
-		   'delay_ns': {100000000.0},
-		   'high_voltage_v': {0.5},
-		   'preset_voltage_v': {1.0},
-		   'preset_pulsewidth_ns': {1000.0},
-		   'diameter': {12.5},
-		   'area': {122.7184630308513},
-		   'trial': {0}},
-		  'data': {'p1': array([0.0004, 0.0012, 0.0004, ..., 0.002 , 0.002 , 0.0004]),
-		   'time': array([0.0000e+00, 4.0000e-02, 8.0000e-02, ..., 1.9988e+02, 1.9992e+02,
-		          1.9996e+02]),
-		   'p2': array([-0.0004, -0.0004,  0.0004, ...,  0.0012,  0.0012,  0.0004])}},}
+		.. code-block:: python
 
-		#retrieve 'p1' data keyed by high_voltage_v
-		>>> analysis.get_vals_by_definition(data, 'high_voltage_v', 'p1')
-		> {	1.0: [-0.003,-0.003, ... ],
-			0.5: [0.0004, 0.0012, ...]}
-		```
+			>>> data
+			> {{0: {'definition': {'type': {'preset2pulse'},
+			   'identifier': {'125um2'},
+			   'pulsewidth_ns': {500.0},
+			   'delay_ns': {100000000.0},
+			   'high_voltage_v': {1.0},
+			   'preset_voltage_v': {1.0},
+			   'preset_pulsewidth_ns': {1000.0},
+			   'diameter': {12.5},
+			   'area': {122.7184630308513},
+			   'trial': {0}},
+			  'data': {'p1': array([-0.003, -0.003, -0.001, ..., -0.003, -0.003, -0.001]),
+			   'time': array([0.0000e+00, 4.0000e-02, 8.0000e-02, ..., 1.9988e+02, 1.9992e+02,
+			          1.9996e+02]),
+			   'p2': array([-0.001, -0.003, -0.005, ..., -0.003,  0.001,  0.003])}},
+			 1: {'definition': {'type': {'preset2pulse'},
+			   'identifier': {'125um2'},
+			   'pulsewidth_ns': {500.0},
+			   'delay_ns': {100000000.0},
+			   'high_voltage_v': {0.5},
+			   'preset_voltage_v': {1.0},
+			   'preset_pulsewidth_ns': {1000.0},
+			   'diameter': {12.5},
+			   'area': {122.7184630308513},
+			   'trial': {0}},
+			  'data': {'p1': array([0.0004, 0.0012, 0.0004, ..., 0.002 , 0.002 , 0.0004]),
+			   'time': array([0.0000e+00, 4.0000e-02, 8.0000e-02, ..., 1.9988e+02, 1.9992e+02,
+			          1.9996e+02]),
+			   'p2': array([-0.0004, -0.0004,  0.0004, ...,  0.0012,  0.0012,  0.0004])}},}
+
+			#retrieve 'p1' data keyed by high_voltage_v
+			>>> analysis.get_vals_by_definition(data, 'high_voltage_v', 'p1')
+			> {	1.0: [-0.003,-0.003, ... ],
+				0.5: [0.0004, 0.0012, ...]}
+		
 	"""
 	out = dict()
 	for i in data:
@@ -82,18 +83,19 @@ def vals_by_definition_to_2darray(vals_by_definition, converter = 'Default'):
 		(numpy.array (2D)): X, Y
 
 	Examples:
-		```
-		>>> vbd
-		> { 1.0 : [1,2,3],
-			0.5 : [2,1,1]}
+		.. code-block:: python
 
-		>>> X, Y = analysis.vals_by_definition_to_2darray(vbd)
-		>>> X
-		> [1.0, 1.0, 1.0, 0.5, 0.5, 0.5]
+			>>> vbd
+			> { 1.0 : [1,2,3],
+				0.5 : [2,1,1]}
 
-		>>> Y
-		> [1, 2, 3, 2, 1, 1]
-		```
+			>>> X, Y = analysis.vals_by_definition_to_2darray(vbd)
+			>>> X
+			> [1.0, 1.0, 1.0, 0.5, 0.5, 0.5]
+
+			>>> Y
+			> [1, 2, 3, 2, 1, 1]
+
 	"""
 	if type(converter) == str:
 		if converter == 'Default':

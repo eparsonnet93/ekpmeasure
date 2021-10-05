@@ -8,22 +8,26 @@ def common_name_mapper(fname):
 
 	args:
 		fname (str): Filename
+
+	returns:
+		(dict): Out
 	 
 	Example:
-	```
-	>>>fname = '5um3_50e-9_1e-9_0x5V_500mv_10000ns_1'
-	>>> common_name_mapper(fname)
-	> {
-		'identifier':5um3,
-		'pulsewidth_ns':50,
-		'delay_ns':1,
-		'high_voltage_v':0.5,
-		'preset_voltage_v':0.5,
-		'preset_pulsewidth_ns':10000,
-		'filename':'5um3_50e-9_1e-9_0x5V_500mv_10000ns_1',
-		'trial':1
-	}
-	```
+	
+		.. code-block:: python
+
+			>>>fname = '5um3_50e-9_1e-9_0x5V_500mv_10000ns_1'
+			>>> common_name_mapper(fname)
+			> {
+				'identifier':5um3,
+				'pulsewidth_ns':50,
+				'delay_ns':1,
+				'high_voltage_v':0.5,
+				'preset_voltage_v':0.5,
+				'preset_pulsewidth_ns':10000,
+				'filename':'5um3_50e-9_1e-9_0x5V_500mv_10000ns_1',
+				'trial':1
+			}
 	"""
 	string = fname.replace('.csv','')
 	spl = string.split('_')
