@@ -5,6 +5,7 @@ import itertools
 import warnings
 import pyvisa
 import os
+from IPython import display
 
 from .misc import get_save_name
 
@@ -148,6 +149,8 @@ class experiment():
 		if set(scan_param_order) != set(kw_scan_params.keys()):
 			raise KeyError('kw_scan_params do not have the same keys as scan_param_order')
 		try:
+			total_scans = int(np.prod([len(kw_scan_params[x]) for x in kw_scan_params])*ntrials)
+			iteration = 0
 			for key in kw_scan_params:
 				params = kw_scan_params[key]
 				if hasattr(params, '__getitem__') and type(params) != str:
@@ -166,6 +169,9 @@ class experiment():
 				for i, key in enumerate(scan_param_order[::-1]):
 					kwargs.update({key:params[i]})
 				for count in range(ntrials):
+					iteration += 1
+					print('Scan {} of {}'.format(iteration, total_scans))
+					display.clear_output(wait=True)
 					trial(self.run_function, kwargs, self.path)
 					time.sleep(1)
 

@@ -43,7 +43,7 @@ def apply_and_listen(waveform_1d, nzeros_front, nzeros_back,
                      in_channel_start = 0, in_channel_end = 0, 
                      out_channel_start = 0, out_channel_end = 0, 
                      rate = 1000000, board_number = 0, 
-                     ul_range = ULRange.BIP10VOLTS, quiet = False):
+                     ul_range = ULRange.BIP10VOLTS, quiet = False, **kwargs):
     """
     Apply a waveform and listen to collect data. Simultaneous output and collection of data. 
 

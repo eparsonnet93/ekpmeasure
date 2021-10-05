@@ -78,7 +78,7 @@ class run():
         self.nave = nave
         self.quiet = quiet
         
-    def go(self):
+    def go(self, **kwargs):
         """Start the run."""
         to_average = []
         #stop old processes in case
@@ -86,34 +86,44 @@ class run():
         ul.stop_background(self.board_num, FunctionType.AIFUNCTION)
 
         nchannels_out = self.out_channel_end - self.out_channel_start + 1
+        nchannels_in = self.in_channel_end - self.in_channel_start + 1
 
         for i in range(self.nave):    
             returned = apply_and_listen(self.wf_1d, self.nzeros_front, self.nzeros_back, 
                                         in_channel_start=self.in_channel_start, in_channel_end=self.in_channel_end, 
                                         out_channel_start=self.out_channel_start, out_channel_end=self.out_channel_end,
-                                        quiet = self.quiet)
+                                        quiet = self.quiet, **kwargs)
             memhandle_in, memhandle_out, data_array_in, data_array_out, count_in, time = returned
+            try:
+                # Free the buffer and set the data_array to None
+                ul.win_buf_free(memhandle_out)
+                data_array_out = None
 
-            # Free the buffer and set the data_array to None
-            ul.win_buf_free(memhandle_out)
-            data_array_out = None
+                #now that it is done convert from data_array back to numpy data:
+                out = []
+                for i in range(0, count_in):
+                    out.append(ul.to_eng_units(self.board_num, self.ul_range, data_array_in[i]))
+                out = np.array(out)
 
-            #now that it is done convert from data_array back to numpy data:
-            out = []
-            for i in range(0, count_in):
-                out.append(ul.to_eng_units(self.board_num, self.ul_range, data_array_in[i]))
-            out = np.array(out)
+                #clear memory
+                ul.win_buf_free(memhandle_in)
+                data_array_in = None
 
-            #clear memory
-            ul.win_buf_free(memhandle_in)
-            data_array_in = None
+                #append data
+                to_average.append(out)
+            except Exception as e:
+                #clear memory
+                try:
+                    ul.win_buf_free(memhandle_in)
+                    ul.win_buf_free(memhandle_out)
+                    raise e
+                except:
+                    raise e
 
-            #append data
-            to_average.append(out)
 
         data = np.array(to_average)
         means = np.mean(data, axis = 0)
-        out = waveform_1d_to_array(means, nchannels_in=nchannels_out)
+        out = waveform_1d_to_array(means, nchannels_in=nchannels_in)
         self.waveform_collected = out
         self.time = time
         return
@@ -130,7 +140,7 @@ class run():
         ax.set_xlabel('time (us)')
         return fig, ax
 
-    def get_df(self):
+    def get_df(self, quiet = False):
         """Create new self attribute 'data' which is a pandas.DataFrame of the collected data."""
         if not hasattr(self, 'waveform_collected'):
             raise AttributeError('no data has been collected, suggest self.go()')
@@ -146,7 +156,8 @@ class run():
         data = pd.DataFrame({
                 'time':time,
             })
-        warn("You are getting the input wfm data (which is perfect), not measured current input to the coil")
+        if not quiet:
+            warn("You are getting the input wfm data (which is perfect), not measured current input to the coil")
         for i in self.input_wfm_df:
             data['AOUT_{}'.format(i)] = 10*(self.input_wfm_df[i]-2047)/2047
 
