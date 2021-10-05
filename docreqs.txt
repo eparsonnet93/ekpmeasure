@@ -6,3 +6,5 @@ numpy
 matplotlib
 scipy
 pyvisa
+sphinx==3.4.3
+sphinx_rtd_theme==0.5.1
