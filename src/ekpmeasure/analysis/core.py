@@ -7,6 +7,7 @@ import warnings
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from functools import wraps
+from numpy import AxisError
 
 
 __all__ = ('Dataset', 'Data',)
@@ -695,7 +696,10 @@ class Data(dict):
 					if len(data[k].shape) == 1: #1d data
 						mean_data.update({k:data[k]})
 					else:
-						mean_data.update({k:np.mean(data[k], axis = 0)})
+						try:
+							mean_data.update({k:np.mean(data[k], axis = 0)})
+						except AxisError:
+							mean_data.update({k:data[k]})
 				tmp_out[key].update({'data':mean_data})
 			return Data(tmp_out)
 

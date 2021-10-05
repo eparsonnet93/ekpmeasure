@@ -137,6 +137,7 @@ class data_array_builder(list):
                 out = np.vstack((out, thing))
             except NameError:
                 out = thing.copy()
+
         return out
 
 
