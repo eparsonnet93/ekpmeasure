@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from functools import wraps
 from numpy import AxisError
+import pickle
 
 
 __all__ = ('Dataset', 'Data',)
@@ -53,6 +54,7 @@ def _check_file_exists(path, filename):
 	else:
 		return False
 
+
 def _remove_nans_from_set(set_to_remove_from):
 	"""Remove multiple nans from a set. Sometimes in Dataset.summary, it returns many nans when it should return only one. Quick fix for that issue"""
 
@@ -93,7 +95,7 @@ class Dataset(pd.DataFrame):
 		self.attrs['index_to_path'] = self._construct_index_to_path(path, initializer)
 		self.pointercolumn = 'filename'
 		if readfileby == None:
-			self.readfileby = lambda file: pd.read_csv(file)
+			self.readfileby = pd.read_csv
 		else:
 			self.readfileby = readfileby
 
@@ -162,6 +164,17 @@ class Dataset(pd.DataFrame):
 		"""
 		return pd.DataFrame(self.iloc[index]).T.reset_index(drop = True)
 
+	def _write_ekpds_file(self, filename):
+		preamble = 'pointercolumn:{}|'.format(self.pointercolumn)
+		with open(filename, 'wb+') as f:
+			f.write(pickle.dumps(preamble))
+			f.write(b'########')
+			f.write(pickle.dumps(self.readfileby))
+			f.write(b'##|##|##|##')
+			f.write(pickle.dumps(self))
+			
+		return
+
 	def remove_index(self, index):
 		"""
 		Remove an index or array-like of indices.
@@ -193,6 +206,7 @@ class Dataset(pd.DataFrame):
 				remove_index.append(ind)
 		
 		return self.remove_index(remove_index)
+
 	
 	def _construct_index_to_path(self, path, initializer):
 		"""Construct index_to_path from path provided
@@ -307,6 +321,93 @@ class Dataset(pd.DataFrame):
 		self.add_column(column_name, new_column_data)
 		
 		return self
+
+	def save_meta_data(self,):
+		"""Save the current meta_data as ``pandas.DataFrame`` to path. This is not allowed for merged datasets *i.e.* Dataset resulting from ``analysis.utils.merge_Datasets``. To save a Dataset (including merged) see :func:`to_ekpds <.ekpds>`.
+		
+		"""
+		if len(set(self.index_to_path)) != 1:
+			raise ValueError('Dataset does not contain a unique path to data. Saving of this type of Dataset is not yet supported. (Coming soon.)')
+
+		path = list(set(self.index_to_path))[0]
+		pd.DataFrame(self).to_pickle(path + 'meta_data')
+
+		return
+
+	def to_ekpds(self, path):
+		"""Save Dataset to file (extension .ekpds).
+
+		args:
+			path (str): Path to save location
+
+		example:
+
+			.. code-block:: python
+				dset.to_ekpds('./dset1.ekpds')
+
+		"""
+		self._set_index_to_path_absolute()
+		self._set_path_absolute()
+
+		#check if file exits:
+		dirname = os.path.dirname(path)
+		name = path.split('/')[-1]
+		if _check_file_exists(dirname, name):
+			yn = input('file ({}) already exists. Overwrite? (y/n)'.format(path))
+			if yn.lower() == 'y':
+				os.remove(path)
+				self._write_ekpds_file(path)
+			else:
+				pass
+		else:
+			self._write_ekpds_file(path)
+
+		return 
+
+
+
+
+	def _set_index_to_path_absolute(self):
+		"""Modify ``.index_to_path`` to absolute paths."""
+		itp = self.index_to_path
+
+		for ind, x in zip(itp.index, itp):
+			abspath = (os.path.abspath(x)).replace('\\', '/')
+			if not abspath[-1] == '/':
+				abspath += '/' #put final slash in place
+				
+			itp.at[ind] = abspath
+
+		return
+
+	def _set_path_absolute(self):
+		"""Modify ``.path`` to absolute paths."""
+		if type(self.path) == str:
+			abspath = (os.path.abspath(self.path)).replace('\\', '/')
+			if not abspath[-1] == '/':
+				abspath += '/' #put final slash in place
+			out = abspath
+		elif type(self.path) == dict:
+			pdict = self.path
+			new_pdict = {}
+			for key in pdict:
+				indices = pdict[key]
+				
+				abspath = (os.path.abspath(key)).replace('\\', '/')
+				if not abspath[-1] == '/':
+					abspath += '/' #put final slash in place
+				
+				new_pdict.update({abspath:indices})
+			del pdict
+			out = new_pdict
+		else:
+			raise TypeError('Only str or dict supported as self.path. Please report this issue.')
+
+		self.attrs['path'] = out
+
+		return
+
+
 	
 	def add_column(self, column_name, column_data):
 		"""Add a column to a Dataset.

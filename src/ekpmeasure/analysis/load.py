@@ -3,10 +3,11 @@ import pandas as pd
 import numpy as np
 
 import warnings
+import pickle
 
 from .core import Dataset
 
-__all__ = ('load_Dataset', 'generate_meta_data')
+__all__ = ('load_Dataset', 'generate_meta_data', 'read_ekpds')
 
 def load_Dataset(path, meta_data = None):
 	"""
@@ -19,7 +20,38 @@ def load_Dataset(path, meta_data = None):
 	returns: 
 		Dataset
 	"""
+	files = list(os.listdir(path))
+	existing_ekpds = []
+	for file in files:
+		if '.ekpds' in file:
+			existing_ekpds.append(file)
+
+	if len(existing_ekpds) != 0:
+		warnings.showwarning('There exist .ekpds files ({}) in this directory. If you want to load those Datasets, be sure to use ``.read_ekpds``'.format(existing_ekpds), UserWarning, '', 0)
+
 	return Dataset(path, _build_df(path, meta_data))
+
+def read_ekpds(filename):
+	"""Read a Dataset from ``.ekpds`` file.
+
+	args:
+		filename (str): Path to file
+
+	returns:
+		(Dataset): Dataset
+
+	"""
+
+	with open(filename, 'rb') as f:
+		out = f.read()
+
+	_location1 = out.find(b'########') #up to here is preamble, after is readfileby
+	pointercolumn = pickle.loads(out[:_location1])
+	readfileby = pickle.loads(out[_location1+8:])
+	_location2 = out.find(b'##|##|##|##') #after this is dset
+	dset = pickle.loads(out[_location2+11:])
+	
+	return Dataset(dset.path, pd.DataFrame(dset), readfileby)
 
 def _build_df(path, meta_data):
 	if type(meta_data) == type(None):
