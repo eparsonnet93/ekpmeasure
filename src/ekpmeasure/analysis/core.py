@@ -32,12 +32,15 @@ def construct_Dataset_from_dataframe(function):
 	return wrapper
 
 def _convert_ITP_to_path_to_index(index_to_path):
-	"""convert index_to_path pandas series to path_to_index dict 
-	----
-	index_to_path:(pandas.series)
+	"""Convert index_to_path (``pandas.Series``) to path_to_index (``dict``) 
+	
 
-	returns
-	path_to_index:(dict) {path:[indices corresponding to that path]}
+	args:
+		index_to_path (pandas.Series): index_to_path to convert
+
+	returns:
+		(dict): path_to_index, key is path and value is list of indices for that path
+
 	"""
 	path_to_index = dict()
 	for i in index_to_path.index:
@@ -56,7 +59,7 @@ def _check_file_exists(path, filename):
 
 
 def _remove_nans_from_set(set_to_remove_from):
-	"""Remove multiple nans from a set. Sometimes in Dataset.summary, it returns many nans when it should return only one. Quick fix for that issue"""
+	"""Remove multiple nans from a set."""
 
 	out = set()
 	for item in set_to_remove_from:
@@ -73,31 +76,43 @@ def _remove_nans_from_set(set_to_remove_from):
 	return out
 
 class Dataset(pd.DataFrame):
-	"""Dataset class for analysis. 
-
-	Dataset is a subclass of pandas.DataFrame. Used to manipulate meta data while keeping track of location for the real data, which can be retrieved when necessary.
+	"""Dataset class for analysis. Subclass of pandas.DataFrame. Used to manipulate meta data while keeping track of location for the real data, which can be retrieved when necessary.
 
 	Args:
-		path (str or dict): a path to where the real data lives. if dict, form is 
+		path (str or dict): Path to the real data. 
+		initializer (pandas.DataFrame or dict):  Initializer for a DataFrame. The meta data.
+		readfileby (function): How to read the data. Default is ``pandas.read_csv``
+		pointercolumn (str or index): Column name which holds name of file. Default is ``'filename'``
 
-				{path: [indices of initializer for this path]} 
+	Examples:
 
-		initializer (pandas.DataFrame):  the meta data. one column must contain a pointer (i.e. filename) to where the real data is stored
-		readfileby (function): how to read the data. default of None corresponds to 
+		.. code-block:: python
+			
+			>>> meta_data = pd.DataFrame(
+				{
+					'voltageApplied':['1v','2v'],
+					'filename':['t1.csv','t2.csv']
+				}
+			)
 
-				pandas.read_csv()
+			#Assuming the data is stored in './data/', create the Dataset
+			>>> dset = Dataset('./data/', meta_data,)
+
+			#Query the meta data for when voltageApplied is '1v':
+			>>> dset.query('voltageApplied == "1v"')
+
+			#return the Data
+			>>> dset.get_data()
+
 
 	"""
 
-	def __init__(self, path, initializer, readfileby=None):
+	def __init__(self, path, initializer, readfileby=pd.read_csv, pointercolumn = 'filename'):
 		super().__init__(initializer)
 		self.attrs['path'] = path
 		self.attrs['index_to_path'] = self._construct_index_to_path(path, initializer)
-		self.pointercolumn = 'filename'
-		if readfileby == None:
-			self.readfileby = pd.read_csv
-		else:
-			self.readfileby = readfileby
+		self.pointercolumn = pointercolumn
+		self.readfileby = readfileby
 
 	@property  
 	def _is_empty(self):
@@ -113,7 +128,13 @@ class Dataset(pd.DataFrame):
 
 	@property
 	def index_to_path(self):
-		"""Return Dict of index and corresponding path"""
+		"""Index to path ``pandas.Series``
+
+		returns:
+			(pandas.Series): Index to path
+
+
+		"""
 		return self.attrs['index_to_path']
 
 	@property
@@ -121,7 +142,40 @@ class Dataset(pd.DataFrame):
 		"""Return a brief summary of the data in your Dataset. 
 
 		Returns:
-			(Dict): a summary of the Dataset"""
+			(Dict): a summary of the Dataset. keys are columns names, values are sets of values appearing in the Dataset.
+
+		Examples:
+
+			.. code-block:: python
+
+				>>> dset.head()
+				identifier  pulsewidth_ns  delay_ns  high_voltage_v  preset_voltage_v  \
+				0      185um          100.0     200.0            0.25               0.5   
+				1      185um          100.0     200.0            0.25               0.5   
+				2      185um          100.0     200.0            0.25               0.5   
+				3      185um          100.0     200.0            0.25               0.5   
+				4      185um          100.0     200.0            0.25               0.5   
+
+				   preset_pulsewidth_ns                                      filename  trial  
+				0               10000.0  185um100e-9_200e-9_0x25V_500mv_10000ns_0.csv      0  
+				1               10000.0  185um100e-9_200e-9_0x25V_500mv_10000ns_1.csv      1  
+				2               10000.0  185um100e-9_200e-9_0x25V_500mv_10000ns_2.csv      2  
+				3               10000.0  185um100e-9_200e-9_0x25V_500mv_10000ns_3.csv      3  
+				4               10000.0  185um100e-9_200e-9_0x25V_500mv_10000ns_4.csv      4  
+				
+				>>> dset.summary
+				{
+					'identifier': {'185um'},
+					'pulsewidth_ns': {10.0, 50.0, 100.0},
+					'delay_ns': {10.0, 20.0, 50.0, 200.0, 300.0, 500.0},
+					'high_voltage_v': {0.125, 0.25, 0.375, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5},
+					'preset_voltage_v': {0.5},
+					'preset_pulsewidth_ns': {10000.0},
+					'trial': {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+				}
+
+
+		"""
 		summary = dict()
 		for column in self.columns:
 			if column == self.pointercolumn:
@@ -148,6 +202,45 @@ class Dataset(pd.DataFrame):
 
 	@construct_Dataset_from_dataframe
 	def filter_on_column(self, column, function, **kwargs_for_function):
+		"""Filter Dataset. Keeps rows with column satisfying function.
+
+		args:
+			column (str or index): Specify column
+			function (function): Filter function. ``function(value) -> bool``
+			kwargs_for_function (kwargs): kwargs to pass to function
+
+		returns:
+			(Dataset): Filtered Dataset.
+
+		examples:
+
+			.. code-block:: python
+
+				>>> dset.summary
+				{
+					'identifier': {'185um'},
+					'pulsewidth_ns': {10.0, 50.0, 100.0},
+					'delay_ns': {10.0, 20.0, 50.0, 200.0, 300.0, 500.0},
+					'high_voltage_v': {0.125, 0.25, 0.375, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5},
+					'preset_voltage_v': {0.5},
+					'preset_pulsewidth_ns': {10000.0},
+					'trial': {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+				}
+				
+				#Return only rows with where the high_voltage_v is greater than 1 and print the summary
+				>>> dset.filter_on_column('high_voltage_v', lambda x: x>1).summary
+				{	'identifier': {'185um'},
+					'pulsewidth_ns': {50.0},
+					'delay_ns': {10.0},
+					'high_voltage_v': {1.5, 2.0, 2.5},
+					'preset_voltage_v': {0.5},
+					'preset_pulsewidth_ns': {10000.0},
+					'trial': {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+				}
+
+
+
+		"""
 		return self[self[column].apply(function, **kwargs_for_function).values].reset_index(drop = True)
 
 	@construct_Dataset_from_dataframe
@@ -158,7 +251,7 @@ class Dataset(pd.DataFrame):
 			index (int or index): Index to select
 
 		returns:
-			(Dataset): Single row dataset.
+			(Dataset): Single row Dataset.
 
 
 		"""
@@ -196,7 +289,7 @@ class Dataset(pd.DataFrame):
 	
 	def remove_nonexistent_files_from_metadata(self):
 		"""
-		Remove references to files that do not exist in path.
+		Remove references to files that do not exist in path. This may occur, for example, if you know certain data files are bad (and thus delete them from the data dir), but did not delete them while collecting data. 
 		"""
 		remove_index = []
 		for ind, path in enumerate(self.index_to_path):
@@ -212,8 +305,8 @@ class Dataset(pd.DataFrame):
 		"""Construct index_to_path from path provided
 		
 		args:
-			path (str or Dict): a path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
-			initializer (pandas.DataFrame: meta data. one column must contain a pointer (filename) to where each the real data is stored
+			path (str or Dict): A path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
+			initializer (pandas.DataFrame): Meta data. one column must contain a pointer (filename) to where each the real data is stored
 
 		"""
 		if len(self) == 0:
@@ -305,12 +398,12 @@ class Dataset(pd.DataFrame):
 			
 			.. code-block:: python
 
-				>>>def how(dataframe):
+				>>> def how(dataframe):
 						nominal_diameter_to_measured_area_dict = {'25um':190, '10um':60}
 						return [nominal_diameter_to_measured_area_dict[x] for x in dataframe['diameter'].values]
-				>>>dset.add_calculated_column('measured_area_um', how = how)
 
-		
+				>>> dset.add_calculated_column('measured_area_um', how = how)
+
 		
 		"""
 		
@@ -327,7 +420,7 @@ class Dataset(pd.DataFrame):
 		
 		"""
 		if len(set(self.index_to_path)) != 1:
-			raise ValueError('Dataset does not contain a unique path to data. Saving of this type of Dataset is not yet supported. (Coming soon.)')
+			raise ValueError('Dataset does not contain a unique path to data. Saving of this type of Dataset is not supported.')
 
 		path = list(set(self.index_to_path))[0]
 		pd.DataFrame(self).to_pickle(path + 'meta_data')
@@ -343,6 +436,7 @@ class Dataset(pd.DataFrame):
 		example:
 
 			.. code-block:: python
+				
 				dset.to_ekpds('./dset1.ekpds')
 
 		"""
@@ -423,7 +517,7 @@ class Dataset(pd.DataFrame):
 
 	def get_data(self, groupby=None, labelby=None,):
 		"""
-		Return data in Data (Data class) for the current Dataset: returns Data class 
+		Return data in Data (Data class) for the current Dataset. If using groupby kwarg, resulting Data will vstack all data which corresponds to that grouping. (See examples)
 		
 		args:
 				groupby (str, label, index or array-like of):  what to group on
@@ -431,6 +525,67 @@ class Dataset(pd.DataFrame):
 
 		returns:
 				(Data): the data
+
+		examples:
+			
+			.. code-block:: python
+
+				>>> dset.summary
+				{
+					'identifier': {'185um'},
+					'pulsewidth_ns': {10.0, 50.0, 100.0},
+					'delay_ns': {10.0, 20.0, 50.0, 200.0, 300.0, 500.0},
+					'high_voltage_v': {0.125, 0.25, 0.375, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5},
+					'preset_voltage_v': {0.5},
+					'preset_pulsewidth_ns': {10000.0},
+					'trial': {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+				}
+
+				>>> data = dset.get_data() #no groupby yet
+				>>> data.data_keys
+				['time', 'p1', 'p2']
+
+				>>> data[0]['data']['p1'] # This corresponds to a single trial (1D data)
+				array([  0.00898495,  0.00765674,  0.00351585, ..., -0.00679731,
+						-0.00101569, -0.00039065])
+
+				# now we will group by high_voltage_v. There are many .csv files that correspond to such a case
+				# for example how many are there for a high_voltage_v of .125? (there are 5, see here)
+				>>> len(dset.query('high_voltage_v == .125'))
+				5
+
+				# let's retrieve the data but with grouping
+				>>> data = dset.get_data(groupby = 'high_voltage_v')
+				>>> data[0]['data']['p1'] #vstack of all different .csv files grouped by high_voltage_v (a meta data parameter)
+				array([[ 0.00898495,  0.00765674,  0.00351585, ..., -0.00679731,
+						-0.00101569, -0.00039065],
+					   [-0.02172014, -0.02773615, -0.03695549, ..., -0.0203138 ,
+						-0.0085943 , -0.00117195],
+					   [-0.0351585 , -0.02859558, -0.02289209, ..., -0.03093948,
+						-0.01968876, -0.01289145],
+					   [-0.02765802, -0.02453282, -0.02070445, ..., -0.00679731,
+						-0.00257829, -0.0093756 ],
+					   [-0.0375024 , -0.04656548, -0.04930003, ..., -0.03789305,
+						-0.02609542, -0.01632917]])
+
+				# no longer is it 1D data. 
+				>>> data[0]['data']['p1'].shape
+				(5, 500)
+
+				#recall that there were 5 rows in the Dataset corresponding to a high_voltage_v of .125. Is this that grouping? we can check:
+				>>> data[0]['definition']
+				# indeed it is!!!
+				{	
+					'identifier': {'185um'},
+					'pulsewidth_ns': {10.0},
+					'delay_ns': {20.0},
+					'high_voltage_v': {0.125},
+					'preset_voltage_v': {0.5},
+					'preset_pulsewidth_ns': {10000.0},
+					'trial': {0, 1, 2, 3, 4}
+				}
+
+
 		"""
 		if len(self) == 0:
 			raise ValueError('No meta data to return data for!!')
