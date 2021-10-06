@@ -3,7 +3,7 @@ import numpy as np
 __all__ = ('get_number_and_suffix', '_get_number_and_suffix','freq_mapper', 'current_amp_mapper', 
     'sci_to_time_mapper', '_scientific_notation', 'voltage_amp_mapper')
 
-freq_mapper = {'khz':'e3', 'hz':'e0'}
+freq_mapper = {'Mhz':'e6','khz':'e3', 'hz':'e0'}
 current_amp_mapper = {'ma':'e-3', 'ua':'e-6'}
 sci_to_time_mapper = {'e0':'s', 'e3':'ks', 'e-3':'ms', 'e-6':'us', 'e-9':'ns'}
 voltage_amp_mapper = {'mv':'e-3', 'v':''}
