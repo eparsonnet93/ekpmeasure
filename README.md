@@ -6,8 +6,9 @@
 [![PyPI license](https://img.shields.io/pypi/l/ekpmeasure.svg)](https://pypi.org/project/ekpmeasure/)
 [![PyPi Downloads](http://pepy.tech/badge/ekpmeasure)](http://pepy.tech/project/ekpmeasure)
 
+[![N|Scheme](imgs/prl2.png)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.125.067601)
 
-Repository of analysis and computer control code for various experiments. 
+A repository of analysis and computer control code for various experiments. Image above is an example of data **collected** and **analyzed** using this package.
 
 
 ## Overview
