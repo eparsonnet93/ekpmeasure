@@ -11,7 +11,7 @@
 A repository of analysis and computer control code for various experiments. Image above is an example of data **collected** and **analyzed** using this package.
 
 
-## Overview
+# Overview
 
 ekpmeasure is a set of control and analysis code designed to help streamline experiments. The basic idea is that in experimental work we often take data from many different sources, store it in different places, have varying degrees meta data associated with the data (even for a single type of data) and somehow(!) we are supposed to make sense of it all. We like to compare across trials, days, experimental conditions, etc. and it is very difficult to keep track of what data is where, and quickly access it when we need it. Often I find that folks end up copying and pasting raw data between excel spreadsheets and if you're not careful you will quickly lose track of which data came from where. This package's goal is to make this all easier. 
 
@@ -21,9 +21,41 @@ At the heart of the analysis is the [Dataset](https://ekpmeasure.readthedocs.io/
 
 I am always improving this repository and if you have suggestions, I appreciate any feedback and or issues (<https://github.com/eparsonnet93/ekpmeasure/issues>)
 
+## User Guide
+
 ---
-## Installation:
+# Installation:
 
 ```bash
 pip install ekpmeasure
+```
+
+---
+# Development
+
+We welcome new contributors of all experience levels. The **Development Guide** has detailed information about
+contributing code, documentation, tests, etc.
+
+## Important Links
+
+* Official source code repo: https://github.com/eparsonnet93/ekpmeasure
+* Issue tracker: https://github.com/eparsonnet93/ekpmeasure/issues
+
+## Source code
+
+# Support 
+
+Code related issues (e.g. bugs, feature requests) can be created in the
+[issue tracker](https://github.com/eparsonnet93/ekpmeasure/issues)
+
+Maintainer: Eric Parsonnet
+
+# Citation 
+
+Please cite this work as:
+
+```shell
+ekpmeasure
+Eric Parsonnet, 2021
+https://github.com/eparsonnet93/ekpmeasure
 ```
