@@ -53,23 +53,22 @@ max_amp = max(amps)
 min_amp = min(amps)
 
 # setup a figure and colormap
-fig, ax = plt.subplots(figsize = (8,4))
+fig, ax = plt.subplots(figsize = (16,8))
 cmap = cm.viridis
 
-for i in data:
-    tdata = data.iloc[i] # pick off a single trial
+for i in windowed_data:
+    tdata = windowed_data.iloc[i] # pick off a single trial
     amp = list(tdata[i]['definition']['Amplitude (mA)'])[0] # get the amplitude for that trial
-    color = cmap((field - min_field)/(max_field - min_field)) # specify the color from the normalized colormap
+    color = cmap((amp - min_amp)/(max_amp - min_amp)) # specify the color from the normalized colormap
     
     tdata.scatter(x = 'angle', y = 'Y2', alpha = 1, ax = ax, color = color) # scatter the data
     fit_data = tdata.apply(fit_sine, anglekey = 'angle', key = 'Y2') # apply a fitting function to the data
     fit_data.plot(x = 'fakex', y = 'simulated', ax = ax, color = color, linewidth = 3) # plot the fit
-
 ```
 
 ![N|Scheme](imgs/example1.png)
 
-For more see [here](https://ekpmeasure.readthedocs.io/en/latest/start.html)
+For more see [here.](https://ekpmeasure.readthedocs.io/en/latest/start.html)
 
 
 ---
