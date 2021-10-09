@@ -96,7 +96,7 @@ class experiment():
 		"""Method to perform a set of checks on params before starting a scan. Default is simple pass."""
 		pass
 	
-	def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order, ntrials = 1):
+	def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order, ntrials = 1, print_progress = True):
 		"""Perform a measurement over a set of params and save the data/meta data. 
 
 		args:
@@ -172,8 +172,9 @@ class experiment():
 					kwargs.update({key:params[i]})
 				for count in range(ntrials):
 					iteration += 1
-					print('Scan {} of {}'.format(iteration, total_scans))
-					display.clear_output(wait=True)
+					if print_progress:
+						print('Scan {} of {}'.format(iteration, total_scans))
+						display.clear_output(wait=True)
 					trial(self.run_function, kwargs, self.path)
 					time.sleep(1)
 
