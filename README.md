@@ -142,7 +142,7 @@ This makes it easy to get find data based on the meta data. For example, let's f
 >>> dset.query('pump_pw == "100ms"')
 ```
 
-![queried2](imgs/querydset2.png)
+![queried2](imgs/querydset2.PNG)
 
 You can see that for this one pulsewidth, we have *many* applied voltages (`'pump_amp'`). We will return to this in a moment. Let's stick with our query `'pump_amp == "10.0V" and pump_pw == "100ms"'` and see how we can retrieve the real data (see [get_data](#https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.analysis.html#ekpmeasure.analysis.core.Dataset.get_data)). Recall from above that the raw data has three important columns `'Polarization(uC/cm2)_x'`, `'Polarization(uC/cm2)_y'`,  and `'DRIVEVoltage_x'`
 
@@ -164,7 +164,7 @@ Same as before! But now, we can **plot all of the data** corresponding to a puls
 >>> data.plot(x = 'DRIVEVoltage_x', y = ['Polarization(uC/cm2)_x', 'Polarization(uC/cm2)_y'])
 ```
 
-![dsetplot2](imgs/dsetplot2.png)
+![dsetplot2](imgs/dsetplot2.PNG)
 
 and done, this is all of the data for 100ms where the color corresponds to the applied voltage (`'pump_amp'`, ranging from 5V to 10V). No more sifting through csv's to find what you're looking for! Let's keep going. Remember, we are interested in the difference between averages around zero voltage for each datafile. We can create a workflow for this using [`Data.apply`](#https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.analysis.html#ekpmeasure.analysis.core.Data.apply). To understand how this works, let's take a deeper look at what our `data` object really is:
 
@@ -344,7 +344,7 @@ for pw, color in zip(pws, colors):
 	ax.scatter(X, Y, color = color)
 ```
 
-![finalplot2](imgs/finalplot2.png)
+![finalplot2](imgs/finalplot2.PNG)
 
 Hopefully this has given you a brief introduction to how to use EKPMEASURE. Happy analyzing!
 
