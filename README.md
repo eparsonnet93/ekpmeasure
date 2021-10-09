@@ -348,49 +348,6 @@ for pw, color in zip(pws, colors):
 
 Hopefully this has given you a brief introduction to how to use EKPMEASURE. Happy analyzing!
 
-
-
-
-``` python
-path = './path/to/data/'
-dset = analysis.load_Dataset(path)
-dset.readfileby = lambda x: pd.read_csv(x, skiprows=12, delimiter = '\t') # Specify how to read the real data
-
-# query meta data subject to some set of conditions:
-tmpdset = dset.query('`Samplename` == "hr358_D1" and Field == 5')
-
-# return the real data
-data = tmpdset.get_data()
-
-# center the real data
-centered_data = data.apply(center_yaxis, key = 'Y2')
-
-# average the data over a specific window (here the data is a function of angle, and we average over a window of 5 degrees)
-windowed_data = centered_data.apply(window, window_size = 5, key = 'Y2')
-
-### plot the data colored by a meta data parameter (in this case `Amplitude (mA)`) ###
-
-# establishing normalization for a colormap
-amps = np.array(sorted(data.summary['Amplitude (mA)']))
-max_amp = max(amps)
-min_amp = min(amps)
-
-# setup a figure and colormap
-fig, ax = plt.subplots(figsize = (16,8))
-cmap = cm.viridis
-
-for i in windowed_data:
-    tdata = windowed_data.iloc[i] # pick off a single trial
-    amp = list(tdata[i]['definition']['Amplitude (mA)'])[0] # get the amplitude for that trial
-    color = cmap((amp - min_amp)/(max_amp - min_amp)) # specify the color from the normalized colormap
-    
-    tdata.scatter(x = 'angle', y = 'Y2', alpha = 1, ax = ax, color = color) # scatter the data
-    fit_data = tdata.apply(fit_sine, anglekey = 'angle', key = 'Y2') # apply a fitting function to the data
-    fit_data.plot(x = 'fakex', y = 'simulated', ax = ax, color = color, linewidth = 3) # plot the fit
-```
-
-![N|Scheme](imgs/example1.png)
-
 For more see [here.](https://ekpmeasure.readthedocs.io/en/latest/start.html)
 
 
