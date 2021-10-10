@@ -10,9 +10,13 @@
 
 A repository of analysis and computer control code for various experiments. Image above is an example of data **collected** and **analyzed** using this package.
 
+- [Overview](#overview)
 - [User Guide](#user-guide)
 - [Installation](#installation)
-
+- [Development](#development)
+- [Important Links](#important-links)
+- [Support](#support)
+- [Cite this code](#citation)
 
 # Overview
 
@@ -365,15 +369,12 @@ For installation issues, please see [Issue Tracker](https://github.com/eparsonne
 ---
 # Development
 
-We welcome new contributors of all experience levels. The **Development Guide** has detailed information about
-contributing code, documentation, tests, etc.
+We welcome new contributors of all experience levels. Please reach out directly (e.parsonnet@berkeley.edu) to inqure about getting involved. 
 
 ## Important Links
 
 * Official source code repo: https://github.com/eparsonnet93/ekpmeasure
 * Issue tracker: https://github.com/eparsonnet93/ekpmeasure/issues
-
-## Source code
 
 # Support 
 
@@ -385,6 +386,8 @@ Maintainer: Eric Parsonnet
 # Citation 
 
 Please cite this work as:
+
+`Parsonnet, E (2021) ekpmeasure source code (Version 0.0.13) [Source code]. https://github.com/eparsonnet93/ekpmeasure/`
 
 ```shell
 ekpmeasure

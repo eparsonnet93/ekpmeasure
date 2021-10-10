@@ -1,7 +1,7 @@
 import numpy as np
 
 __all__ = ('get_number_and_suffix', 'frequency_suffix_to_scientific_str', 'current_suffix_to_scientific_str', 
-    'scientific_str_to_time_suffix', 'voltage_suffix_to_scientic_str')
+    'scientific_str_to_time_suffix', 'voltage_suffix_to_scientic_str', 'time_suffix_to_scientic_str')
 
 freq_mapper = {'Mhz':'e6','khz':'e3', 'hz':'e0', 'mhz':'e-3'}
 current_amp_mapper = {'ma':'e-3', 'ua':'e-6', 'na':'e-9', 'mA':'e-3', 'uA':'e-6', 'nA':'e-9'}
