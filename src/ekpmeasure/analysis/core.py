@@ -75,8 +75,8 @@ def _remove_nans_from_set(set_to_remove_from):
 		
 	return out
 
-class Dataset(pd.DataFrame):
-	"""Dataset class for analysis. Subclass of pandas.DataFrame. Used to manipulate meta data while keeping track of location for the real data, which can be retrieved when necessary.
+class Dataset():
+	"""Dataset class for analysis. Used to manipulate meta data while keeping track of location for the real data, which can be retrieved when necessary.
 
 	Args:
 		path (str or dict): Path to the real data. 
@@ -87,7 +87,7 @@ class Dataset(pd.DataFrame):
 	Examples:
 
 		.. code-block:: python
-			
+
 			>>> meta_data = pd.DataFrame(
 				{
 					'voltageApplied':['1v','2v'],
@@ -108,12 +108,29 @@ class Dataset(pd.DataFrame):
 	"""
 
 	def __init__(self, path, initializer, readfileby=pd.read_csv, pointercolumn = 'filename'):
-		super().__init__(initializer)
+		self.meta_data = pd.DataFrame(initializer)
+		self.attrs = dict()
 		self.attrs['path'] = path
 		self.attrs['index_to_path'] = self._construct_index_to_path(path, initializer)
 		self.pointercolumn = pointercolumn
 		self.readfileby = readfileby
 
+	def __str__(self):
+		return self.meta_data.__str__()
+
+	def __repr__(self):
+		return self.meta_data.__repr__()
+	
+	def __len__(self):
+		return self.meta_data.__len__()
+	
+	def _repr_html_(self):
+		return self.meta_data._repr_html_()
+	
+	@property
+	def columns(self):
+		return self.meta_data.columns
+	
 	@property  
 	def _is_empty(self):
 		if len(self) == 0 and len(self.columns) == 0:
@@ -162,7 +179,7 @@ class Dataset(pd.DataFrame):
 				2               10000.0  185um100e-9_200e-9_0x25V_500mv_10000ns_2.csv      2  
 				3               10000.0  185um100e-9_200e-9_0x25V_500mv_10000ns_3.csv      3  
 				4               10000.0  185um100e-9_200e-9_0x25V_500mv_10000ns_4.csv      4  
-				
+
 				>>> dset.summary
 				{
 					'identifier': {'185um'},
@@ -180,25 +197,25 @@ class Dataset(pd.DataFrame):
 		for column in self.columns:
 			if column == self.pointercolumn:
 				continue
-			summary.update({column: _remove_nans_from_set(set(self[column].values))})
+			summary.update({column: _remove_nans_from_set(set(self.meta_data[column].values))})
 
 		return summary
 	
 	@construct_Dataset_from_dataframe
-	def query(*args, **kwargs):
+	def query(self, *args, **kwargs):
 		"""Query the columns of a Dataset with a boolean expression.
 
 		Parameters:
 			expr (str): The query string to evaluate. You can refer to variables in the environment by prefixing them with an ‘@’ character like @a + b. You can refer to column names that are not valid Python variable names by surrounding them in backticks. Thus, column names containing spaces or punctuations (besides underscores) or starting with digits must be surrounded by backticks. (For example, a column named “Area (cm^2) would be referenced as Area (cm^2)). Column names which are Python keywords (like “list”, “for”, “import”, etc) cannot be used. For example, if one of your columns is called a a and you want to sum it with b, your query should be `a a` + b.
-		
+
 		Returns:
 			(Dataset): the result of the query
 		"""
-		return pd.DataFrame.query(*args, **kwargs)
-
+		return self.meta_data.query(*args, **kwargs)
+	
 	@construct_Dataset_from_dataframe
-	def head(*args, **kwargs):
-		return pd.DataFrame.head(*args, **kwargs)
+	def head(self, *args, **kwargs):
+		return self.meta_data.head(*args, **kwargs)
 
 	@construct_Dataset_from_dataframe
 	def filter_on_column(self, column, function, **kwargs_for_function):
@@ -226,10 +243,10 @@ class Dataset(pd.DataFrame):
 					'preset_pulsewidth_ns': {10000.0},
 					'trial': {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 				}
-				
+
 				#Return only rows with where the high_voltage_v is greater than 1 and print the summary
 				>>> dset.filter_on_column('high_voltage_v', lambda x: x>1).summary
-				{	'identifier': {'185um'},
+				{   'identifier': {'185um'},
 					'pulsewidth_ns': {50.0},
 					'delay_ns': {10.0},
 					'high_voltage_v': {1.5, 2.0, 2.5},
@@ -241,7 +258,7 @@ class Dataset(pd.DataFrame):
 
 
 		"""
-		return self[self[column].apply(function, **kwargs_for_function).values].reset_index(drop = True)
+		return self.meta_data[self.meta_data[column].apply(function, **kwargs_for_function).values].reset_index(drop = True)
 
 	@construct_Dataset_from_dataframe
 	def select_index(self, index):
@@ -255,7 +272,7 @@ class Dataset(pd.DataFrame):
 
 
 		"""
-		return pd.DataFrame(self.iloc[index]).T.reset_index(drop = True)
+		return pd.DataFrame(self.meta_data.iloc[index]).T.reset_index(drop = True)
 
 	def _write_ekpds_file(self, filename):
 		preamble = 'pointercolumn:{}|'.format(self.pointercolumn)
@@ -264,46 +281,13 @@ class Dataset(pd.DataFrame):
 			f.write(b'########')
 			f.write(pickle.dumps(self.readfileby))
 			f.write(b'##|##|##|##')
-			f.write(pickle.dumps(self))
-			
+			f.write(pickle.dumps(self.meta_data))
+
 		return
-
-	def remove_index(self, index):
-		"""
-		Remove an index or array-like of indices.
-
-		args:
-			index (index or array-like): index to be removed
-
-		returns:
-			(Dataset): updated Dataset
-
-		"""
-		index = np.array([index]).flatten()
-		
-		#adjust index_to_path and convert to path_to_index
-		path = _convert_ITP_to_path_to_index(self.index_to_path.drop(index = index).reset_index(drop = True))
-		meta_data = self.drop(index = index).reset_index(drop = True)
-		return Dataset(path, meta_data, readfileby=self.readfileby)
-	
-	
-	def remove_nonexistent_files_from_metadata(self):
-		"""
-		Remove references to files that do not exist in path. This may occur, for example, if you know certain data files are bad (and thus delete them from the data dir), but did not delete them while collecting data. 
-		"""
-		remove_index = []
-		for ind, path in enumerate(self.index_to_path):
-			if _check_file_exists(path, self[self.pointercolumn].iloc[ind]):
-				continue
-			else:
-				remove_index.append(ind)
-		
-		return self.remove_index(remove_index)
-
 	
 	def _construct_index_to_path(self, path, initializer):
 		"""Construct index_to_path from path provided
-		
+
 		args:
 			path (str or Dict): A path to where the real data lives. if dict, form is {path: [indices of initializer for this path]}  
 			initializer (pandas.DataFrame): Meta data. one column must contain a pointer (filename) to where each the real data is stored
@@ -315,7 +299,7 @@ class Dataset(pd.DataFrame):
 		if type(path) != dict:
 			assert type(path) == str, "path must be dict or str"
 			#set all indices to the single path provided
-			index_to_path = pd.Series({i:path for i in range(len(initializer))}, dtype = 'object')
+			index_to_path = pd.Series({i:path for i in range(len(self.meta_data))}, dtype = 'object')
 		else:
 			for l, key in enumerate(path):
 				#path is {path:[indices]}, need inverse
@@ -336,8 +320,40 @@ class Dataset(pd.DataFrame):
 		#check for duplicate indices:
 		if len(index_to_path) != len(set(index_to_path.index)):
 			raise ValueError('Duplicate indices provided in path dict!')
-			
+
 		return index_to_path
+	
+	def remove_index(self, index):
+		"""
+		Remove an index or array-like of indices.
+
+		args:
+			index (index or array-like): index to be removed
+
+		returns:
+			(Dataset): updated Dataset
+
+		"""
+		index = np.array([index]).flatten()
+
+		#adjust index_to_path and convert to path_to_index
+		path = _convert_ITP_to_path_to_index(self.index_to_path.drop(index = index).reset_index(drop = True))
+		meta_data = self.meta_data.drop(index = index).reset_index(drop = True)
+		return Dataset(path, meta_data, readfileby=self.readfileby)
+
+
+	def remove_nonexistent_files_from_metadata(self):
+		"""
+		Remove references to files that do not exist in path. This may occur, for example, if you know certain data files are bad (and thus delete them from the data dir), but did not delete them while collecting data. 
+		"""
+		remove_index = []
+		for ind, path in enumerate(self.index_to_path):
+			if _check_file_exists(path, self.meta_data[self.pointercolumn].iloc[ind]):
+				continue
+			else:
+				remove_index.append(ind)
+
+		return self.remove_index(remove_index)
 
 
 	def _group(self, by):
@@ -346,7 +362,7 @@ class Dataset(pd.DataFrame):
 		args:
 			by (str, int, label or array-like of): on what to group. 
 		"""
-		groups = self.groupby(by = by).groups
+		groups = self.meta_data.groupby(by = by).groups
 		for ijk, key in enumerate(groups):
 			original_dataset_indices = groups[key]
 			new_row = None
@@ -384,18 +400,18 @@ class Dataset(pd.DataFrame):
 
 	def add_calculated_column(self, column_name, how):
 		"""Add a calculated column to the Dataset.
-		
+
 		args:
 			column_name (str): The new column name
 			how (function): f(self) -> column data. A function which operates on self (pandas.DataFrame) and returns new column data.
-			
+
 		returns:
 			(Dataset): Updated Dataset.
-			
+
 		examples:
-			
+
 			Convert 25um and 10um to measured areas. This will only work if no other diameters are present in the Dataset.
-			
+
 			.. code-block:: python
 
 				>>> def how(dataframe):
@@ -404,26 +420,26 @@ class Dataset(pd.DataFrame):
 
 				>>> dset.add_calculated_column('measured_area_um', how = how)
 
-		
+
 		"""
-		
+
 		if not hasattr(how, '__call__'):
 			raise TypeError('how must be a function that operates on a DataFrame')
-			
-		new_column_data = how(pd.DataFrame(self))
+
+		new_column_data = how(pd.DataFrame(self.meta_data))
 		self.add_column(column_name, new_column_data)
-		
+
 		return self
 
 	def save_meta_data(self,):
 		"""Save the current meta_data as ``pandas.DataFrame`` to path. This is not allowed for merged datasets *i.e.* Dataset resulting from ``analysis.utils.merge_Datasets``. To save a Dataset (including merged) see :func:`to_ekpds <.ekpds>`.
-		
+
 		"""
 		if len(set(self.index_to_path)) != 1:
 			raise ValueError('Dataset does not contain a unique path to data. Saving of this type of Dataset is not supported.')
 
 		path = list(set(self.index_to_path))[0]
-		pd.DataFrame(self).to_pickle(path + 'meta_data')
+		self.meta_data.to_pickle(path + 'meta_data')
 
 		return
 
@@ -436,7 +452,7 @@ class Dataset(pd.DataFrame):
 		example:
 
 			.. code-block:: python
-				
+
 				dset.to_ekpds('./dset1.ekpds')
 
 		"""
@@ -469,7 +485,7 @@ class Dataset(pd.DataFrame):
 			abspath = (os.path.abspath(x)).replace('\\', '/')
 			if not abspath[-1] == '/':
 				abspath += '/' #put final slash in place
-				
+
 			itp.at[ind] = abspath
 
 		return
@@ -486,11 +502,11 @@ class Dataset(pd.DataFrame):
 			new_pdict = {}
 			for key in pdict:
 				indices = pdict[key]
-				
+
 				abspath = (os.path.abspath(key)).replace('\\', '/')
 				if not abspath[-1] == '/':
 					abspath += '/' #put final slash in place
-				
+
 				new_pdict.update({abspath:indices})
 			del pdict
 			out = new_pdict
@@ -502,18 +518,18 @@ class Dataset(pd.DataFrame):
 		return
 
 
-	
+
 	def add_column(self, column_name, column_data):
 		"""Add a column to a Dataset.
-		
+
 		args:
 			column_name (str): The new column name.
 			column_data (array-like): The data for the column
-		
+
 		"""
 		path_to_index = _convert_ITP_to_path_to_index(self.index_to_path)
-		self[column_name] = column_data
-		return Dataset(path_to_index, self)        
+		self.meta_data[column_name] = column_data
+		return Dataset(path_to_index, self.meta_data)      
 
 	def get_data(self, groupby=None, labelby=None,):
 		"""
@@ -575,7 +591,7 @@ class Dataset(pd.DataFrame):
 				#recall that there were 5 rows in the Dataset corresponding to a high_voltage_v of .125. Is this that grouping? we can check:
 				>>> data[0]['definition']
 				# indeed it is!!!
-				{	
+				{   
 					'identifier': {'185um'},
 					'pulsewidth_ns': {10.0},
 					'delay_ns': {20.0},
@@ -1083,7 +1099,7 @@ class Data(dict):
 			return_fig = False
 
 		if cmap not in set(cm.cmaps_listed.keys()):
-			raise KeyError('cmap "{}" not supported. Supported colormaps are {}'.format(cmap, cm.cmaps_listed.keys()))	
+			raise KeyError('cmap "{}" not supported. Supported colormaps are {}'.format(cmap, cm.cmaps_listed.keys()))  
 
 		if color == None:
 			colors = [cm.cmaps_listed[cmap](x) for x in np.linspace(0, 1, len(self.keys()))]
@@ -1161,7 +1177,7 @@ class Data(dict):
 			return_fig = False
 
 		if cmap not in set(cm.cmaps_listed.keys()):
-			raise KeyError('cmap "{}" not supported. Supported colormaps are {}'.format(cmap, cm.cmaps_listed.keys()))	
+			raise KeyError('cmap "{}" not supported. Supported colormaps are {}'.format(cmap, cm.cmaps_listed.keys()))  
 
 		if color == None:
 			colors = [cm.cmaps_listed[cmap](x) for x in np.linspace(0, 1, len(self.keys()))]
