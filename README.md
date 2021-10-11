@@ -387,8 +387,6 @@ Maintainer: Eric Parsonnet
 
 Please cite this work as:
 
-`Parsonnet, E (2021) ekpmeasure source code (Version 0.0.13) [Source code]. https://github.com/eparsonnet93/ekpmeasure/`
-
 ```shell
 ekpmeasure
 Eric Parsonnet, 2021
