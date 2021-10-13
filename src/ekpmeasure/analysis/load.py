@@ -54,12 +54,20 @@ def read_ekpds(filename):
 	return Dataset(dset.path, pd.DataFrame(dset), readfileby)
 
 def _build_df(path, meta_data):
+
+	# I have noticed I'm getting an attribute error when the pickle file is created by a different version of pandas... TODO find the origin of this error, for now, updating to store meta_data as a csv as well in control.experiment
 	if type(meta_data) == type(None):
 		try:
 			return pd.read_pickle(path + 'meta_data')
 		except FileNotFoundError:
 			print('meta_data does not exist in path {} you may want to create it with generate_meta_data()'.format(path))
 			return pd.DataFrame()
+		except AttributeError:
+			try:
+				return pd.read_csv(path + 'meta_data.csv')
+			except FileNotFoundError:
+				print('Pickle file "meta_data" exists in path "{}", but failed to load (likely do to incompatible pandas versions). Backup, "meta_data.csv" does not exist in "{}", you may want to create one or both of these with `.generate_meta_data()`'.format(path, path))
+				return pd.DataFrame()
 	else:
 		return meta_data
 
