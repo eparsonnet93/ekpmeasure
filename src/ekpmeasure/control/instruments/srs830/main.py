@@ -2,10 +2,11 @@ from .. import misc
 import time
 
 __all__ = (
-	'get_lockin_r_theta','set_harmonic', 'set_time_constant', 'get_time_constant', 'auto_gain',
+	'get_R_theta','set_harmonic', 'set_time_constant', 'get_time_constant', 'auto_gain',
 	'get_sensitivity', 'set_sensitivity', 'get_reference_source', 'set_reference_source',
 	'set_internal_frequency', 'set_internal_amplitude', 'get_time_constant_from_frequency',
-	'get_time_constant_float', 'set_lockin_sensitivity', 'initialize_lockin', 'set_phase'
+	'get_time_constant_float', 'set_lockin_sensitivity', 'initialize_lockin', 'set_phase', 
+	'get_X_Y',
 )
 
 
@@ -168,7 +169,21 @@ def get_time_constant_from_frequency(frequency, multiplier = 3):
 	
 	return tmp_out
 
-def get_lockin_r_theta(lockin):
+def get_X_Y(lockin):
+	"""
+	Get X and Y (Measure)
+
+	args:
+		lockin (pyvisa.resources.gpib.GPIBInstrument): SRS830
+
+	returns:
+		(tuple): X, Y
+	"""
+	X, Y = lockin.query('SNAP? 1,2').split('\n')[0].split(',')
+	X, Y = float(X), float(Y)
+	return X, Y
+
+def get_R_theta(lockin):
 	"""Get R and Theta. (Measure).
 
 	args:
