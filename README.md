@@ -15,6 +15,7 @@ A repository of analysis and computer control code for various experiments. Imag
 - [Installation](#installation)
 - [Development](#development)
 - [Important Links](#important-links)
+- [Change Log](#change-log)
 - [Support](#support)
 - [Cite this code](#citation)
 
@@ -378,10 +379,9 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 # Change log
 
-Version 0.1.0
-------
+#### Version 0.1.0
 
-*10/24/21*
+**10/24/21**
 
 - Dataset class is no longer subclass of `pandas.DataFrame`. This is to limit usage of unsupported functions. 
 - Data class updates including sorting and collapsing. 
