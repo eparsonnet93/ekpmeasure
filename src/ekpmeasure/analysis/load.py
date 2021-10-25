@@ -60,8 +60,11 @@ def _build_df(path, meta_data):
 		try:
 			return pd.read_pickle(path + 'meta_data')
 		except FileNotFoundError:
-			print('meta_data does not exist in path {} you may want to create it with generate_meta_data()'.format(path))
-			return pd.DataFrame()
+			try:
+				return pd.read_csv(path + 'meta_data.csv')
+			except FileNotFoundError:
+				print('No file named "meta_data" exists in path "{}", you may want to create one or both of these with `.generate_meta_data()`'.format(path, path))
+				return pd.DataFrame()
 		except AttributeError:
 			try:
 				return pd.read_csv(path + 'meta_data.csv')
