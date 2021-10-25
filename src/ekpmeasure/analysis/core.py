@@ -824,7 +824,7 @@ class Data(dict):
 		out = {}
 		
 		for i, key in enumerate(sorted_keys):
-			out.update({i: data.contains({definition_key:[key]})})
+			out.update({i: self.contains({definition_key:[key]})})
 		
 		return Data(out)
 
