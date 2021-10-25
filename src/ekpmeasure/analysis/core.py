@@ -977,6 +977,8 @@ class Data(dict):
 				continue
 			out = np.concatenate((out, current))
 
+		return out
+
 	def apply(self, function_on_data, pass_defn = False, kwargs_for_function=None,**kwargs):
 		"""Apply data_function to the data in each index. ``**kwargs`` will be passed to data_function.
 
