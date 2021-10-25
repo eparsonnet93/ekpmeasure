@@ -1016,13 +1016,13 @@ class Data(dict):
 
 		return out
 
-	def apply(self, function_on_data, pass_defn = False, kwargs_for_function=None,**kwargs):
+	def apply(self, function_on_data, pass_defn=False, ignore_errors=True,**kwargs):
 		"""Apply data_function to the data in each index. ``**kwargs`` will be passed to data_function.
 
 		args:
 			function_on_data (function): f(dict) -> dict. Function is passed the data_dict (corresponding to self[index]['data']).
 			pass_defn (bool): Whether or not to pass the definition to function_on_data. If True, will be passed with other kwargs. 
-			kwargs_for_function (dict): Carryover from an older version. This serves as a error catch to help users convert older code. This argument is not supported.
+			ignore_errors (bool): If True, errors in function_on_data will be printed, but not raised. Resulting data will be original data. If False, errors will be raised.
 
 		returns:
 				(Data): the new data after operating on it
@@ -1068,13 +1068,6 @@ class Data(dict):
 						'data': {'raw_data': array([1, 4, 9], dtype=int64)}}}
 
 		"""
-		if type(kwargs_for_function) != type(None):
-			raise ValueError("kwargs_for_function argument is no longer supported as of version 0.0.7. Pass kwargs for the apply function simply as kwargs in .apply()")
-
-		#TODO delete kwargs_for_function argument
-
-			
-
 
 		data_function = function_on_data
 		tmp_out = self.to_dict().copy()
@@ -1103,8 +1096,11 @@ class Data(dict):
 
 				tmp_out.update({key:internal_out})
 			except Exception as e:
-				print('Error in data_function: {} \n{}'.format(data_function.__name__, e))
-				print('Skipping data key: {} with defintion: \n{}'.format(key, tmp_out[key]['definition']))
+				if ignore_errors:
+					print('Error in data_function: {} \n{}'.format(data_function.__name__, e))
+					print('Skipping data key: {} with defintion: \n{}'.format(key, tmp_out[key]['definition']))
+				else:
+					raise e
 
 		return Data(tmp_out)
 
