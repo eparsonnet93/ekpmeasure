@@ -376,6 +376,17 @@ We welcome new contributors of all experience levels. Please reach out directly 
 * Official source code repo: https://github.com/eparsonnet93/ekpmeasure
 * Issue tracker: https://github.com/eparsonnet93/ekpmeasure/issues
 
+# Change log
+
+Version 0.1.0
+------
+
+*10/24/21*
+
+- Dataset class is no longer subclass of `pandas.DataFrame`. This is to limit usage of unsupported functions. 
+- Data class updates including sorting and collapsing. 
+- Experiment class now saves a backup `.csv` meta data file in addition to the pickle file in order to help with errors related to different pandas versions on various machines. 
+
 # Support 
 
 Code related issues (e.g. bugs, feature requests) can be created in the
