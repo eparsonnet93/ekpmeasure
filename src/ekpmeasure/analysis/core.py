@@ -367,7 +367,7 @@ class Dataset():
 			original_dataset_indices = groups[key]
 			new_row = None
 			for index in original_dataset_indices:
-				original_row = self.loc[index] #this is a pandas series of a row from the original dataset
+				original_row = self.meta_data.loc[index] #this is a pandas series of a row from the original dataset
 				#columns in this row
 				if type(new_row) == type(None):
 					#import pdb; pdb.set_trace()
@@ -806,6 +806,27 @@ class Data(dict):
 			(list): data keys
 		"""
 		return list(self[list(self.keys())[0]]['data'].keys())
+
+	def sort_by_definition(self, definition_key, how=None, reverse=False):
+		"""Sort Data. 
+		
+		args:
+			definition_key (key): Key to sort by.
+			how (function): Method for sorting.
+			reverse (bool): Reverse sorting
+			
+		returns:
+			(Data): Sorted Data
+		"""
+		available_options = self.summary[definition_key]
+		sorted_keys = sorted(available_options, key=how, reverse=reverse)
+		
+		out = {}
+		
+		for i, key in enumerate(sorted_keys):
+			out.update({i: data.contains({definition_key:[key]})})
+		
+		return Data(out)
 
 	def _get_indices_satisfying_definition_condtion(self, condition):
 		"""need docstring"""
