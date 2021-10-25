@@ -275,7 +275,7 @@ class Dataset():
 		return pd.DataFrame(self.meta_data.iloc[index]).T.reset_index(drop = True)
 
 	def _write_ekpds_file(self, filename):
-		preamble = 'pointercolumn:{}|'.format(self.pointercolumn)
+		preamble = 'pointercolumn:{}|path:{}'.format(self.pointercolumn, self.path)
 		with open(filename, 'wb+') as f:
 			f.write(pickle.dumps(preamble))
 			f.write(b'########')

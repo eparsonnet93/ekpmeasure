@@ -4,6 +4,7 @@ import numpy as np
 
 import warnings
 import pickle
+import ast
 
 from .core import Dataset
 
@@ -46,12 +47,30 @@ def read_ekpds(filename):
 		out = f.read()
 
 	_location1 = out.find(b'########') #up to here is preamble, after is readfileby
-	pointercolumn = pickle.loads(out[:_location1])
+	preamble = pickle.loads(out[:_location1])
+	preamble_spl = preamble.split('|')
+	preamble_dict = {}
+
+	y = None
+	for x in preamble_spl:
+		if 'pointercolumn' in x:
+			key, value = x.split(':')
+			preamble_dict.update({key:value})
+		else:
+			if type(y) == type(None):
+				y = x
+			else:
+				raise ValueError('error in load. expected 2 items in preamble, recieved at least 3. This likely originated from a change in .to_ekpds without appropriate changes to reading ekpds.')
+
+	assert 'path:' in y, '"path:" not in preamble, or incorrectly passed.'
+	path = ast.literal_eval(y.split('path:')[-1])
+	preamble_dict.update({'path':path})
+
 	readfileby = pickle.loads(out[_location1+8:])
 	_location2 = out.find(b'##|##|##|##') #after this is dset
-	dset = pickle.loads(out[_location2+11:])
+	meta_data = pickle.loads(out[_location2+11:])
 	
-	return Dataset(dset.path, pd.DataFrame(dset.meta_data), readfileby)
+	return Dataset(preamble_dict['path'], pd.DataFrame(meta_data), readfileby, pointercolumn=preamble_dict['pointercolumn'])
 
 def _build_df(path, meta_data):
 
