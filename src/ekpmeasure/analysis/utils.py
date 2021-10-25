@@ -46,6 +46,11 @@ def merge_Datasets(datasets):
 	
 	if not hasattr(datasets, '__iter__'):
 		raise TypeError('datasets is not iterable.')
+
+	readfileby = datasets[0].readfileby
+	for dset in datasets[1:]:
+		if dset.readfileby != readfileby:
+			raise ValueError('not all datasets have the same function for readfileby. Ensure they agree and try again.')
 		
 	columns = datasets[0].columns
 	for dset in datasets[1:]:
@@ -64,7 +69,7 @@ def merge_Datasets(datasets):
 			
 	path = _convert_ITP_to_path_to_index(new_path)
 	
-	return Dataset(path,new_df)
+	return Dataset(path,new_df,readfileby=readfileby)
 
 def merge(datasets):
 	"""Merge datasets.
