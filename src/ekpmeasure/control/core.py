@@ -96,7 +96,7 @@ class experiment():
 		"""Method to perform a set of checks on params before starting a scan. Default is simple pass."""
 		pass
 	
-	def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order, ntrials = 1):
+	def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order, ntrials = 1, print_progress = True):
 		"""Perform a measurement over a set of params and save the data/meta data. 
 
 		args:
@@ -172,8 +172,9 @@ class experiment():
 					kwargs.update({key:params[i]})
 				for count in range(ntrials):
 					iteration += 1
-					print('Scan {} of {}'.format(iteration, total_scans))
-					display.clear_output(wait=True)
+					if print_progress:
+						print('Scan {} of {}'.format(iteration, total_scans))
+						display.clear_output(wait=True)
 					trial(self.run_function, kwargs, self.path)
 					time.sleep(1)
 
@@ -187,7 +188,7 @@ class experiment():
 			print('done.')
 		
 
-def trial(run_function, run_function_args, path, return_df = False):
+def trial(run_function, run_function_args, path, return_df = False, save_meta_data_csv = True):
 	"""
 	A trial for an experiment. This will save each trial (as csv) to path with a unique name (indexed by trial if an identical basename already exists). Also creates and saves meta data to path. The specified run_function must return ((str) base_name, (dict) meta_data, (pandas.dataframe) data).
 
@@ -198,6 +199,8 @@ def trial(run_function, run_function_args, path, return_df = False):
 			```
 		run_function_args (dict): Dict of arguments for the specified run_function
 		path (str): Save location.
+		return_df (bool): Return the resulting data (pandas.DataFrame)
+		save_meta_data_csv (bool): Save the meta_data as a .csv in addition to pickle. This can be used to bypass issues with incompatible pandas versions across multiple machines.
 	
 
 
@@ -228,5 +231,7 @@ def trial(run_function, run_function_args, path, return_df = False):
 		out = meta_data.copy()
 
 	out.to_pickle(path + 'meta_data')
+	if save_meta_data_csv:
+		out.to_csv(path + 'meta_data.csv', index = False)
 	if return_df:
 		return df

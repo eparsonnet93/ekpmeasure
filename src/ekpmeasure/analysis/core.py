@@ -959,6 +959,26 @@ class Data(dict):
 				tmp_out[key].update({'data':mean_data})
 			return Data(tmp_out)
 
+	def collapse(self, data_key):
+		"""
+		Return collapsed (numpy.array) data corresponding to data_key. This will return all data for all indices concatenated into a single array.
+
+		args:
+			data_key (key): Key for data you wish to collapse
+
+		returns:
+			(numpy.array): Concatenated array of all data corresponding to data_key for all indices in self. 
+
+		"""
+		for ijk, i in enumerate(self):
+			current = self[i]['data'][data_key].flatten()
+			if ijk == 0:
+				out = current
+				continue
+			out = np.concatenate((out, current))
+
+		return out
+
 	def apply(self, function_on_data, pass_defn = False, kwargs_for_function=None,**kwargs):
 		"""Apply data_function to the data in each index. ``**kwargs`` will be passed to data_function.
 

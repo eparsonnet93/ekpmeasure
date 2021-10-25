@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 
 __all__ = ('get_number_and_suffix', '_get_number_and_suffix','freq_mapper', 'current_amp_mapper', 
     'sci_to_time_mapper', '_scientific_notation', 'voltage_amp_mapper')
@@ -26,6 +27,7 @@ def get_number_and_suffix(string):
 
 
     """
+    warnings.showwarning("get_number_and_suffix will be deprecated. Please use ekpmeasure.universal.get_number_and_suffix", DeprecationWarning, '', 0)
     return _get_number_and_suffix(string)
 
 def _get_number_and_suffix(string):
@@ -39,6 +41,7 @@ def _get_number_and_suffix(string):
 
 
     """
+    warnings.showwarning("_get_number_and_suffix will be deprecated. Please use ekpmeasure.universal._get_number_and_suffix", DeprecationWarning, '', 0)
     iteration = 0
     number = np.nan
     while np.isnan(number):
@@ -62,9 +65,11 @@ def scientific_notation(number):
 
 
     """
+    warnings.showwarning("scientific_notation will be deprecated. Please use ekpmeasure.universal.scientific_notation", DeprecationWarning, '', 0)
+    return _scientific_notation(number)
 
 def _scientific_notation(number):
-
+    warnings.showwarning("_scientific_notation will be deprecated. Please use ekpmeasure.universal._scientific_notation", DeprecationWarning, '', 0)
     number = float(number)
 
     if len(str(number).split('e'))>1:
