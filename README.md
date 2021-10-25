@@ -365,6 +365,8 @@ Find the latest build [here](https://pypi.org/project/ekpmeasure/).
 pip install ekpmeasure
 ```
 
+You can also access `.whl` or `.tar.gz` files in the `dist/` directory directly for installation. 
+
 For installation issues, please see [Issue Tracker](https://github.com/eparsonnet93/ekpmeasure/issues)
 
 ---
