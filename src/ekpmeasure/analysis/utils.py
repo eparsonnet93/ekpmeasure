@@ -54,18 +54,18 @@ def merge_Datasets(datasets):
 		
 	columns = datasets[0].columns
 	for dset in datasets[1:]:
-		if len(columns) != len(dset.columns):
+		if len(columns) != len(dset.meta_data.columns):
 			raise ValueError('supplied datasets do not all have the same columns!')
-		if (columns != dset.columns).all():
+		if (columns != dset.meta_data.columns).all():
 			raise ValueError('supplied datasets do not all have the same columns!')
 	
 	for i, dset in enumerate(datasets):
 		if i == 0:
 			new_path = dset.index_to_path
-			new_df = pd.DataFrame(dset)
+			new_df = pd.DataFrame(dset.meta_data)
 		else:
 			new_path = pd.concat((new_path, dset.index_to_path), ignore_index = True)
-			new_df = pd.concat((new_df, pd.DataFrame(dset)), ignore_index = True)
+			new_df = pd.concat((new_df, pd.DataFrame(dset.meta_data)), ignore_index = True)
 			
 	path = _convert_ITP_to_path_to_index(new_path)
 	
