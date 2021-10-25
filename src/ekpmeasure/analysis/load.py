@@ -51,7 +51,7 @@ def read_ekpds(filename):
 	_location2 = out.find(b'##|##|##|##') #after this is dset
 	dset = pickle.loads(out[_location2+11:])
 	
-	return Dataset(dset.path, pd.DataFrame(dset), readfileby)
+	return Dataset(dset.path, pd.DataFrame(dset.meta_data), readfileby)
 
 def _build_df(path, meta_data):
 

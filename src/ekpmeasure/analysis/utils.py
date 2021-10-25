@@ -96,10 +96,10 @@ def merge(datasets):
 	for i, dset in enumerate(datasets):
 		if i == 0:
 			new_path = dset.index_to_path
-			new_df = pd.DataFrame(dset)
+			new_df = pd.DataFrame(dset.meta_data)
 		else:
 			new_path = pd.concat((new_path, dset.index_to_path), ignore_index = True)
-			new_df = pd.concat((new_df, pd.DataFrame(dset)), ignore_index = True)
+			new_df = pd.concat((new_df, pd.DataFrame(dset.meta_data)), ignore_index = True)
 			
 	path = _convert_ITP_to_path_to_index(new_path)
 	
