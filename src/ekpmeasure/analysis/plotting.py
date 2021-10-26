@@ -15,6 +15,7 @@ lane_martin = {
     'xtick.minor.visible':True,
     'ytick.minor.visible':True,
     'xtick.major.size':5,
+    'lines.linewidth':3,
 }
 
 
