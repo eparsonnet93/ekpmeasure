@@ -1,7 +1,21 @@
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-__all__ = ('add_legend_element', 'format_legend')
+__all__ = ('add_legend_element', 'format_legend', 'lane_martin')
+
+lane_martin = {
+    "xtick.top" : True, 
+    "xtick.direction" : 'in',
+    "ytick.direction": 'in',
+    'ytick.right': True,
+    'font.sans-serif':'Arial',
+    'xtick.labelsize' : 16,
+    'ytick.labelsize' : 16,
+    'axes.labelsize':20,
+    'xtick.minor.visible':True,
+    'ytick.minor.visible':True,
+    'xtick.major.size':5,
+}
 
 
 def add_legend_element(ax, label, color, **kwargs):
