@@ -387,6 +387,7 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 - Dataset class is no longer subclass of `pandas.DataFrame`. This is to limit usage of unsupported functions. 
 - Data class updates including sorting and collapsing. 
+- One can access data or definition directly as an attribute now `Data.definition`, for example. One can also access pieces of information such as the real data corresponding to `p1` as `Data.p1` or definition keys, *e.g.* `high_voltage` as `Data.high_voltage`
 - Experiment class now saves a backup `.csv` meta data file in addition to the pickle file in order to help with errors related to different pandas versions on various machines. 
 
 # Support 
