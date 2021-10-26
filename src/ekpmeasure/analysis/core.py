@@ -764,11 +764,67 @@ class Data(dict):
 				}
 			}
 
+		.. code-block:: python
+			
+			# one can access data and/or definition as an attribute
+			>>> data.definition
+			>{'frequency': {'1067hz'},
+			   'amplitude': {'500ua'},
+			   'nave': {5},
+			   'low_current': {-2.5},
+			   'high_current': {2.5},
+			   'delay': {1},
+			   'time_constant': {'30ms'},
+			   'ramp_rate': {0.05},
+			   'ramp_up_first': {True},
+			   'identifier': {'B1'},
+			   'sensitivity': {'50mv/na'},
+			   'trial': {0}
+			}
+			>>> data.data
+			> {'H_mean': array([-403.524  , -407.18   , -395.602  , -382.146  , -367.444  , ... ]),
+			   'H_std': array([10.39320663,  4.7261697 ,  5.3691951 ,  5.71281577,  5.9829578 , ... ]),
+			   'R_mean': array([0.0324881 , 0.03248582, 0.03248772, 0.03248544, 0.03248354, ... ]),
+			   'R_std': array([1.69941166e-06, 1.42182981e-06, 1.42182981e-06, 3.31276320e-06, ...]),
+			   'Theta_mean': array([0.0324881 , 0.03248582, 0.03248772, 0.03248544, 0.03248354, ...]),
+			   'Theta_std': array([0.    , 0.    , 0.    , 0.    , 0.    , 0.    , 0.    , 0.    , ...])}
+
+			# one can also access individual attributes of definition or data:
+			>>> data.H_mean
+			> array([-403.524  , -407.18   , -395.602  , -382.146  , -367.444  , ... ])
+
 
 	"""
 
 	def __init__(self, initializer):
 		super().__init__(initializer)
+
+
+	def __getattr__(self, key):
+		if key == 'definition' or key == 'data':            
+			return self._get_defn_or_data(key)
+		try:
+			return self._get_defn_attr(key)
+		except KeyError:
+			return self._get_data_attr(key)
+		
+	def _get_defn_attr(self, key):
+		if len(self) == 1:
+			return self[list(self.keys())[0]]['definition'][key]
+	
+		return {i:self[i]['definition'][key] for i in self}
+	
+	def _get_data_attr(self, key):
+		if len(self) == 1:
+			return self[list(self.keys())[0]]['data'][key]
+	
+		return {i:self[i]['data'][key] for i in self}
+	
+	def _get_defn_or_data(self, key):
+		if len(self) == 1:
+			return self[list(self.keys())[0]][key]
+		
+		return {i:self[i][key] for i in self}
 
 	@property
 	def iloc(self):
