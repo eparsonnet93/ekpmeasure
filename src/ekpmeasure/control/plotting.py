@@ -8,6 +8,6 @@ def update_plot(fig):
     args:
         fig (matplotlib.figure.Figure): updated figure to replot
     """
-    display.display(fig)
     display.clear_output(wait=True)
+    display.display(fig)
     return 

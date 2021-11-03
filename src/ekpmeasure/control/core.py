@@ -47,7 +47,7 @@ class experiment():
 		print(self.run_function.__code__.co_varnames)
 		return
 
-	def config_path(self, path, directory_delimiter = '/'):
+	def config_path(self, path, directory_delimiter='/'):
 		"""Config the path to save data. If path does not exist, user will be prompted to create. 
 
 		args:
@@ -95,8 +95,37 @@ class experiment():
 	def checks(self, params):
 		"""Method to perform a set of checks on params before starting a scan. Default is simple pass."""
 		pass
-	
-	def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order, ntrials = 1, print_progress = True):
+
+
+	def _plot(self, data, scan_params):
+		"""Method for plotting. This Method should be overwritten with details of how to create a plot if one wishes to plot the data as it is collected.
+
+		args:
+			data (pandas.DataFrame): Data from trial.
+			scan_params (dict): Parameters of current scan
+
+		example:
+			Example of overriding the _plot method to plot a simple scatter plot each time
+
+			.. code-block:: python
+
+				def _plot(self, data, scan_params):
+					if hasattr(self, 'fig') and hasattr(self, 'ax'):
+						pass
+					else:
+						fig, ax = plt.subplots()
+						self.fig = fig
+						self.ax = ax
+						
+					self.ax.scatter(scan_params['frequency'], np.mean(data['R']), color = 'blue')
+					plt.show(self.fig)
+					plotting.update_plot(self.fig)
+
+		"""
+		raise NotImplementedError('_plot() should be overridden in experiment subclass. It is not.')
+
+
+	def n_param_scan(self, kw_scan_params, fixed_params, scan_param_order, ntrials=1, print_progress=True, plot=False):
 		"""Perform a measurement over a set of params and save the data/meta data. 
 
 		args:
@@ -104,6 +133,7 @@ class experiment():
 			fixed_params (dict): Parameters to keep fixed.
 			scan_param_order (array-like): Order of scan parameters. 
 			ntrials (int): Number of trials to perform.
+			plot (bool): Plot as data is collected.
 
 
 		Examples:
@@ -142,7 +172,7 @@ class experiment():
 		self.checks(params)
 
 		if not hasattr(self, 'terminate'):
-			raise AttributeError('no terminate function specified')
+			raise NotImplementedError('no terminate function specified')
 		if not hasattr(self, 'run_function'):
 			raise AttributeError('run_function not yet defined.')
 		if not hasattr(self, 'path'):
@@ -172,10 +202,13 @@ class experiment():
 					kwargs.update({key:params[i]})
 				for count in range(ntrials):
 					iteration += 1
-					if print_progress:
-						print('Scan {} of {}'.format(iteration, total_scans))
-						display.clear_output(wait=True)
-					trial(self.run_function, kwargs, self.path)
+					print('Scan {} of {}'.format(iteration, total_scans))
+					
+					trial_df = trial(self.run_function, kwargs, self.path, return_df = True)
+					if plot:
+						self._plot(trial_df, kwargs)
+					else:
+						display.clear_output(wait = True)
 					time.sleep(1)
 
 			return 
@@ -188,7 +221,7 @@ class experiment():
 			print('done.')
 		
 
-def trial(run_function, run_function_args, path, return_df = False, save_meta_data_csv = True):
+def trial(run_function, run_function_args, path, return_df=False, save_meta_data_csv=True):
 	"""
 	A trial for an experiment. This will save each trial (as csv) to path with a unique name (indexed by trial if an identical basename already exists). Also creates and saves meta data to path. The specified run_function must return ((str) base_name, (dict) meta_data, (pandas.dataframe) data).
 
