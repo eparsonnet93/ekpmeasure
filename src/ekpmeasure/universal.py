@@ -1,13 +1,14 @@
 import numpy as np
 
 __all__ = ('get_number_and_suffix', 'frequency_suffix_to_scientific_str', 'current_suffix_to_scientific_str', 
-    'scientific_str_to_time_suffix', 'voltage_suffix_to_scientic_str', 'time_suffix_to_scientic_str')
+    'scientific_str_to_time_suffix', 'voltage_suffix_to_scientic_str', 'time_suffix_to_scientic_str', 'freq_mapper', 
+    'sci_to_time_mapper', 'voltage_amp_mapper')
 
 freq_mapper = {'Mhz':'e6','khz':'e3', 'hz':'e0', 'mhz':'e-3'}
 current_amp_mapper = {'ma':'e-3', 'ua':'e-6', 'na':'e-9', 'mA':'e-3', 'uA':'e-6', 'nA':'e-9'}
 sci_to_time_mapper = {'e0':'s', 'e3':'ks', 'e-3':'ms', 'e-6':'us', 'e-9':'ns'}
 voltage_amp_mapper = {'mv':'e-3', 'v':'e0', 'mV':'e-3','V':'e0','kV':'e3','kv':'e3'}
-time_to_sci_mapper = {'ms':'e-3', 'us':'e-6', 'ns':'e-9', 'ps':'e-12', 's':'e0'}
+time_to_sci_mapper = {'ms':'e-3', 'us':'e-6', 'ns':'e-9', 'ps':'e-12', 's':'e0', 'ks':'e3'}
 
 def scientific_str_to_time_suffix(sci_str):
     """Convert scientific notation string to suffix for time. *i.e.* 'e-9' -> 'ns'
@@ -66,8 +67,8 @@ def current_suffix_to_scientific_str(current_suffix):
     returns:
         (str): Scientific notation str
     """
-    assert current_suffix in set(current_amp_mapper.keys()), "Suffix {} not in freq_mapper. Allowed keys are {}".format(current_suffix, list(current_amp_mapper.keys()))
-    return current_amp_mapper[current_suffix]
+    assert current_suffix in set(freq_mapper.keys()), "Suffix {} not in freq_mapper. Allowed keys are {}".format(current_suffix, list(freq_mapper.keys()))
+    return freq_mapper[current_suffix]
 
 def get_number_and_suffix(string):
     """Return number and suffix of a string.

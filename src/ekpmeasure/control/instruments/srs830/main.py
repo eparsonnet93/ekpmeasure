@@ -1,12 +1,13 @@
-from .. import misc
+from ....universal import get_number_and_suffix, time_suffix_to_scientic_str, scientific_notation, freq_mapper, sci_to_time_mapper, voltage_amp_mapper
 import time
+import numpy as np
 
 __all__ = (
 	'get_R_theta','set_harmonic', 'set_time_constant', 'get_time_constant', 'auto_gain',
 	'get_sensitivity', 'set_sensitivity', 'get_reference_source', 'set_reference_source',
 	'set_internal_frequency', 'set_internal_amplitude', 'get_time_constant_from_frequency',
 	'get_time_constant_float', 'set_lockin_sensitivity', 'initialize_lockin', 'set_phase', 
-	'get_X_Y',
+	'get_X_Y', 'get_nearest_time_constant',
 )
 
 
@@ -27,6 +28,27 @@ sensitivity_to_index_mapper = {
 }
 
 index_to_sensitivity_mapper = {sensitivity_to_index_mapper[key]:key for key in sensitivity_to_index_mapper}
+
+def get_nearest_time_constant(time):
+	"""Return the time constant closest to given time (by rounding up)"""
+	available_time_constants = list(time_constant_to_index_mapper.keys())
+	float_time_constants = []
+	float_to_str_dict = {}
+
+	if type(time) == str:
+		number, suffix = get_number_and_suffix(time)
+		float_time = float(str(number) + time_suffix_to_scientic_str(suffix))
+		time = float_time
+
+	for tc in available_time_constants:
+		number, suffix = get_number_and_suffix(tc)
+		floated_tc = float(str(number) + time_suffix_to_scientic_str(suffix))
+		float_time_constants.append(floated_tc)
+		float_to_str_dict.update({floated_tc:tc})
+
+	ordered_float_time_constants = np.array(sorted(float_time_constants))
+	time_constant = ordered_float_time_constants[ordered_float_time_constants>time][0] # take the first one
+	return float_to_str_dict[time_constant]
 
 def set_phase(lockin, phase=None):
 	"""Set the phase of the lockin.
@@ -130,10 +152,10 @@ def get_time_constant_from_frequency(frequency, multiplier = 3):
 
 
 	"""
-	number, suffix = misc._get_number_and_suffix(frequency)
-	freq = float(str(number) + misc.freq_mapper[suffix])
+	number, suffix = get_number_and_suffix(frequency)
+	freq = float(str(number) + freq_mapper[suffix])
 	time = multiplier*1/freq
-	sci_time = misc._scientific_notation(time)
+	sci_time = scientific_notation(time)
 	
 	exponent = sci_time.split('e')[-1]
 	counter = 0
@@ -165,7 +187,7 @@ def get_time_constant_from_frequency(frequency, multiplier = 3):
 		pass
 	tmp_out.replace('.','')
 	
-	tmp_out = tmp_out.split('e')[0] + misc.sci_to_time_mapper['e' + tmp_out.split('e')[-1]]
+	tmp_out = tmp_out.split('e')[0] + sci_to_time_mapper['e' + tmp_out.split('e')[-1]]
 	
 	return tmp_out
 
@@ -309,8 +331,8 @@ def set_internal_frequency(lockin, frequency):
 	"""
 
 	if type(frequency) == str:
-		number, suffix = misc._get_number_and_suffix(frequency.lower())
-		frequency = float('{}{}'.format(number, misc.freq_mapper[suffix]))
+		number, suffix = get_number_and_suffix(frequency.lower())
+		frequency = float('{}{}'.format(number, freq_mapper[suffix]))
 	else:
 		frequency = float(frequency)
 
@@ -329,8 +351,8 @@ def set_internal_amplitude(lockin, amplitude):
 	"""
 
 	if type(amplitude) == str:
-		number, suffix = misc._get_number_and_suffix(amplitude.lower())
-		amplitude = float('{}{}'.format(number, misc.voltage_amp_mapper[suffix]))
+		number, suffix = get_number_and_suffix(amplitude.lower())
+		amplitude = float('{}{}'.format(number, voltage_amp_mapper[suffix]))
 	else:
 		amplitude = float(amplitude)
 
