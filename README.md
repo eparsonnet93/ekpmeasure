@@ -381,6 +381,35 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 # Change log
 
+#### Version 0.1.1
+
+**11/2/21**
+
+- Updates to plotting during experimental control. Now one can simply override the `control.experiment` method `_plot` to define how plotting will take place. Here is a brief example of such an override:
+```python
+from ekpmeasure.control import plotting
+from ekpmeasure.control import experiment
+import matplotlib.pyplot as plt
+
+class experiment(experiment):
+
+	...
+
+	def _plot(self, data, scan_params):
+		if hasattr(self, 'fig') and hasattr(self, 'ax'):
+			pass
+		else:
+			fig, ax = plt.subplots()
+			self.fig = fig
+			self.ax = ax
+			
+		self.ax.scatter(scan_params['frequency'], np.mean(data['R']), color = 'blue')
+		plt.show(self.fig)
+		plotting.update_plot(self.fig)
+
+	...
+```
+
 #### Version 0.1.0
 
 **10/24/21**

@@ -109,6 +109,9 @@ class experiment():
 
 			.. code-block:: python
 
+				from ekpmeasure.control import plotting
+				import matplotlib.pyplot as plt
+
 				def _plot(self, data, scan_params):
 					if hasattr(self, 'fig') and hasattr(self, 'ax'):
 						pass
