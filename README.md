@@ -391,7 +391,7 @@ from ekpmeasure.control import plotting
 from ekpmeasure.control import experiment
 import matplotlib.pyplot as plt
 
-class experiment(experiment):
+class exp(experiment):
 
 	...
 
