@@ -1,4 +1,8 @@
-from ....universal import get_number_and_suffix, time_suffix_to_scientic_str, scientific_notation, freq_mapper, sci_to_time_mapper, voltage_amp_mapper
+from ....universal import (get_number_and_suffix, 
+	time_suffix_to_scientic_str, scientific_notation, 
+	frequency_suffix_to_scientific_str, 
+	scientific_str_to_time_suffix, 
+	voltage_suffix_to_scientic_str)
 import time
 import numpy as np
 
@@ -153,7 +157,7 @@ def get_time_constant_from_frequency(frequency, multiplier = 3):
 
 	"""
 	number, suffix = get_number_and_suffix(frequency)
-	freq = float(str(number) + freq_mapper[suffix])
+	freq = float(str(number) + frequency_suffix_to_scientific_str(suffix))
 	time = multiplier*1/freq
 	sci_time = scientific_notation(time)
 	
@@ -187,7 +191,7 @@ def get_time_constant_from_frequency(frequency, multiplier = 3):
 		pass
 	tmp_out.replace('.','')
 	
-	tmp_out = tmp_out.split('e')[0] + sci_to_time_mapper['e' + tmp_out.split('e')[-1]]
+	tmp_out = tmp_out.split('e')[0] + scientific_str_to_time_suffix('e' + tmp_out.split('e')[-1])
 	
 	return tmp_out
 
@@ -332,7 +336,7 @@ def set_internal_frequency(lockin, frequency):
 
 	if type(frequency) == str:
 		number, suffix = get_number_and_suffix(frequency.lower())
-		frequency = float('{}{}'.format(number, freq_mapper[suffix]))
+		frequency = float('{}{}'.format(number, frequency_suffix_to_scientific_str(suffix)))
 	else:
 		frequency = float(frequency)
 
@@ -352,7 +356,7 @@ def set_internal_amplitude(lockin, amplitude):
 
 	if type(amplitude) == str:
 		number, suffix = get_number_and_suffix(amplitude.lower())
-		amplitude = float('{}{}'.format(number, voltage_amp_mapper[suffix]))
+		amplitude = float('{}{}'.format(number, voltage_suffix_to_scientic_str(suffix)))
 	else:
 		amplitude = float(amplitude)
 
