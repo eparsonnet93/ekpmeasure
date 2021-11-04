@@ -339,17 +339,15 @@ class Dataset():
 		Remove references to files that do not exist in path. This may occur, for example, if you know certain data files are bad (and thus delete them from the data dir), but did not delete them while collecting data. 
 		"""
 		# determine available paths in the dataset
-		try: # case when self.path is a dict (key, value) = (path, indices corresponding to that path)
-			paths = list(self.path.keys())
-		except AttributeError:
-			assert type(self.path) == str, "Path is not string or dict. path is type {}".format(self.path)
-			paths = [self.path]
-			self.path = {self.path:self.meta_data.index.values}
+		if type(self.path) == str:
+			paths = {self.path:self.meta_data.index.values}
+		else:
+			paths = self.path
 			
 		remove_index = []
 			
 		for path in paths:
-			indices_to_check = self.path[path]
+			indices_to_check = paths[path]
 			existing_files = set(os.listdir(path))
 			pointercolumn_values_for_path = self.meta_data.iloc[indices_to_check][self.pointercolumn].values
 			
