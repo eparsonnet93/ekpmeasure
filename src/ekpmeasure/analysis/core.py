@@ -33,7 +33,6 @@ def construct_Dataset_from_dataframe(function):
 
 def _convert_ITP_to_path_to_index(index_to_path):
 	"""Convert index_to_path (``pandas.Series``) to path_to_index (``dict``) 
-	
 
 	args:
 		index_to_path (pandas.Series): index_to_path to convert
@@ -42,14 +41,7 @@ def _convert_ITP_to_path_to_index(index_to_path):
 		(dict): path_to_index, key is path and value is list of indices for that path
 
 	"""
-	path_to_index = dict()
-	for i in index_to_path.index:
-		index, path = i, index_to_path[i]
-		if path in set(path_to_index.keys()):
-			path_to_index[path].append(index)
-		else:
-			path_to_index.update({path:[index]})
-	return path_to_index
+	return {x:y.values for x,y in pd.Series(index_to_path.index, index = index_to_path.values).groupby(level=0)}
 
 def _check_file_exists(path, filename):
 	if filename in set(os.listdir(path)):
@@ -346,12 +338,24 @@ class Dataset():
 		"""
 		Remove references to files that do not exist in path. This may occur, for example, if you know certain data files are bad (and thus delete them from the data dir), but did not delete them while collecting data. 
 		"""
+		# determine available paths in the dataset
+		try: # case when self.path is a dict (key, value) = (path, indices corresponding to that path)
+			paths = list(self.path.keys())
+		except AttributeError:
+			assert type(self.path) == str, "Path is not string or dict. path is type {}".format(self.path)
+			paths = [self.path]
+			self.path = {self.path:self.meta_data.index.values}
+			
 		remove_index = []
-		for ind, path in enumerate(self.index_to_path):
-			if _check_file_exists(path, self.meta_data[self.pointercolumn].iloc[ind]):
-				continue
-			else:
-				remove_index.append(ind)
+			
+		for path in paths:
+			indices_to_check = self.path[path]
+			existing_files = set(os.listdir(path))
+			pointercolumn_values_for_path = self.meta_data.iloc[indices_to_check][self.pointercolumn].values
+			
+			for index, value in zip(indices_to_check, pointercolumn_values_for_path):
+				if value not in existing_files:
+					remove_index.append(index)
 
 		return self.remove_index(remove_index)
 
