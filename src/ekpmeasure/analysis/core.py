@@ -9,6 +9,7 @@ from matplotlib import cm
 from functools import wraps
 from numpy import AxisError
 import pickle
+from pprint import pformat
 
 
 __all__ = ('Dataset', 'Data',)
@@ -731,7 +732,7 @@ class iDataIndexer():
 			index = i
 		return Data({index: self.indexed_dict[index]})
 
-class Data(dict):
+class Data():
 	"""Data class for maintaining and manipulating the real data. Typically retrieved via ``Dataset.get_data()``
 
 
@@ -767,7 +768,7 @@ class Data(dict):
 			}
 
 		.. code-block:: python
-			
+
 			# one can access data and/or definition as an attribute
 			>>> data.definition
 			>{'frequency': {'1067hz'},
@@ -799,8 +800,22 @@ class Data(dict):
 	"""
 
 	def __init__(self, initializer):
-		super().__init__(initializer)
-
+		self._dict = dict(initializer)
+		
+	def __getitem__(self, key):
+		try:
+			return self._dict.__getitem__(key)
+		except KeyError:
+			return self.__getattr__(key)
+		
+	def __str__(self):
+		return self._dict.__str__()
+	
+	def __repr__(self):
+		return pformat(self._dict, indent=1,)
+		
+	def __len__(self):
+		return self._dict.__len__()
 
 	def __getattr__(self, key):
 		if key == 'definition' or key == 'data':            
@@ -809,24 +824,24 @@ class Data(dict):
 			return self._get_defn_attr(key)
 		except KeyError:
 			return self._get_data_attr(key)
-		
+
 	def _get_defn_attr(self, key):
 		if len(self) == 1:
-			return self[list(self.keys())[0]]['definition'][key]
-	
-		return {i:self[i]['definition'][key] for i in self}
-	
+			return self._dict[list(self._dict.keys())[0]]['definition'][key]
+
+		return {i:self._dict[i]['definition'][key] for i in self._dict}
+
 	def _get_data_attr(self, key):
 		if len(self) == 1:
-			return self[list(self.keys())[0]]['data'][key]
-	
-		return {i:self[i]['data'][key] for i in self}
-	
+			return self._dict[list(self._dict.keys())[0]]['data'][key]
+
+		return {i:self._dict[i]['data'][key] for i in self._dict}
+
 	def _get_defn_or_data(self, key):
 		if len(self) == 1:
-			return self[list(self.keys())[0]][key]
-		
-		return {i:self[i][key] for i in self}
+			return self._dict[list(self._dict.keys())[0]][key]
+
+		return {i:self._dict[i][key] for i in self._dict}
 
 	@property
 	def iloc(self):
@@ -839,21 +854,21 @@ class Data(dict):
 		example:
 
 			.. code-block:: python
-				
+
 				>>> Data.iloc[0]
-			
+
 		"""
-		return iDataIndexer(self.to_dict().copy())
+		return iDataIndexer(self._dict.copy())
 
 	@property 
 	def summary(self):
 		"""Return a summary of the definitions in data
-		
+
 		returns:
 			(dict): summary of the data included
 
 		"""
-		return _summarize_data(self.to_dict().copy())
+		return _summarize_data(self._dict.copy())
 
 	@property
 	def data_keys(self):
@@ -863,27 +878,27 @@ class Data(dict):
 		returns:
 			(list): data keys
 		"""
-		return list(self[list(self.keys())[0]]['data'].keys())
+		return list(self._dict[list(self._dict.keys())[0]]['data'].keys())
 
 	def sort_by_definition(self, definition_key, how=None, reverse=False):
 		"""Sort Data. 
-		
+
 		args:
 			definition_key (key): Key to sort by.
 			how (function): Method for sorting.
 			reverse (bool): Reverse sorting
-			
+
 		returns:
 			(Data): Sorted Data
 		"""
 		available_options = self.summary[definition_key]
 		sorted_keys = sorted(available_options, key=how, reverse=reverse)
-		
+
 		out = {}
-		
+
 		for i, key in enumerate(sorted_keys):
 			out.update({i: self.contains({definition_key:[key]})[0]})
-		
+
 		return Data(out)
 
 	def _get_indices_satisfying_definition_condtion(self, condition):
@@ -898,15 +913,15 @@ class Data(dict):
 		indices = [] #to hold which data satisfies condition
 
 		for condition_key in condition:
-			for index in self:
-				defn = self[index]['definition']
+			for index in self._dict:
+				defn = self._dict[index]['definition']
 				if _check_definition_contains_or(defn, condition_key, condition[condition_key]):
 					indices.append(index)
 		return indices
 
 	def filter(self, data_condition_function_dict, definition_condition_dict=None, additional_data_keys_to_filter=None):
 		"""Filter the data.
-		
+
 		args:
 			data_condition_function_dict (dict): a dict with one entry. key is data key, value is function which operates on a single value.
 			definition_condition_dict (dict): a dict specifying specific definition conditions, which when satisfied can allow their data to be operated on. If None, all data will be filtered.
@@ -918,25 +933,25 @@ class Data(dict):
 		Examples:
 
 			Filter the data such that the data key 'R' only contains values >10. This leaves all other data keys unchanged.
-			
+
 			.. code-block:: python
 
 				>>> Data.filter({'R': lambda x: x>10}) 
-			
+
 
 
 			Filter data corresponding to an amplitude of '500ua' such that data key 'R' contains only values >10.
-			
+
 			.. code-block:: python
 
 				>>> Data.filter({'R': lambda x: x>10}, {'amplitude':'500ua'}) 
-	
+
 			Filter data based on 'saturation' but also filter the 'switching_time' data.
-		
+
 			.. code-block:: python
 
 				>>> Data.filter({'saturation': lambda x: x > .003}, additional_data_keys_to_filter='switching_time')
-	
+
 
 			You may use this method to remove outliers, for example.
 
@@ -948,18 +963,18 @@ class Data(dict):
 			additional_data_keys_to_filter = []
 		else:
 			additional_data_keys_to_filter = np.array([additional_data_keys_to_filter]).flatten()
-		
+
 		assert len(data_condition_function_dict) <= 1, "more than one condition supplied in data_condition_function_dict. only one is supported at a time."
 		data_function_key = list(data_condition_function_dict)[0]
 		assert hasattr(data_condition_function_dict[data_function_key], '__call__'), "value associated with key '{}' in data_condition_function_dict is a not a function. is type {}".format(data_condition_function_dict, type(data_condition_function_dict[data_function_key]))
-		assert data_function_key in set(self[0]['data'].keys()), "data_function_key '{}' not in data. available keys are {}".format(data_function_key, set(self[0]['data'].keys()))
-		
+		assert data_function_key in set(self._dict[0]['data'].keys()), "data_function_key '{}' not in data. available keys are {}".format(data_function_key, set(self[0]['data'].keys()))
+
 		sat_indices = self._get_indices_satisfying_definition_condtion(definition_condition_dict)
 		if definition_condition_dict == {}:
-			sat_indices = set(self.keys())
-		all_index = set(self.keys())
+			sat_indices = set(self._dict.keys())
+		all_index = set(self._dict.keys())
 		not_sat_indices = all_index - set(sat_indices)
-		
+
 		func = data_condition_function_dict[data_function_key]
 
 		keys_to_update = [key for key in additional_data_keys_to_filter]
@@ -967,18 +982,18 @@ class Data(dict):
 		keys_to_update.append(data_function_key)
 		keys_to_update = keys_to_update[::-1]
 
-		
+
 		for index in sat_indices:
-			checker = self[index]['data'][data_function_key]
+			checker = self._dict[index]['data'][data_function_key]
 			for key in keys_to_update:
-				old = self[index]['data'][key]
+				old = self._dict[index]['data'][key]
 				old_shape = old.shape
 				#ensure that all keys in keys_to_update have the same dimensionality
 				if old_shape != checker.shape:
 					raise ValueError('data corresponding to data_key "{}" does not have the same shape as data corresponding to data_function_key "{}"'.format(key, data_function_key))
-				self[index]['data'].update({key:old[func(checker)]})
-			
-		return Data(self.to_dict())
+				self._dict[index]['data'].update({key:old[func(checker)]})
+
+		return Data(self._dict)
 
 	def contains(self, condition):
 		"""Returns data specified by condition.
@@ -988,11 +1003,11 @@ class Data(dict):
 
 		returns:
 			(Data): data satisfying condition 
-		
+
 		examples:
 
 			.. code-block:: python
-				
+
 				#Providing multiple values will be joined by logical or, i.e.
 				Data.contains({'high_voltage_v':{'100mv', '200mv'}})
 				#will search for all data with '100mv' OR '200mv' for high_voltage_v. 
@@ -1002,7 +1017,7 @@ class Data(dict):
 				#will search for x = 1 AND y = 2.
 
 
-	
+
 		"""
 		indices = self._get_indices_satisfying_definition_condtion(condition)
 
@@ -1021,7 +1036,7 @@ class Data(dict):
 		#build the final Data:
 		out = {}
 		for new, old in enumerate(indices_out):
-			out.update({new: self[old]})
+			out.update({new: self._dict[old]})
 
 		return Data(out)
 
@@ -1036,12 +1051,12 @@ class Data(dict):
 		returns:
 			(Data): averaged data across 0th axis.
 		"""
-		
+
 		if not inplace:
 			tmp_out = {}
-			for key in self:
-				tmp_out.update({key:self[key].copy()})
-				data = self[key]['data']
+			for key in self._dict:
+				tmp_out.update({key:self._dict[key].copy()})
+				data = self._dict[key]['data']
 				mean_data = {}
 				for k in data:
 					if len(data[k].shape) == 1: #1d data
@@ -1065,8 +1080,8 @@ class Data(dict):
 			(numpy.array): Concatenated array of all data corresponding to data_key for all indices in self. 
 
 		"""
-		for ijk, i in enumerate(self):
-			current = self[i]['data'][data_key].flatten()
+		for ijk, i in enumerate(self._dict):
+			current = self._dict[i]['data'][data_key].flatten()
 			if ijk == 0:
 				out = current
 				continue
@@ -1078,7 +1093,7 @@ class Data(dict):
 		"""Apply data_function to the data in each index. ``**kwargs`` will be passed to data_function.
 
 		args:
-			function_on_data (function): f(dict) -> dict. Function is passed the data_dict (corresponding to self[index]['data']).
+			function_on_data (function): f(dict) -> dict. Function is passed the data_dict for each index.
 			pass_defn (bool): Whether or not to pass the definition to function_on_data. If True, will be passed with other kwargs. 
 			ignore_errors (bool): If True, errors in function_on_data will be printed, but not raised. Resulting data will be original data. If False, errors will be raised.
 
@@ -1088,7 +1103,7 @@ class Data(dict):
 		examples:
 
 			.. code-block:: python
-				
+
 				>>> some_data
 				>
 				{
@@ -1128,7 +1143,7 @@ class Data(dict):
 		"""
 
 		data_function = function_on_data
-		tmp_out = self.to_dict().copy()
+		tmp_out = self._dict.copy()
 
 		for key in tmp_out.keys():
 			try:
@@ -1169,7 +1184,7 @@ class Data(dict):
 
 		returns:
 			(dict): a dict class with identical structure"""
-		return {key: self[key] for key in self.keys()}
+		return self._dict
 
 	def plot(self, x=None, y=None, ax=None, color = None, cmap = 'viridis', labelby = None, **kwargs):
 		"""
@@ -1197,38 +1212,38 @@ class Data(dict):
 			raise KeyError('cmap "{}" not supported. Supported colormaps are {}'.format(cmap, cm.cmaps_listed.keys()))  
 
 		if color == None:
-			colors = [cm.cmaps_listed[cmap](x) for x in np.linspace(0, 1, len(self.keys()))]
+			colors = [cm.cmaps_listed[cmap](x) for x in np.linspace(0, 1, len(self._dict.keys()))]
 		else: 
-			colors = [color for i in range(len(self.keys()))]
+			colors = [color for i in range(len(self._dict.keys()))]
 
-		for color, index in zip(colors, self.keys()):
+		for color, index in zip(colors, self._dict.keys()):
 			if x == None:
-				data_keys_to_plot = list(self[index]['data'].keys())
+				data_keys_to_plot = list(self._dict[index]['data'].keys())
 			else:
-				xs = self[index]['data'][x]
-				data_keys_to_plot = set(self[index]['data'].keys()) - set({x})
+				xs = self._dict[index]['data'][x]
+				data_keys_to_plot = set(self._dict[index]['data'].keys()) - set({x})
 
 			if labelby == None:
 				label = None
 			else:
-				label = self[index]['definition'][labelby]
+				label = self._dict[index]['definition'][labelby]
 
 			if type(y) == type(None):
 				pass
 			else:
 				data_keys_to_plot = set(np.array([y]).flatten())
-				
+
 
 			for plotkey in data_keys_to_plot:
-				to_plot = self[index]['data'][plotkey]
-				
+				to_plot = self._dict[index]['data'][plotkey]
+
 				if len(to_plot.shape) == 1: #1d data
 					if x == None:
 						ax.plot(to_plot, color = color, label = label, **kwargs)
 					else:
 						ax.plot(xs, to_plot, color = color, label = label, **kwargs)
 					continue
-					
+
 				for i in range(to_plot.shape[0]):
 					if i == 0: #label only the first becuase we don't want a big legend with many trials
 						if x == None:
@@ -1275,38 +1290,38 @@ class Data(dict):
 			raise KeyError('cmap "{}" not supported. Supported colormaps are {}'.format(cmap, cm.cmaps_listed.keys()))  
 
 		if color == None:
-			colors = [cm.cmaps_listed[cmap](x) for x in np.linspace(0, 1, len(self.keys()))]
+			colors = [cm.cmaps_listed[cmap](x) for x in np.linspace(0, 1, len(self._dict.keys()))]
 		else: 
-			colors = [color for i in range(len(self.keys()))]
+			colors = [color for i in range(len(self._dict.keys()))]
 
-		for color, index in zip(colors, self.keys()):
+		for color, index in zip(colors, self._dict.keys()):
 			if x == None:
-				data_keys_to_plot = list(self[index]['data'].keys())
+				data_keys_to_plot = list(self._dict[index]['data'].keys())
 			else:
-				xs = self[index]['data'][x]
-				data_keys_to_plot = set(self[index]['data'].keys()) - set({x})
+				xs = self._dict[index]['data'][x]
+				data_keys_to_plot = set(self._dict[index]['data'].keys()) - set({x})
 
 			if labelby == None:
 				label = None
 			else:
-				label = self[index]['definition'][labelby]
+				label = self._dict[index]['definition'][labelby]
 
 			if type(y) == type(None):
 				pass
 			else:
 				data_keys_to_plot = set(np.array([y]).flatten())
-				
+
 
 			for plotkey in data_keys_to_plot:
-				to_plot = self[index]['data'][plotkey]
-				
+				to_plot = self._dict[index]['data'][plotkey]
+
 				if len(to_plot.shape) == 1: #1d data
 					if x == None:
 						ax.scatter(to_plot, color = color, label = label, **kwargs)
 					else:
 						ax.scatter(xs, to_plot, color = color, label = label, **kwargs)
 					continue
-					
+
 				for i in range(to_plot.shape[0]):
 					if i == 0: #label only the first becuase we don't want a big legend with many trials
 						if x == None:
@@ -1326,3 +1341,34 @@ class Data(dict):
 			return fig, ax
 		else:
 			return ax
+			
+	def sort(self, by, key=None, reverse=False):
+		sorter = _data_sorter(self._dict, by).sort(key=key, reverse=reverse)
+		sorted_out = {}
+		index = 0
+		for i in sorter.values:
+			sorted_out.update({index:self._dict[sorter.value_index_mapper[i]]})
+			index += 1
+			
+		return Data(sorted_out)
+	
+class _data_sorter():
+	
+	def __init__(self, _dict, _definition_key):
+		self._dict = _dict
+		self._definition_key = _definition_key
+		self._keys = list(_dict.keys())
+		self.values = []
+		self.value_index_mapper = {}
+		
+	def sort(self, key=None, reverse=False):
+		for i in self._keys:
+			definition_value = self._dict[i]['definition'][self._definition_key]
+			assert len(definition_value) == 1, "Definition for index '{}' is not unique. It contains multiple values: {}. Cannot sort.".format(self._keys[self.index], definition_value)
+			value = list(definition_value)[0]
+			self.values.append(value)
+			self.value_index_mapper.update({value:i})
+			
+		self.values = sorted(self.values, key = key, reverse = reverse)
+			
+		return self
