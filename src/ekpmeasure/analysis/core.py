@@ -770,6 +770,7 @@ class Data():
 		.. code-block:: python
 
 			# one can access data and/or definition as an attribute
+			
 			>>> data.definition
 			>{'frequency': {'1067hz'},
 			   'amplitude': {'500ua'},
