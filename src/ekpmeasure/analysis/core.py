@@ -359,13 +359,13 @@ class Dataset():
 		return self.remove_index(remove_index)
 
 
-	def _group(self, by):
+	def _group(self, by, level=None):
 		"""Group data by 'by' and return a pandas dataframe. makes use of pandas.groupby
 
 		args:
 			by (str, int, label or array-like of): on what to group. 
 		"""
-		groups = self.meta_data.groupby(by = by).groups
+		groups = self.meta_data.groupby(by = by, level = level).groups
 		for ijk, key in enumerate(groups):
 			original_dataset_indices = groups[key]
 			new_row = None
@@ -564,7 +564,7 @@ class Dataset():
 				>>> data.data_keys
 				['time', 'p1', 'p2']
 
-				>>> data[0]['data']['p1'] # This corresponds to a single trial (1D data)
+				>>> data.iloc[0].p1 # This corresponds to a single trial (1D data)
 				array([  0.00898495,  0.00765674,  0.00351585, ..., -0.00679731,
 						-0.00101569, -0.00039065])
 
@@ -575,7 +575,7 @@ class Dataset():
 
 				# let's retrieve the data but with grouping
 				>>> data = dset.get_data(groupby = 'high_voltage_v')
-				>>> data[0]['data']['p1'] #vstack of all different .csv files grouped by high_voltage_v (a meta data parameter)
+				>>> data.iloc[0]['p1'] #vstack of all different .csv files grouped by high_voltage_v (a meta data parameter)
 				array([[ 0.00898495,  0.00765674,  0.00351585, ..., -0.00679731,
 						-0.00101569, -0.00039065],
 					   [-0.02172014, -0.02773615, -0.03695549, ..., -0.0203138 ,
@@ -612,15 +612,15 @@ class Dataset():
 		readfileby = self.readfileby
 
 		if type(groupby) == type(None):
-			data_to_retrieve = self._group(by = pointercolumn) #gives us a unique col for each
+			data_to_retrieve = self._group(by = None, level = 0) # gives us a unique col for each
 		else:
 			data_to_retrieve = self._group(by = groupby)
 
 		out = {}
-		for counter, i in enumerate(data_to_retrieve.index): #for each row
-			#data_to_retrieve.at[i, self.pointercolumn] is a dict
+		for counter, i in enumerate(data_to_retrieve.index): # for each row
+			# NOTE data_to_retrieve.at[i, self.pointercolumn] is a dict
 			filename_index_to_path_dict = data_to_retrieve.at[i, self.pointercolumn]
-			for k, index_of_original in enumerate(filename_index_to_path_dict): #datafile in the set of datafiles in that row
+			for k, index_of_original in enumerate(filename_index_to_path_dict):
 				try:
 					tdf = readfileby(self.index_to_path[index_of_original] + filename_index_to_path_dict[index_of_original])
 				except Exception as e:
