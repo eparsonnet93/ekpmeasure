@@ -381,6 +381,12 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 # Change log
 
+#### Version 0.1.2
+
+**11/7/21**
+- Speed improvements to `Dataset.remove_nonexistent_files`
+- `Data` objects can now be sorted by a definition parameter
+
 #### Version 0.1.1
 
 **11/2/21**

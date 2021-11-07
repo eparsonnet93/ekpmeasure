@@ -807,6 +807,12 @@ class Data():
 			return self._dict.__getitem__(key)
 		except KeyError:
 			return self.__getattr__(key)
+
+	def __iter__(self):
+		return self._dict.__iter__()
+	
+	def __next__(self):
+		return self._dict.__next__()
 		
 	def __str__(self):
 		return self._dict.__str__()
@@ -1341,8 +1347,68 @@ class Data():
 			return fig, ax
 		else:
 			return ax
-			
+
 	def sort(self, by, key=None, reverse=False):
+		"""
+		Sort `Data` by definition key. This might be useful, for example in plotting with color maps. This Method sorts Data over mulitple indices, does not sort Data within an index. 
+
+		args:
+			by (str or key): Definition key. The definition key that you are sorting on must be unique for each index in your `Data` object. 
+			key (function): Method for accessing value to sort.
+			reverse (bool): Reverse order
+
+		returns:
+			(Data): Sorted Data
+
+		examples:
+
+			Sort Data on parameter 'test'
+
+			.. code-block:: python
+
+				>>> data = dset.get_data()
+				>>> data.summary
+				> 
+				{'param': {'v'},
+				 'test': {0, 1, 2, 3, 4},
+				 'test2': {'100mv', '15mv', '1mv', '20mv', '32mv'}}
+
+				# Sort by definition key 'test'
+				>>> data = data.sort(by='test')
+
+				# Confirm sorted:
+				>>> data.test
+				> {0: {0}, 1: {1}, 2: {2}, 3: {3}, 4: {4}}
+
+				### Sort in reverse order:
+
+				>>> data = dset.get_data()
+				>>> data.sort(by = 'test', reverse = True).test
+				> {0: {4}, 1: {3}, 2: {2}, 3: {1}, 4: {0}}
+
+			
+			Sort Data on a key that is not int or float:
+
+			.. code-block:: python
+
+				>>> data = dset.get_data()
+				>>> data.summary
+				> 
+				{'param': {'v'},
+				 'test': {0, 1, 2, 3, 4},
+				 'test2': {'100mv', '15mv', '1mv', '20mv', '32mv'}}
+				
+				# unsorted data
+				>>> data.test2
+				> {0: {'1mv'}, 1: {'100mv'}, 2: {'20mv'}, 3: {'15mv'}, 4: {'32mv'}}
+
+				# Sort by definition key 'test2'
+				>>> sort_by = lambda x: float(x.replace('mv', '')) # get rid of 'mv' suffix and convert to float
+				>>> data = data.sort(by='test2', key=sort_by)
+				>>> data.test2
+				> {0: {'1mv'}, 1: {'15mv'}, 2: {'20mv'}, 3: {'32mv'}, 4: {'100mv'}}
+
+		"""
 		sorter = _data_sorter(self._dict, by).sort(key=key, reverse=reverse)
 		sorted_out = {}
 		index = 0
@@ -1353,6 +1419,67 @@ class Data():
 		return Data(sorted_out)
 	
 class _data_sorter():
+	"""Class for sorting data. Upon running `self.sort` self contains two attributes, `.values` and `.value_index_mapper`. `values` contains the sorted values corresponding to arg `_definition_key` and `value_index_mappper` is a dict mapping each (sorted) value to a `Data` index. 
+		
+		args:
+			_dict (dict): Dict representation of Data object. 
+			_definition_key (str or key): Definition key to sort on.
+
+		examples:
+
+			One can explicitly use the _data_sorter class
+
+			.. code-block:: python 
+
+				>>> data = dset.get_data()
+				>>> data.summary
+				> {'test':{0,1,2,3,4}}
+
+				# Create a sorter for definition key 'test' 
+				>>> sorter = _data_sorter(data._dict, 'test')
+				>>> sorter.sort()
+				>>> sorted_out = {}
+				>>> index = 0
+				>>> for i in sorter.values:
+						sorted_out.update({index:self._dict[sorter.value_index_mapper[i]]})
+						index += 1
+				>>> Data(sorted_out)
+				> 
+				{0: {'data': {'R': array([1, 2, 3], dtype=int64)},
+					 'test': {0}}},
+				 1: {'data': {'R': array([1, 2, 3], dtype=int64)},
+					 'test': {1}}},
+				 2: {'data': {'R': array([1, 2, 3], dtype=int64)},
+					 'test': {2}}},
+				 3: {'data': {'R': array([1, 2, 3], dtype=int64)},
+					 'test': {3}}},
+				 4: {'data': {'R': array([1, 2, 3], dtype=int64)},
+					 'test': {4}}}}
+
+			The same exact functionality can be accessed with `Data.sort()`
+
+			.. code-block:: python
+
+				>>> data = dset.get_data()
+				>>> test.summary
+				> {'data':{0,1,2,3,4}}
+
+				# Sort by definition key 'test'
+				>>> data.sort(by='test')
+				> 
+				{0: {'data': {'R': array([1, 2, 3], dtype=int64)},
+					 'test': {0}}},
+				 1: {'data': {'R': array([1, 2, 3], dtype=int64)},
+					 'test': {1}}},
+				 2: {'data': {'R': array([1, 2, 3], dtype=int64)},
+					 'test': {2}}},
+				 3: {'data': {'R': array([1, 2, 3], dtype=int64)},
+					 'test': {3}}},
+				 4: {'data': {'R': array([1, 2, 3], dtype=int64)},
+					 'test': {4}}}}
+
+
+		"""
 	
 	def __init__(self, _dict, _definition_key):
 		self._dict = _dict
@@ -1362,9 +1489,19 @@ class _data_sorter():
 		self.value_index_mapper = {}
 		
 	def sort(self, key=None, reverse=False):
+		"""
+		Populate attributes `.values` and `value_index_mapper`. 
+
+		args:
+			key (function): Method for accessing value to sort. 
+			reverse (bool): Reverse order
+
+		returns:
+			(_data_sorter) 
+		"""
 		for i in self._keys:
 			definition_value = self._dict[i]['definition'][self._definition_key]
-			assert len(definition_value) == 1, "Definition for index '{}' is not unique. It contains multiple values: {}. Cannot sort.".format(self._keys[self.index], definition_value)
+			assert len(definition_value) == 1, "Definition for index '{}' is not unique. It contains multiple values: {}. Cannot sort.".format(i, definition_value)
 			value = list(definition_value)[0]
 			self.values.append(value)
 			self.value_index_mapper.update({value:i})
