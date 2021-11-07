@@ -887,27 +887,6 @@ class Data():
 		"""
 		return list(self._dict[list(self._dict.keys())[0]]['data'].keys())
 
-	def sort_by_definition(self, definition_key, how=None, reverse=False):
-		"""Sort Data. 
-
-		args:
-			definition_key (key): Key to sort by.
-			how (function): Method for sorting.
-			reverse (bool): Reverse sorting
-
-		returns:
-			(Data): Sorted Data
-		"""
-		available_options = self.summary[definition_key]
-		sorted_keys = sorted(available_options, key=how, reverse=reverse)
-
-		out = {}
-
-		for i, key in enumerate(sorted_keys):
-			out.update({i: self.contains({definition_key:[key]})[0]})
-
-		return Data(out)
-
 	def _get_indices_satisfying_definition_condtion(self, condition):
 		"""need docstring"""
 		for key in condition:
