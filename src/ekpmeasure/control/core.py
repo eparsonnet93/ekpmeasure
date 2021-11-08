@@ -201,11 +201,13 @@ class experiment():
 			
 			for params in iterable_param_list:
 				kwargs = fixed_params
+				current_scan_params = {} # just the scanning params
 				for i, key in enumerate(scan_param_order[::-1]):
 					kwargs.update({key:params[i]})
+					current_scan_params.update({key:params[i]})
 				for count in range(ntrials):
 					iteration += 1
-					print('Scan {} of {}'.format(iteration, total_scans))
+					print('Scan {} of {}. {}'.format(iteration, total_scans, current_scan_params))
 					
 					trial_df = trial(self.run_function, kwargs, self.path, return_df = True)
 					if plot:
