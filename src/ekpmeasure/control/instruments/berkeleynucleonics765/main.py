@@ -182,9 +182,10 @@ def initialize_2pulse(pg, polarity = 'up', channel = '1', pulsewidth = '10e-9', 
 	pg.write('trig:seq:sour man')
 	pg.write('outp'+pgchannel+':stat on')
 	pg.write('PULSEGENControl:START')
-	if pg.query('syst:err:next?') != 'Error: 0, No error\n':
+	error_check = pg.query('syst:err:next?')
+	if error_check != 'Error: 0, No error\n':
 		stop(pg,)
-		raise ValueError('error in initialize_2pulse init')
+		raise ValueError('error in initialize_2pulse init. Error Message: {}'.format(error_check))
 		
 	return
 
