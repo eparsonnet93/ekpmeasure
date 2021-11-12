@@ -1,4 +1,4 @@
-from ..misc import _get_number_and_suffix
+from ....universal import _get_number_and_suffix
 import numpy as np
 
 

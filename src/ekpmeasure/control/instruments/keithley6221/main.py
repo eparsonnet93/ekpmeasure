@@ -1,5 +1,6 @@
 import numpy as np
 from .. import misc
+from ....universal import get_number_and_suffix
 
 __all__ = ('restore', 'set_output_sin', 'set_wave_on', 'set_wave_off')
 
@@ -27,10 +28,10 @@ def set_output_sin(current_source, frequency, amplitude, compliance = 1.1):
     """
     restore(current_source)
     
-    freq_number, freq_suffix = misc._get_number_and_suffix(frequency)
+    freq_number, freq_suffix = get_number_and_suffix(frequency)
     if freq_suffix not in set(misc.freq_mapper.keys()):
         raise KeyError('frequency suffix {} is not allowed. (allowed are khz and hz)'.format(freq_suffix))
-    amp_number, amp_suffix = misc._get_number_and_suffix(amplitude)
+    amp_number, amp_suffix = get_number_and_suffix(amplitude)
     if amp_suffix not in set(misc.current_amp_mapper.keys()):
         raise KeyError('amplitude suffix {} is not allowed. (allowed are ma and ua)'.format(amp_suffix))
         
