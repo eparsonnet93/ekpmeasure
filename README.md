@@ -381,6 +381,11 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 # Change log
 
+#### Version 0.1.3
+
+**11/11/21**
+- Minor fixes for deprecations
+
 #### Version 0.1.2
 
 **11/7/21**
