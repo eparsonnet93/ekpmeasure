@@ -125,14 +125,31 @@ class data_array_builder(list):
     def __init__(self,):
         super().__init__()
     
-    def build(self,):
+    def build(self,fix_lengths=True):
         """Build the final array (create a numpy.vstack).
+
+        args:
+            fix_lengths (bool): Whether or not to append nans to make lengths match. Only works with 1D data. 
 
         returns:
             (numpy.vstack): VStacks all items in the data_array_builder.
 
         """
+        if fix_lengths:
+            for thing in self:
+                if len(thing.shape)!=1:
+                    raise ValueError('Data is not 1-dimensional. (has shape {}). Cannot fix lengths. Try again with fix_lengths=False')
+        
+        target_length = 0
+        
         for thing in self:
+            if len(thing)>target_length:
+                target_length = len(thing)
+
+        for thing in self:
+            # get thing into target shape
+            while len(thing) != target_length:
+                thing = np.concatenate((thing, np.array([np.nan])))
             try:
                 out = np.vstack((out, thing))
             except NameError:
