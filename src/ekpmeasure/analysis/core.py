@@ -1076,7 +1076,7 @@ class Data():
 		return out
 
 	def apply(self, function_on_data, pass_defn=False, ignore_errors=True,**kwargs):
-		"""Apply data_function to the data in each index. ``**kwargs`` will be passed to data_function.
+		"""Apply data_function to the data in each index. ``**kwargs`` will be passed to data_function. If function_on_data returns 'None', that piece of data will be dropped. 
 
 		args:
 			function_on_data (function): f(dict) -> dict. Function is passed the data_dict for each index.
@@ -1129,35 +1129,39 @@ class Data():
 		"""
 
 		data_function = function_on_data
-		tmp_out = self._dict.copy()
+		tmp_out = {}
+		new_key = 0
 
-		for key in tmp_out.keys():
+		for key in self._dict.keys():
 			try:
 
 				if pass_defn:
 					#ensure no overlap between passed arguments and definition arguments:
-					overlap = set(kwargs.keys()).intersection(set(tmp_out[key]['definition'].keys()))
+					overlap = set(kwargs.keys()).intersection(set(self._dict[key]['definition'].keys()))
 					if len(overlap) != 0:
 						raise ValueError('kwargs passed in both definition and as kwargs in .apply(). Overlapping keys are "{}"'.format(overlap))
 
-					to_pass = tmp_out[key]['definition'].copy()
+					to_pass = self._dict[key]['definition'].copy()
 					for key in kwargs:
 						to_pass.update({key:kwargs})
 					internal_out = {
-						'definition':tmp_out[key]['definition'],
-						'data':data_function(tmp_out[key]['data'].copy(), defn = tmp_out[key]['definition'], **to_pass)
+						'definition':self._dict[key]['definition'],
+						'data':data_function(self._dict[key]['data'].copy(), defn = self._dict[key]['definition'], **to_pass)
 					}
 				else:
 					internal_out = {
-						'definition':tmp_out[key]['definition'],
-						'data':data_function(tmp_out[key]['data'].copy(), **kwargs)
+						'definition':self._dict[key]['definition'],
+						'data':data_function(self._dict[key]['data'].copy(), **kwargs)
 					}
+				if internal_out['data'] == 'None':
+					continue
 
-				tmp_out.update({key:internal_out})
+				tmp_out.update({new_key:internal_out})
+				new_key += 1
 			except Exception as e:
 				if ignore_errors:
 					print('Error in data_function: {} \n{}'.format(data_function.__name__, e))
-					print('Skipping data key: {} with defintion: \n{}'.format(key, tmp_out[key]['definition']))
+					print('Skipping data key: {} with defintion: \n{}'.format(key, self._dict[key]['definition']))
 				else:
 					raise e
 
