@@ -381,10 +381,17 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 # Change log
 
+#### Version 0.1.4
+
+**11/16/21**
+- `Data.apply` now allows for dropping data. This can be executed by having the function in `.apply` return `'None'`.
+- `data_array_builder.build` now allows one to fix lengths on 1D data by appending nans to make all data arrays the same length.
+- `analysis.plotting.add_legend_element` now allows kwarg fontsize
+
 #### Version 0.1.3
 
 **11/11/21**
-- Minor fixes for deprecations
+- Minor fixes for deprecations in `control.misc`
 
 #### Version 0.1.2
 
