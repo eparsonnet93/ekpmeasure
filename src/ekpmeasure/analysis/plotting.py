@@ -19,7 +19,7 @@ lane_martin = {
 }
 
 
-def add_legend_element(ax, label, color, **kwargs):
+def add_legend_element(ax, label, color, fontsize = 'auto', **kwargs):
     """
     Add element to legend for matplotlib.axis. For ``**kwargs`` see `matplotlib.lines.line2D <https://matplotlib.org/stable/api/_as_gen/matplotlib.lines.Line2D.html>`_
 
@@ -27,6 +27,7 @@ def add_legend_element(ax, label, color, **kwargs):
         ax (matplotlib.axis): Axis to add legend element.
         label (str or int or float): Label for legend element.
         color (str or color): Color for legend element.
+        fontsize (str or float): Fontsize for the legend. Default is 'auto'. 
 
     returns:
         (matplotlib.axis): Axis with updated legend
@@ -49,7 +50,10 @@ def add_legend_element(ax, label, color, **kwargs):
 
     elements.append(Line2D([0], [0], label=label, color = color, **kwargs))
 
-    ax.legend(handles = elements)
+    if fontsize == 'auto':
+        ax.legend(handles = elements)
+    else:
+        ax.legend(handles = elements, fontsize = fontsize)
     return ax
 
 def format_legend(ax, **kwargs):
