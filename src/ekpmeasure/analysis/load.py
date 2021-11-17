@@ -95,13 +95,27 @@ def _build_df(path, meta_data):
 
 def generate_meta_data(path, mapper, pass_path = False, pointercolumn = 'filename', overwrite = False):
 	"""
-	Generate meta_data from a path for a given mapper function. 
+	Generate meta_data from a path for a given mapper function. **Important** mapper must include pointercolumn which is `(key,value) = ('<pointer column name>', <filename>)`. Default is to call such a column `filename`, i.e. {'filename':'a.csv'}
 
 	args:
 		path (str): Specify the path to the directory
 		mapper ( function ) : filename (str) -> dict. A function which operates on a single file name in order to get the columns (dict key) and values (dict value) for meta_data of that file.
 		pointercolumn (str) : The name of the pointercolumn in the created meta_data
 		overwrite (bool) : True will overwrite any existing meta_data in path. 
+
+
+	examples:
+
+		.. code-block:: python
+
+			def mapper(file, path):
+				path_to_file = path + file
+
+				meta_data = {'filename':file} # not full path to file, just file in path dir
+
+				return meta_data
+
+			generate_meta_data(path, mapper, pointercolumn = 'filename')
 	"""
 	if 'meta_data' in set(os.listdir(path)):
 		if not overwrite:
