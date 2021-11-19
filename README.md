@@ -388,6 +388,10 @@ We welcome new contributors of all experience levels. Please reach out directly 
 - `data_array_builder.build` now allows one to fix lengths on 1D data by appending nans to make all data arrays the same length.
 - `analysis.plotting.add_legend_element` now allows kwarg fontsize
 
+**11/19/21**
+- `Data` can now be saved. Use `data.to_ekpdat`.
+	- Can be loaded as `analysis.read_ekpdat`
+
 #### Version 0.1.3
 
 **11/11/21**
