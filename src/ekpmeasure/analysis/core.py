@@ -887,6 +887,15 @@ class Data():
 		"""
 		return list(self._dict[list(self._dict.keys())[0]]['data'].keys())
 
+	def to_ekpdat(self, file):
+		"""Save file as `.ekpdat` file.
+
+		args:
+			file (str): Path to file
+		"""
+		with open(file, 'wb') as f:
+			pickle.dump(self._dict, f)
+
 	def _get_indices_satisfying_definition_condtion(self, condition):
 		"""need docstring"""
 		for key in condition:

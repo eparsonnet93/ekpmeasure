@@ -32,8 +32,19 @@ def load_Dataset(path, meta_data = None):
 
 	return Dataset(path, _build_df(path, meta_data))
 
+
+def read_ekpdat(filename):
+	"""Read Data from `.ekpdat` file.
+
+	args:
+		filename (str): Path to file
+
+	returns:
+		(Data): Data
+	"""
+
 def read_ekpds(filename):
-	"""Read a Dataset from ``.ekpds`` file.
+	"""Read a Dataset from `.ekpds` file.
 
 	args:
 		filename (str): Path to file
@@ -95,7 +106,7 @@ def _build_df(path, meta_data):
 
 def generate_meta_data(path, mapper, pass_path = False, pointercolumn = 'filename', overwrite = False):
 	"""
-	Generate meta_data from a path for a given mapper function. **Important** mapper must include pointercolumn which is `(key,value) = ('<pointer column name>', <filename>)`. Default is to call such a column `filename`, i.e. {'filename':'a.csv'}
+	Generate meta_data from a path for a given mapper function. **Important** mapper must include pointercolumn which is `(key,value) = ('<pointer column name>', <filename>)`. Default is to call such a column `filename`, i.e. `{'filename':'a.csv'}`
 
 	args:
 		path (str): Specify the path to the directory
