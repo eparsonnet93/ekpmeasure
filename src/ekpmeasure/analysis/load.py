@@ -8,7 +8,7 @@ import ast
 
 from .core import Dataset
 
-__all__ = ('load_Dataset', 'generate_meta_data', 'read_ekpds')
+__all__ = ('load_Dataset', 'generate_meta_data', 'read_ekpds', 'read_ekpdat')
 
 def load_Dataset(path, meta_data = None):
 	"""
