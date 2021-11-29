@@ -3,11 +3,11 @@ import numpy as np
 import time
 
 
-from ..instruments.lakeshore647 import ramp_powersupply_to_current
-from ..instruments.lakeshore475 import measure_field
-from ..instruments import keithley6221 as k6221
-from ..instruments import srs830 as srs 
-from .. import core
+from ...control.instruments.lakeshore647 import ramp_powersupply_to_current
+from ...control.instruments.lakeshore475 import measure_field
+from ...control.instruments import keithley6221 as k6221
+from ...control.instruments import srs830 as srs 
+from ...control import core
 
 
 __all__ = ('measure_field_and_lockin', 'gmr', 'cyclic_gmr', 'GMR')

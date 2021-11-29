@@ -1,9 +1,9 @@
-from ..instruments.berkeleynucleonics765 import *
-from ..instruments.tektronixTDS620B import get_wf_from_scope as tds620B_get_wf
-from ..instruments.tektronixTDS6604 import initialize_scope as initialize_scope_tds6604
-from ..instruments.tektronixTDS6604 import get_waveform as get_wf_tds6604
-from ..misc import get_save_name
-from .. import core
+from ...control.instruments.berkeleynucleonics765 import *
+from ...control.instruments.tektronixTDS620B import get_wf_from_scope as tds620B_get_wf
+from ...control.instruments.tektronixTDS6604 import initialize_scope as initialize_scope_tds6604
+from ...control.instruments.tektronixTDS6604 import get_waveform as get_wf_tds6604
+from ...control.misc import get_save_name
+from ...control import core
 import pandas as pd
 import numpy as np
 import os 
