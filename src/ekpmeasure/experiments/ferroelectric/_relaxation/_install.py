@@ -5,7 +5,7 @@ __all__ = ('install', )
 
 def install(name='Relaxation.ipynb'):
 
-	if name[-6] != '.ipynb':
+	if name[-6:] != '.ipynb':
 		name += '.ipynb'
 
 	lines = _copy()
