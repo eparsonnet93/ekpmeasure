@@ -4,9 +4,9 @@ from pathlib import Path
 
 def install_interface():
     """ Installs Seeq Add-on Tool """
-    parser = argparse.ArgumentParser(description='Install Relaxation')
+    parser = argparse.ArgumentParser(description='Install Switching')
     parser.add_argument('--name', type=str,
-                        help='Name of notebook to create', default='Relaxation.ipynb')
+                        help='Name of notebook to create', default='Switching.ipynb')
     return parser.parse_args()
 
 
