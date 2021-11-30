@@ -1,5 +1,5 @@
-from ...control import core
-from ...control.instruments.berkeleynucleonics765 import stop
+from ....control import core
+from ....control.instruments.berkeleynucleonics765 import stop
 from ..switching import preset_run_function
 import pandas as pd
 import numpy as np
