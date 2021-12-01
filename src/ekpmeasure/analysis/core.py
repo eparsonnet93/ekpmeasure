@@ -1404,10 +1404,8 @@ class Data():
 		"""
 		sorter = _data_sorter(self._dict, by).sort(key=key, reverse=reverse)
 		sorted_out = {}
-		index = 0
-		for i in sorter.values:
-			sorted_out.update({index:self._dict[sorter.value_index_mapper[i]]})
-			index += 1
+		for i in sorter.mapper:
+			sorted_out.update({i:self._dict[sorter.mapper[i]]})
 			
 		return Data(sorted_out)
 	
@@ -1432,10 +1430,8 @@ class _data_sorter():
 				>>> sorter = _data_sorter(data._dict, 'test')
 				>>> sorter.sort()
 				>>> sorted_out = {}
-				>>> index = 0
-				>>> for i in sorter.values:
-						sorted_out.update({index:self._dict[sorter.value_index_mapper[i]]})
-						index += 1
+				>>> for i in sorter.mapper:
+						sorted_out.update({i:data._dict[sorter.mapper[i]]})
 				>>> Data(sorted_out)
 				> 
 				{0: {'data': {'R': array([1, 2, 3], dtype=int64)},
@@ -1478,8 +1474,6 @@ class _data_sorter():
 		self._dict = _dict
 		self._definition_key = _definition_key
 		self._keys = list(_dict.keys())
-		self.values = []
-		self.value_index_mapper = {}
 		
 	def sort(self, key=None, reverse=False):
 		"""
@@ -1492,13 +1486,20 @@ class _data_sorter():
 		returns:
 			(_data_sorter) 
 		"""
+		values = []
+		if type(key) == type(None):
+			key = lambda x: x
+
 		for i in self._keys:
 			definition_value = self._dict[i]['definition'][self._definition_key]
 			assert len(definition_value) == 1, "Definition for index '{}' is not unique. It contains multiple values: {}. Cannot sort.".format(i, definition_value)
 			value = list(definition_value)[0]
-			self.values.append(value)
-			self.value_index_mapper.update({value:i})
-			
-		self.values = sorted(self.values, key = key, reverse = reverse)
+			values.append(value)	
+
+		float_values = [key(value) for value in values]
+		argsort = np.argsort(float_values)
+		if reverse:
+			argsort = argsort[::-1]
+		self.mapper = {i:old_index for i, old_index in enumerate(argsort)}
 			
 		return self

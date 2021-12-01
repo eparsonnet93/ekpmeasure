@@ -26,7 +26,7 @@ class FE(core.experiment):
 
 	"""
 
-	def __init__(self, pg, scope, scopetype = '6604',run_function = preset_run_function):
+	def __init__(self, pg, scope, scopetype='6604',run_function=preset_run_function):
 		super().__init__()
 		if scopetype != '6604' and scopetype != '620B':
 			raise ValueError('must specify scope type as either 6604 or 620B (corresponding to the correct scope you are using)')
