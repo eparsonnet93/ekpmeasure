@@ -383,6 +383,10 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 #### Version 0.1.4
 
+**12/2/21**
+- Added experiments module with `ferroelectric` experiments. This contains both relaxation (`_relaxation`) and switching (`_switching`) experiments. These consist of self contained jupyter notebooks that can be installed by `python -m ekpmeasure.experiments.ferroelectric.<experiment_name>`. For more see the experiment specific README for [relaxation](https://github.com/eparsonnet93/ekpmeasure/tree/main/src/ekpmeasure/experiments/ferroelectric/_relaxation) or [switching](https://github.com/eparsonnet93/ekpmeasure/tree/main/src/ekpmeasure/experiments/ferroelectric/_switching)
+- Bug fix on `Data.sort`
+
 **11/16/21**
 - `Data.apply` now allows for dropping data. This can be executed by having the function in `.apply` return `'None'`.
 - `data_array_builder.build` now allows one to fix lengths on 1D data by appending nans to make all data arrays the same length.
