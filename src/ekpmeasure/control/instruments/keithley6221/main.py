@@ -2,7 +2,7 @@ import numpy as np
 from .. import misc
 from ....universal import get_number_and_suffix
 
-__all__ = ('restore', 'set_output_sin', 'set_wave_on', 'set_wave_off')
+__all__ = ('restore', 'set_output_sin', 'set_wave_on', 'set_wave_off', 'is_on')
 
 def restore(current_source):
     """Restore settings on current source.
@@ -61,6 +61,22 @@ def set_wave_on(current_source):
     current_source.write("SOUR:WAVE:ARM")
     current_source.write("SOUR:WAVE:INIT")
     return
+
+def is_on(current_source):
+    """Query the current source as on or off.
+
+    args:
+        current_source (pyvisa.resources.gpib.GPIBInstrument): Keithley 6221
+
+    returns:
+        (bool): True (on) or False (off)
+    """
+    result = current_source.query('output?')
+    if float(result.replace('\n', '')) == 1:
+        return True
+    else:
+        return False
+
 
 def set_wave_off(current_source):
     """Turn off the current source.
