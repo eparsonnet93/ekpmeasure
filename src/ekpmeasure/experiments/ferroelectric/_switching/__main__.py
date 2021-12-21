@@ -3,7 +3,7 @@ import argparse
 from pathlib import Path
 
 def install_interface():
-    """ Installs Seeq Add-on Tool """
+    """ Installs Notebook """
     parser = argparse.ArgumentParser(description='Install Switching')
     parser.add_argument('--name', type=str,
                         help='Name of notebook to create', default='Switching.ipynb')
