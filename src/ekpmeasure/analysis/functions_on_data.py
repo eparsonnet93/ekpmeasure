@@ -1,6 +1,41 @@
 import numpy as np
 
-__all__ = ('_fod_dimensionality_fixer', 'iterable_data_array', 'data_array_builder')
+__all__ = ('_fod_dimensionality_fixer', 'iterable_data_array', 'data_array_builder', 'not_nan_indexer')
+
+def not_nan_indexer(tpl:()):
+    """
+    Return an indexer of good indices (not nan) which checks all arrays in the tpl. Resulting indexer will work for all elements in tpl.
+
+    args:
+        tpl (array-like): Array-like of arrays to find good indices in.
+
+    examples:
+
+        .. code-block:: python
+
+            angle = fod.iterable_data_array(data_dict, 'angle')
+            r_ida = fod.iterable_data_array(data_dict, 'R')
+            
+            for a, r in zip(angle, r_ida):
+                indexer = fod.not_nan_indexer((a, r)) # retun only non-nans for both `a` and `r`
+                a = a[indexer] # access not nan
+                r = r[indexer] # acces not nan
+    """
+    l = len(tpl[0])
+    for t in tpl:
+        assert len(t) == l, 'Not all arrays in tpl have the same length.'
+
+    indexer = []
+    for i in range(l):
+        # checker will be 0 if all are not nan
+        checker = sum(np.isnan([tpl[j][i] for j in range(len(tpl))]))
+        if checker == 0:
+            indexer.append(True)
+
+        else:
+            indexer.append(False)
+
+    return indexer
 
 
 class iterable_data_array():
@@ -8,7 +43,7 @@ class iterable_data_array():
     Iterable for usage building functions on data. 
 
     args:
-        data_dict (dict): data
+        data_dict (dict): Dict of Data
         key (str or key): Key for which to return iterable data array.
 
     Examples:
@@ -27,7 +62,7 @@ class iterable_data_array():
             [1,2,3]
         
     """
-    def __init__(self, data_dict, key):
+    def __init__(self, data_dict, key, dropna_on_pass=True):
         
         data_dict = self._data_dimensionality_fixer(data_dict)
         array = data_dict[key]

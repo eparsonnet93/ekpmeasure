@@ -1036,12 +1036,12 @@ class Data():
 		return Data(out)
 
 
-	def mean(self, inplace = False):
+	def mean(self, inplace=False):
 		"""
 		Return data class where data is averaged across 0th axis. This is best used for averaging across trials or similar.
 
 		args:
-			inplace (bool): do operation inplace
+			inplace (bool): Do operation inplace
 
 		returns:
 			(Data): averaged data across 0th axis.
