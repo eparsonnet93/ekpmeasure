@@ -21,6 +21,8 @@ I am always improving this repository and if you have suggestions, I appreciate 
    :maxdepth: 2
    :caption: Contents:
 
+   getting_started
+
    start
 
    modules

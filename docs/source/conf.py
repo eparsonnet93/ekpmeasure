@@ -22,7 +22,7 @@ copyright = '2021, Eric Parsonnet'
 author = 'Eric Parsonnet'
 
 # The full version, including alpha/beta/rc tags
-release = 'v0.0.10'
+release = 'v0.1.5'
 
 
 # -- General configuration ---------------------------------------------------
