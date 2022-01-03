@@ -9,11 +9,3 @@ Subpackages
 
    ekpmeasure.analysis
    ekpmeasure.control
-
-Module contents
----------------
-
-.. automodule:: ekpmeasure
-   :members:
-   :undoc-members:
-   :show-inheritance:
