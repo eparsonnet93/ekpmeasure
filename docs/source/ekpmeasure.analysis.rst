@@ -1,4 +1,4 @@
-Analysis
+ekpmeasure.analysis package
 ===========================
 
 Subpackages
@@ -15,7 +15,7 @@ Subpackages
 Submodules
 ----------
 
-.core module
+ekpmeasure.analysis.core module
 -------------------------------
 
 .. automodule:: ekpmeasure.analysis.core
@@ -23,7 +23,7 @@ Submodules
    :undoc-members:
    :show-inheritance:
 
-.data\_utils module
+ekpmeasure.analysis.data\_utils module
 --------------------------------------
 
 .. automodule:: ekpmeasure.analysis.data_utils
@@ -31,7 +31,7 @@ Submodules
    :undoc-members:
    :show-inheritance:
 
-.functions\_on\_data module
+ekpmeasure.analysis.functions\_on\_data module
 ----------------------------------------------
 
 .. automodule:: ekpmeasure.analysis.functions_on_data
@@ -39,7 +39,7 @@ Submodules
    :undoc-members:
    :show-inheritance:
 
-.load module
+ekpmeasure.analysis.load module
 -------------------------------
 
 .. automodule:: ekpmeasure.analysis.load
@@ -47,7 +47,7 @@ Submodules
    :undoc-members:
    :show-inheritance:
 
-.plotting module
+ekpmeasure.analysis.plotting module
 -----------------------------------
 
 .. automodule:: ekpmeasure.analysis.plotting
@@ -55,10 +55,18 @@ Submodules
    :undoc-members:
    :show-inheritance:
 
-.utils module
+ekpmeasure.analysis.utils module
 --------------------------------
 
 .. automodule:: ekpmeasure.analysis.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: ekpmeasure.analysis
    :members:
    :undoc-members:
    :show-inheritance:
