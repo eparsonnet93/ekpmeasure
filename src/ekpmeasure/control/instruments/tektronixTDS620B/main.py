@@ -3,7 +3,7 @@ import numpy as np
 
 __all__ = ('get_wf_from_scope',)
 
-def get_wf_from_scope(scope, channel = 'ch1'):
+def get_wf_from_scope(scope, channel='ch1'):
     """Get displayed waveform from single channel.
 
     args:

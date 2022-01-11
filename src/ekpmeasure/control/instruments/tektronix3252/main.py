@@ -52,7 +52,7 @@ def set_pulse_delay(pulse_gen, delay, channel = 1, both = False):
 
     return
 
-def start_pulse_gen(pulse_gen, channel = 1, both = False):
+def start_pulse_gen(pulse_gen, channel=1, both=False):
     """
     Start the pulse generator.
 
@@ -72,7 +72,7 @@ def start_pulse_gen(pulse_gen, channel = 1, both = False):
         pulse_gen.write('OUTPut{}:STATe ON'.format(channel))
     return
 
-def stop_pulse_gen(pulse_gen, channel = 1, both = False):
+def stop_pulse_gen(pulse_gen, channel=1, both=False):
     """
     Stop the pulse generator.
 

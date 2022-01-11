@@ -1,4 +1,178 @@
-__all__= ('single_pulse_SCPI', 'symmetric_up_down_SCPI', 'initialize_2pulse', 'initialize_pulse', 'manual_trigger','initialize_trig', 'stop')
+from ....universal import get_number_and_suffix, time_to_sci_mapper, voltage_amp_mapper
+
+
+# __all__= ('single_pulse_SCPI', 'symmetric_up_down_SCPI', 
+# 	'initialize_2pulse', 'initialize_pulse', 'manual_trigger',
+# 	'initialize_trig', 'stop',
+# 	'set_pulse_mode'
+# 	)
+
+
+__all__  = ('get_pulse_mode', 'set_pulse_mode', 'set_pulse_width', 'set_pulse_delay',
+	'set_pulse_mode', 'set_polarity', 'set_channel_on', 'set_channel_off', 'set_low_voltage', 
+	'set_high_voltage', 'set_trigger_mode', 'set_trigger_source', 'set_trigger_input_slope',
+	'set_trigger_input_threshold', 'check_errors', 'clear_errors', 'stop', 'start',
+	# next will soon be deprecated
+	'single_pulse_SCPI', 'symmetric_up_down_SCPI', 
+	'initialize_2pulse', 'initialize_pulse', 'manual_trigger',
+	'initialize_trig', 'stop')
+
+pulse_modes = {'single', 'double', 'triple', 'quadruple'}
+channels = {'ch1', 'ch2'}
+puslewidth_suffixes = {'ns', 'us', 'ms'}
+triggers = {'external', 'timer', 'manual'}
+trigger_modes = {'single', 'burst', 'gated', 'continuous'}
+trigger_slopes = {'rising', 'falling'}
+
+def check_channel(channel: str):
+	if channel.lower() not in channels:
+		raise ValueError('Channel "{}" not allowed. Please use one of {}'.format(channel, channels))
+	else:
+		return channel[-1]
+
+def get_pulse_mode(pg, channel: str):
+	"""Return 'single', 'double', 'triple', 'quadruple'"""
+	channel_int_str = check_channel(channel)
+	out = pg.query("output{}:pulse:mode?".format(channel_int_str)).replace('\n', '').lower()
+	if out not in {'single','double', 'triple', 'quadruple'}:
+		raise ValueError('Expected .get_pulse_mode to return one of {}. Instead got {}'.format("'single','double', 'triple', 'quadruple'", "out"))
+	return out
+
+def set_pulse_mode(pg, pulse_mode: str, channel: str = 'Ch1'):
+	"""docstring"""
+	if pulse_mode.lower() not in pulse_modes:
+		raise ValueError('Pulse mode "{}" not allowed. Please use one of {}'.format(pulse_mode, pulse_modes))
+
+	channel_int_str = check_channel(channel)
+
+	pg.write('output{}:pulse:mode {}'.format(channel_int_str, pulse_mode))
+	return
+
+def _check_pulse_count_vs_pulse_mode(pulse_count: int, pulse_mode: str):
+	checker_dict = {'single':1,'double':2, 'triple':3, 'quadruple':4}
+	if pulse_count>checker_dict[pulse_mode]:
+		raise ValueError('Cannot modify pulse number {} in pulse mode "{}"'.format(pulse_count, pulse_mode))
+
+def set_pulse_width(pg, pulsewidth: str, pulse_count: int = 1, channel: str = 'Ch1'):
+	"""docstring"""
+	if pulsewidth[-2:] not in puslewidth_suffixes:
+		raise ValueError('Pulsewidth "{}" not allowed. Allowed are {}'.format(pulsewidth, puslewidth_suffixes))
+
+	channel_int_str = check_channel(channel)
+	pulse_mode = get_pulse_mode(pg, channel)
+
+	_check_pulse_count_vs_pulse_mode(pulse_count, pulse_mode)
+
+	pg.write('source{}:pulse{}:width {}'.format(channel_int_str,pulse_count,pulsewidth))
+	return
+
+def set_pulse_delay(pg, delay: str, pulse_count: int = 1, channel: str = 'Ch1'):
+	"""docstring"""
+
+	channel_int_str = check_channel(channel)
+	pulse_mode = get_pulse_mode(pg, channel)
+
+	_check_pulse_count_vs_pulse_mode(pulse_count, pulse_mode)
+
+	number, suffix = get_number_and_suffix(delay)
+	scientific_delay = str(number)+time_to_sci_mapper[suffix]
+
+	pg.write('source{}:pulse{}:delay {}'.format(channel_int_str, pulse_count, scientific_delay))
+	return
+
+
+def set_polarity(pg, inverted: bool = False, channel: str = "Ch1"):
+	"""docstring"""
+	channel_int_str = check_channel(channel)
+	_dict = {True: 'on', False: 'off'}
+	pg.write("source{}:inv {}".format(channel_int_str, _dict[inverted]))
+	return
+
+def set_high_voltage(pg, high_voltage: str, channel: str = 'Ch1'):
+	"""docstring"""
+	channel_int_str = check_channel(channel)
+	number, suffix = get_number_and_suffix(high_voltage)
+	if suffix.lower() not in {'v', 'mv'}:
+		raise ValueError('High Voltage "{}" not allowed. Must have suffix "V or mV"'.format(high_voltage))
+
+	pg.write("source{}:voltage:level:immediate:high {}".format(channel_int_str, high_voltage))
+	return
+
+
+def set_low_voltage(pg, low_voltage: str, channel: str = 'Ch1'):
+	"""docstring"""
+	channel_int_str = check_channel(channel)
+	number, suffix = get_number_and_suffix(low_voltage)
+	if suffix.lower() not in {'v', 'mv'}:
+		raise ValueError('Low Voltage "{}" not allowed. Must have suffix "V or mV"'.format(low_voltage))
+
+	pg.write("source{}:voltage:level:immediate:low {}".format(channel_int_str, low_voltage))
+	return
+
+def set_trigger_source(pg, _type: str):
+	if _type.lower() not in triggers:
+		raise ValueError('Trigger type "{}" not allowed, must be {}'.format(_type, triggers))
+
+	pg.write('trig:seq:sour {}'.format(_type))
+	return
+
+def set_trigger_mode(pg, _mode: str):
+	if _mode.lower() not in trigger_modes:
+		raise ValueError('Trigger mode "{}" not allowed, must be {}'.format(_mode, trigger_modes))
+
+	pg.write('trig:seq:mode {}'.format(_mode))
+	return
+
+def set_trigger_input_slope(pg, _type: str):
+	if _type.lower() not in trigger_slopes:
+		raise ValueError('Trigger slope {} not allowed, must be {}'.format(_type, trigger_slopes))
+
+	pg.write('trig:seq:slope {}'.format(_type))
+	return
+
+def set_trigger_input_threshold(pg, threshold_voltage: str):
+	number, suffix = get_number_and_suffix(threshold_voltage)
+	if suffix.lower() not in {'v', 'mv'}:
+		raise ValueError('Threshold Voltage "{}" not allowed. Must have suffix "V or mV"'.format(threshold_voltage))
+
+	pg.write('trig:seq:threshold {}'.format(str(number) + voltage_amp_mapper[suffix]))
+	return
+
+def start(pg):
+	pg.write('PULSEGENControl:START')
+	return
+
+def stop(pg):
+	pg.write('PULSEGENControl:STOP')
+
+def check_errors(pg):
+	error_check = pg.query('syst:err:next?')
+
+	if error_check != 'Error: 0, No error\n':
+		raise ValueError('Error. Error Message: {}'.format(error_check))
+
+	return
+
+def clear_errors(pg, max_iterations: int = 10):
+	error_check = pg.query('syst:err:next?')
+	_iter = 0
+	while error_check != 'Error: 0, No error\n':
+		_iter += 1
+		if _iter>=max_iterations:
+			raise ValueError('Maximum number of iterations reached in clearing errors.')
+		error_check = pg.query('syst:err:next?')
+
+	return
+
+def set_channel_on(pg, channel: str = 'Ch1'):
+	channel_int_str = check_channel(channel)
+	pg.write('outp{}:stat on'.format(channel_int_str))
+	return
+
+def set_channel_off(pg, channel: str = 'Ch1'):
+	channel_int_str = check_channel(channel)
+	pg.write('outp{}:stat off'.format(channel_int_str))
+	return
 
 def single_pulse_SCPI(pulsewidth, updown, high_voltage, low_voltage, channel = '1', *args, **kwargs):
 	"""
