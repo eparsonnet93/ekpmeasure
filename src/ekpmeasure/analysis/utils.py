@@ -6,16 +6,16 @@ import warnings
 from .core import Dataset, Data
 from .core import _convert_ITP_to_path_to_index
 
-__all__ = ('merge_Datasets', 'merge_Datas')
+__all__ = ('merge_Datasets', 'merge_Datas', 'concat_Datas', 'concat_Datasets')
 
-def merge_Datas(datas):
-	"""Merge data.
+def concat_Datas(datas):
+	"""Concatenate data.
 
 	args:
 		datas (iter of Data): Iterable of Data objects to merge.
 
 	returns:
-		(Data): Merged data.
+		(Data): Concatenated data.
 
 	"""
 
@@ -33,14 +33,90 @@ def merge_Datas(datas):
 
 	return Data(out)
 
+def merge_Datas(tpl, by:str):
+	"""Merge tpl of Data on definition key (by). 
+	
+	args:
+		tpl (array-like): Array-like of Data objects
+		by (str): Definition key to merge on
+		
+	returns:
+		(Data): Merged Data. 
+		
+	example:
+	
+		.. code-block:: python
+		
+			>> data1 = Data({
+				0 : {
+					'definition': {'param1':{'eric'}, 'param2':{'merge_on'}},
+					'data':{'data1':[0,1,2]}
+				}
+			})
+
+			>> data2 = Data({
+				0 : {
+					'definition': {'param1':{'othername'}, 'param2':{'merge_on'}},
+					'data':{'data1':[3,4,5]}
+				}
+			})
+			
+			>> merge_Datas((data1, data2), by='param2')
+			> {0: {  'data': {'data1_0': [0, 1, 2], 'data1_1': [3, 4, 5]},
+					 'definition': {'param1_0': {'eric'},
+									'param1_1': {'othername'},
+									'param2': {'merge_on'}}}}
+									
+			>> data3 = Data({
+				0 : {
+					'definition': {'param1':{'eric'}, 'param2':{'this will be its own index'}},
+					'data':{'data1':[0,1,2]}
+				}
+			})
+			> {0: {'data': {'data1_0': [0, 1, 2], 'data1_1': [3, 4, 5]},
+				 'definition': {'param1_0': {'eric'},
+								'param1_1': {'othername'},
+								'param2': {'merge_on'}}},
+			 1: {'data': {'data1_0': [0, 1, 2]},
+				 'definition': {'param1_0': {'eric'},
+								'param2': {'this will be its own index'}}}}
+	
+	"""
+	by_options = concat_Datas(tpl).summary[by]
+	
+	out_dict = dict()
+	
+	for i, b in enumerate(by_options):
+		
+		definition_dicts = []
+		data_dicts = []
+		
+		for dat in tpl:
+			tdat = dat.contains({'{}'.format(by):[b]})
+			if len(tdat)==0:
+				continue
+			if len(tdat)>1:
+				raise ValueError("At least one Data has more than one index corresponding to condition: data.contains({{'{}':[{}]}}). Try grouping before matching?".format(by, b))
+			definition_dicts.append(tdat.definition)
+			data_dicts.append(tdat.data)
+			
+		defn = _merge_datadefinition_dicts(definition_dicts, by=by)
+		data_dict = _merge_datadefinition_dicts(data_dicts, by=by)
+		out_dict.update({i:{'definition':defn, 'data':data_dict}})
+		
+	return Data(out_dict)
+
 def merge_Datasets(datasets):
-	"""Merge datasets.
+	raise NameError('merge_Datasets was deprecated following version 0.1.4. Use "concat_Datasets" instead! (It has the exact some functionality)')
+
+def concat_Datasets(datasets):
+	"""Concatenate datasets.
 
 	args:
 		datasets (iter of Dataset): Iterable of Dataset objects to merge.
 
 	returns:
-		(Dataset): Merged dataset.
+		(Dataset): Concatenated dataset.
 
 	"""
 	
@@ -70,3 +146,24 @@ def merge_Datasets(datasets):
 	path = _convert_ITP_to_path_to_index(new_path)
 	
 	return Dataset(path,new_df,readfileby=readfileby)
+
+
+def _merge_datadefinition_dicts(tpl, by:str):
+	"""Merge data_dict or definition dict.
+	
+	args:
+		tpl (array-like): Array-like of dicts
+		by (str): Key to merge on. 
+	
+	"""
+	try:
+		out = {'{}'.format(by): tpl[0][by]}
+	except KeyError:
+		out = dict()
+	for i, _dict in enumerate(tpl):
+		for key in _dict:
+			if key == by:
+				continue
+			out.update({'{}_{}'.format(key, i):_dict[key]})
+			
+	return out

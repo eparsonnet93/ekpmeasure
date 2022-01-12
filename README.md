@@ -381,6 +381,14 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 # Change log
 
+#### Version 0.1.5
+
+**1/12/22**
+- `merge_Datas` was replaced. The older version is now `concat_Datas` as it was really just concatenation, not merging. Merging now has real meaning, to merge a set of similar data objects on a specified definition key. Please report errors as they arise.
+
+- similary `merge_Datasets` is deprecated. One must use `concat_Datasets`. 
+
+
 #### Version 0.1.4
 
 **12/2/21**
