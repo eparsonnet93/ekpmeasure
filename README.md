@@ -176,7 +176,7 @@ and done, this is all of the data for 100ms where the color corresponds to the a
 
 ```python
 >>> type(data)
-> ekpmeasure.analysis.core.Data #subclass of Dict
+> ekpmeasure.analysis.core.Data
 ```
 
 This [`ekpmeasure.analysis.core.Data`](#https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.analysis.html#ekpmeasure.analysis.core.Data) is integer indexed and holds the raw data as well as a definition (describing the meta data) for each index. Let's take a look:
