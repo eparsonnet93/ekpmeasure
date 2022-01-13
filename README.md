@@ -369,7 +369,7 @@ You can also access `.whl` or `.tar.gz` files in the `dist/` directory directly 
 
 For installation issues, please see [Issue Tracker](https://github.com/eparsonnet93/ekpmeasure/issues)
 
-There are also specific [experiments](#https://github.com/eparsonnet93/ekpmeasure/tree/main/src/ekpmeasure/experiments) that can be installed following installation of `ekpmeasure`. Please see the accompanying readme (*e.g.*, [here](#https://github.com/eparsonnet93/ekpmeasure/blob/main/src/ekpmeasure/experiments/ferroelectric/_fastPUND/README.md)) for such cases. 
+There are also specific [experiments](https://github.com/eparsonnet93/ekpmeasure/tree/main/src/ekpmeasure/experiments) that can be installed following installation of `ekpmeasure`. Please see the accompanying readme (*e.g.*, [here](https://github.com/eparsonnet93/ekpmeasure/blob/main/src/ekpmeasure/experiments/ferroelectric/_fastPUND/README.md)) for such cases. 
 
 ---
 # Development
