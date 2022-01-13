@@ -50,7 +50,7 @@ def reset_time(data_dict, key = 'p1', cutoff = 0.01, grace = 10):
 
 
     """
-    assert set(data_dict.keys()) == set({'p1', 'p2', 'time'}), "data_dict keys ({}) do not match required keys: {}".format(set(data_dict.keys()), set({'p1', 'p2', 'time'}))
+    assert set({'p1', 'p2', 'time'}).issubset(set((data_dict.keys()))), "data_dict keys ({}) do not match required keys: {}".format(set(data_dict.keys()), set({'p1', 'p2', 'time'}))
     
     key = key.lower()
     
