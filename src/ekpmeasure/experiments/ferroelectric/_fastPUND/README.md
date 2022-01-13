@@ -8,6 +8,12 @@ python -m ekpmeasure.experiments.ferroelectric._fastPUND --name <notebook_name>
 
 This will create a notebook with name `<notebook_name>` which can be used to run the fast PUND measurements.
 
+# Measurement Schematic
+
+
+[![N|Scheme](imgs/schematic.png)](#https://github.com/eparsonnet93/ekpmeasure/tree/main/src/ekpmeasure/experiments/ferroelectric/_fastPUND)
+
+
 # List of Instruments Used:
 
 1. [Berkeley Nucleonics Fast Rise Time Pulse Generator](#https://www.berkeleynucleonics.com/model-765-800-mhz-fast-rise-time-pulse-generator)
