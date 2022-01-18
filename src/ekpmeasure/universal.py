@@ -54,6 +54,7 @@ def frequency_suffix_to_scientific_str(freq_suffix):
     returns:
         (str): Scientific notation str
     """
+    freq_suffix = freq_suffix.replace('H', 'h').replace('Z', 'z')
     assert freq_suffix in set(freq_mapper.keys()), "Suffix {} not in freq_mapper. Allowed keys are {}".format(freq_suffix, list(freq_mapper.keys()))
     return freq_mapper[freq_suffix]
 
