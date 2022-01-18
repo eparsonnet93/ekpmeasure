@@ -1,12 +1,6 @@
 from ....universal import get_number_and_suffix, time_to_sci_mapper, voltage_amp_mapper
 
 
-# __all__= ('single_pulse_SCPI', 'symmetric_up_down_SCPI', 
-# 	'initialize_2pulse', 'initialize_pulse', 'manual_trigger',
-# 	'initialize_trig', 'stop',
-# 	'set_pulse_mode'
-# 	)
-
 
 __all__  = ('get_pulse_mode', 'set_pulse_mode', 'set_pulse_width', 'set_pulse_delay',
 	'set_pulse_mode', 'set_polarity', 'set_channel_on', 'set_channel_off', 'set_low_voltage', 
