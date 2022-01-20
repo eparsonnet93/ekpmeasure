@@ -122,7 +122,7 @@ def get_dps(data_dict, R = 50):
     return {'time':data_dict['time'], 'dp':worker.build()}
 
 
-def smooth(data_dict, key='dp', N = 3, Wn = 0.05):
+def smooth(data_dict, key='dp', N=3, Wn=0.05):
     """
     Apply butterworth filter (scipy.signal.butter) to specified key of data.
 
@@ -152,7 +152,7 @@ def smooth(data_dict, key='dp', N = 3, Wn = 0.05):
     out.update({key:for_out.build()})
     return out
 
-def subtract_median_of_lastN(data_dict, key = 'dp', N=20):
+def subtract_median_of_lastN(data_dict, key='dp', N=20):
     """
     Subtract the median of the last N samples. This may be used to account for constant offsets in the noise floor, for example.
 

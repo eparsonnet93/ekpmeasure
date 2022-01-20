@@ -69,7 +69,7 @@ def get_vals_by_definition(data, definition_key, data_key):
 			out.update({out_key:[app for app in to_append]})
 	return out
 
-def vals_by_definition_to_2darray(vals_by_definition, converter = 'Default'):
+def vals_by_definition_to_2darray(vals_by_definition, converter='Default', ascending=True):
 	"""Convert vals by definition to 2d array. Typically used for plotting and after .get_vals_by_definition().
 
 	args:
@@ -78,6 +78,7 @@ def vals_by_definition_to_2darray(vals_by_definition, converter = 'Default'):
 			```
 			converter = lambda x: float(x)
 			```
+		ascending (bool): Return X in ascending or descending order
 
 	returns:
 		(numpy.array (2D)): X, Y
@@ -111,5 +112,13 @@ def vals_by_definition_to_2darray(vals_by_definition, converter = 'Default'):
 		x = [converter(key) for i in y]
 		xout = np.concatenate((xout, x))
 		yout = np.concatenate((yout, y))
+
+	indexer = list(np.argsort(xout))
+	if ascending:
+		xout = xout[indexer]
+		yout = yout[indexer]
+	else:
+		xout = xout[indexer[::-1]]
+		yout = yout[indexer[::-1]]
 		
 	return np.vstack((xout, yout))

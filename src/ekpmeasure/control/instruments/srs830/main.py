@@ -71,7 +71,7 @@ def set_phase(lockin, phase=None):
 		lockin.write("phas {}".format(phase))
 	return
 
-def initialize_lockin(lockin, trigger, harmonic, time_constant, frequency = None, amplitude = None,):
+def initialize_lockin(lockin, trigger, harmonic, time_constant, frequency=None, amplitude=None,):
 	"""Initialize lockin.
 
 	args:
