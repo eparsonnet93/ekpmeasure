@@ -327,11 +327,12 @@ from matplotlib import cm
 from ekpmeasure.universal import get_number_and_suffix, time_suffix_to_scientic_str
 
 # sort the pulsewidths in the dataset
-pws = list(dset.summary['pump_pw'])
 def sorter(pw):
 	number, suffix = get_number_and_suffix(pw)
 	return float(str(number) + time_suffix_to_scientic_str(suffix))
-pws = sorted(pws, key = sorter)
+
+# group, average over trials, sort by 'pump_pw'
+data = dset.get_data(groupby='pump_pw').mean().sort(by='pump_pw', key=sorter)
 
 # generate a color map for each pulsewidth
 cmap = cm.plasma
@@ -340,12 +341,14 @@ colors = [cmap(x) for x in np.linspace(0,1,len(pws))]
 # set up a plot
 fig, ax = plt.subplots()
 
-for pw, color in zip(pws, colors):
-	tmpdata = dset.query("pump_pw == '{}'".format(pw)).get_data() 
+for tmpdata, color in zip(data, colors):
 	# calculate 
 	diff_data = tmpdata.apply(find_avg_P_loop1_loop2).apply(difference)
+
+	# want to plot versus 'pump_amp', a definition key
 	vbd = analysis.get_vals_by_definition(diff_data, definition_key='pump_amp', data_key='difference')
 	X, Y = analysis.vals_by_definition_to_2darray(vbd, converter = lambda x: float(x.replace('V', '')))
+	
 	ax.scatter(X, Y, color = color)
 ```
 
