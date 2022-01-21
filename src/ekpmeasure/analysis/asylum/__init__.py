@@ -1,1 +1,2 @@
-from .main import *
+from ._load import *
+from ._plot import *
