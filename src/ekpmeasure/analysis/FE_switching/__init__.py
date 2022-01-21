@@ -1,2 +1,2 @@
-from .main import *
-from .functions_on_data import *
+from ._load import *
+from ._data_funcs import *

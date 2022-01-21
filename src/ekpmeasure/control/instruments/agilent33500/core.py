@@ -1,6 +1,6 @@
-from ....universal import get_number_and_suffix, current_suffix_to_scientific_str, voltage_suffix_to_scientic_str
+from ....universal import get_number_and_suffix, current_suffix_to_scientific_str, frequency_suffix_to_scientific_str, voltage_suffix_to_scientic_str
 
-__all__ = ('stop', 'start', 'apply')
+__all__ = ('stop', 'start', 'apply', 'set_output_load')
 
 def stop(inst,):
 	"""Stop the waveform generator output"""
@@ -67,13 +67,13 @@ def apply(inst, waveform: str, frequency: str, amplitude: str, offset: str='0v',
 	"""
 	channel = _check_channel(channel)
 
-	options = ['sin', 'ramp', 'square']
+	options = ['sin', 'ramp', 'square','dc']
 	waveform = waveform.lower()
 	assert waveform in options, 'waveform must be ({}) not {}'.format(options, waveform)
 
 
 	freq_number, freq_suffix = get_number_and_suffix(frequency)
-	freq = str(freq_number) + current_suffix_to_scientific_str(freq_suffix)
+	freq = str(freq_number) + frequency_suffix_to_scientific_str(freq_suffix)
 
 	amp_number, amp_suffix = get_number_and_suffix(amplitude)
 	amp = str(amp_number) + voltage_suffix_to_scientic_str(amp_suffix)
@@ -89,5 +89,22 @@ def apply(inst, waveform: str, frequency: str, amplitude: str, offset: str='0v',
 
 	return
 
+def set_output_load(agilent33500, load:str):
+	"""Set the output load impedance.
 
+	
+	args:
+		agilent33500 (pyvisa.pyvisa.resources.gpib.GPIBInstrument): Agilent 33500
+		load (str) : Output load impedance. Options are ['50','HIGH']
+
+	"""
+	if load == 50:
+		load = '50'
+	mapper = {'50':'50', 'HIGH':'9.9E37'}
+	load = load.upper()
+	if load not in set(mapper.keys()):
+		raise KeyError('load "{}" not allowed. Must be in "{}"'.format(load, set(mapper.keys())))
+		
+	agilent33500.write('OUTPUT1:LOAD {}'.format(mapper[load]))
+	return
 

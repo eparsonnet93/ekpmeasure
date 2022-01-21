@@ -468,6 +468,6 @@ Please cite this work as:
 
 ```shell
 ekpmeasure
-Eric Parsonnet, 2021
+Eric Parsonnet, 2022
 https://github.com/eparsonnet93/ekpmeasure
 ```

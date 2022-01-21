@@ -42,7 +42,7 @@ def voltage_suffix_to_scientic_str(volt_suffix):
     returns:
         (str): Scientific notation str
     """
-    assert volt_suffix in set(voltage_amp_mapper.keys()), "volt_suffix {} not in voltage_amp_mapper. Allowed keys are {}".format(volt_suffix, list(voltage_amp_mapper.keys()))
+    assert volt_suffix in set(voltage_amp_mapper.keys()), "volt_suffix '{}' not in voltage_amp_mapper. Allowed keys are {}".format(volt_suffix, list(voltage_amp_mapper.keys()))
     return voltage_amp_mapper[volt_suffix]
 
 def frequency_suffix_to_scientific_str(freq_suffix):
@@ -55,7 +55,7 @@ def frequency_suffix_to_scientific_str(freq_suffix):
         (str): Scientific notation str
     """
     freq_suffix = freq_suffix.replace('H', 'h').replace('Z', 'z')
-    assert freq_suffix in set(freq_mapper.keys()), "Suffix {} not in freq_mapper. Allowed keys are {}".format(freq_suffix, list(freq_mapper.keys()))
+    assert freq_suffix in set(freq_mapper.keys()), "Suffix '{}'' not in freq_mapper. Allowed keys are {}".format(freq_suffix, list(freq_mapper.keys()))
     return freq_mapper[freq_suffix]
 
 def current_suffix_to_scientific_str(current_suffix):
@@ -67,8 +67,8 @@ def current_suffix_to_scientific_str(current_suffix):
     returns:
         (str): Scientific notation str
     """
-    assert current_suffix in set(freq_mapper.keys()), "Suffix {} not in freq_mapper. Allowed keys are {}".format(current_suffix, list(freq_mapper.keys()))
-    return freq_mapper[current_suffix]
+    assert current_suffix in set(current_amp_mapper.keys()), "Suffix '{}'' not in current_amp_mapper. Allowed keys are {}".format(current_suffix, list(current_amp_mapper.keys()))
+    return current_amp_mapper[current_suffix]
 
 def get_number_and_suffix(string):
     """Return number and suffix of a string.

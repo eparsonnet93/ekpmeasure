@@ -11,7 +11,8 @@ __all__ = (
 	'get_sensitivity', 'set_sensitivity', 'get_reference_source', 'set_reference_source',
 	'set_internal_frequency', 'set_internal_amplitude', 'get_time_constant_from_frequency',
 	'get_time_constant_float', 'set_lockin_sensitivity', 'initialize_lockin', 'set_phase', 
-	'get_X_Y', 'get_nearest_time_constant',
+	'get_X_Y', 'get_nearest_time_constant', 'set_low_pass_filter_slope', 'set_external_reference_slope',
+	'set_signal_input_shield_grounding', 'set_signal_input_coupling', 'set_signal_input_configuration',
 )
 
 
@@ -32,6 +33,69 @@ sensitivity_to_index_mapper = {
 }
 
 index_to_sensitivity_mapper = {sensitivity_to_index_mapper[key]:key for key in sensitivity_to_index_mapper}
+
+def set_signal_input_configuration(lockin, config:str):
+	"""Set the signal input configuration.
+
+	args:
+		lockin (pyvisa.resources.gpib.GPIBInstrument): SRS830
+		config (str): Input configuration. Options are ['A', 'A-B', 'I(1M)', 'I(100M)']
+	"""
+	mapper = {'A':0, 'A-B':1, 'I(1M)':2, 'I(100M)':3}
+	config = config.upper()
+	if config not in set(mapper.keys()):
+		raise KeyError('config "{}" not allowed. Must be in "{}"'.format(config, set(mapper.keys())))
+		
+	lockin.write('ISRC {}'.format(mapper[config]))
+	return
+
+def set_signal_input_coupling(lockin, coupling:str):
+	"""Set the signal input coupling.
+
+	args:
+		lockin (pyvisa.resources.gpib.GPIBInstrument): SRS830
+		coupling (str): Input coupling. Options are ['AC', 'DC']
+
+	"""
+	mapper = {'AC':0, 'DC':1}
+	coupling = coupling.upper()
+	if coupling not in set(mapper.keys()):
+		raise KeyError('coupling "{}" not allowed. Must be in "{}"'.format(coupling, set(mapper.keys())))
+		
+	lockin.write('ICPL {}'.format(mapper[coupling]))
+	return
+
+def set_signal_input_shield_grounding(lockin, grounding:str):
+	"""Set the signal input shield grounding.
+
+	args:
+		lockin (pyvisa.resources.gpib.GPIBInstrument): SRS830
+		grounding (str): Input shield grounding. Options are ['FLOAT', 'GROUND']
+
+	"""
+	mapper = {'FLOAT':0, 'GROUND':1}
+	grounding = grounding.upper()
+	if grounding not in set(mapper.keys()):
+		raise KeyError('grounding "{}" not allowed. Must be in "{}"'.format(grounding, set(mapper.keys())))
+		
+	lockin.write('IGND {}'.format(mapper[grounding]))
+	return
+
+def set_external_reference_slope(lockin, slope:str):
+	"""Set the external reference slope.
+
+	args:
+		lockin (pyvisa.resources.gpib.GPIBInstrument): SRS830
+		slope (str): External reference slope. Options are ['SINE', 'RISING', 'FALLING']
+
+	"""
+	mapper = {'SINE':0, 'RISING':1, 'FALLING':2}
+	slope = slope.upper()
+	if slope not in set(mapper.keys()):
+		raise KeyError('slope "{}" not allowed. Must be in "{}"'.format(slope, set(mapper.keys())))
+		
+	lockin.write('RSLP {}'.format(mapper[slope]))
+	return
 
 def get_nearest_time_constant(time):
 	"""Return the time constant closest to given time (by rounding up)"""
@@ -268,6 +332,23 @@ def set_time_constant(lockin, time_constant):
 	if get_time_constant(lockin) != time_constant:
 		raise ValueError("set_time_constant failed")
 	return
+
+def set_low_pass_filter_slope(lockin, slope:str):
+	"""
+	Set the low pass filter slope. Allowed slopes are '6dB/oct', '12dB/oct', '18dB/oct', '24dB/oct'
+	
+	args:
+		lockin (pyvisa.resources.gpib.GPIBInstrument): SRS830
+		slope (str): Slope
+	
+	"""
+	slope = slope.lower()
+	string_to_int_mapper = {'6db/oct':0, '12db/oct':1, '18db/oct':2, '24db/oct':3}
+	if slope not in set(string_to_int_mapper.keys()):
+		raise KeyError('Slope "{}" not allowed. Must be chosen from "{}"'.format(slope, set(string_to_int_mapper.keys())))
+	lockin.write('OFSL{}'.format(string_to_int_mapper[slope]))
+	return
+
 
 def get_time_constant(lockin):
 	"""Get the current time constant.
