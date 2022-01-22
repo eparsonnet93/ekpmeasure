@@ -1185,6 +1185,114 @@ class Data():
 			(dict): a dict class with identical structure"""
 		return self._dict
 
+
+	def to_DataFrame(self, how='lump_mean', include_defn_keys=[], defn_converter=None):
+	    """Convert `Data` to pandas.DataFrame. 
+	    
+	    args:
+	        how (function): Method for converting data. f(ndarray, key) -> value. Default 'lump_mean' averages all data for each index in `Data` corresponding to each data key. ndarray is data array corresponding to data key `key`. `how` should operate on data corresponding to a single `Data` index. 
+	        include_defn_keys (str, key or array-like): Definition key(s) to include in resulting dataframe. *i.e.*, each key in `include_defn_keys` will be a column name with values corresponding to the value for each index in `Data`.
+	        defn_converter (function or array-like): Optional. Methods for converting definition values to alternative type, perhaps from str to float. 
+	        
+	    returns:
+	        (pandas.DataFrame)
+	        
+	    examples:
+	    
+	        .. code-block:: python
+	        
+	            >>> _dict = {
+	                            0: {
+	                                'definition':{
+	                                    'frequency':{'1khz'},
+	                                    'amplitude':{'500mv'}
+	                                },
+	                                'data':{
+	                                    'R':np.array([1,2,2,2]),
+	                                    'theta':np.array([0,0,0,0])
+	                                },
+	                            },
+	                            1: {
+	                                'definition':{
+	                                    'frequency':{'1khz'},
+	                                    'amplitude':{'800mv'}
+	                                },
+	                                'data':{
+	                                    'R':np.array([2,3,3,3]),
+	                                    'theta':np.array([0,0,0,0])
+	                                },
+	                            }
+	                        }
+	                        
+	        .. code-block:: python
+	        
+	            >>> data = Data(_dict)
+	            >>> data.to_DataFrame()
+	            > 
+	                  R  theta
+	            0  1.75    0.0
+	            1  2.75    0.0
+	            
+	        
+	        .. code-block:: python
+	        
+	            >>> data.to_DataFrame(how=lambda x,key: x[0])
+	            > 
+	                  R  theta
+	            0  1.0    0.0
+	            1  2.0    0.0
+	            
+	            
+	        .. code-block:: python
+	        
+	            >>> data.to_DataFrame(include_defn_keys='frequency')
+	            > 
+	                  R  theta frequency
+	            0  1.75    0.0      1khz
+	            1  2.75    0.0      1khz
+	            
+	        .. code-block:: python
+	            
+	            >>> data.to_DataFrame(include_defn_keys=['frequency', 'amplitude'], defn_converter=[
+	                lambda x: float(x.replace('khz', 'e3')), lambda x: float(x.replace('mv', 'e-3'))
+	            ])
+	            >
+	                  R  theta  frequency  amplitude
+	            0  1.75    0.0     1000.0        0.5
+	            1  2.75    0.0     1000.0        0.8
+	    """
+	    
+	    include_defn_keys = np.array([include_defn_keys]).flatten()
+	    
+	    if defn_converter is None:
+	        float_converter = [lambda x: x for i in include_defn_keys]
+	    else:
+	        float_converter = np.array([defn_converter]).flatten()
+	        if len(float_converter) == 1:
+	            float_converter = [float_converter[0] for key in include_defn_keys]
+	        
+	    if len(include_defn_keys)!=len(float_converter):
+	        raise ValueError('Number of float converters does not equal number of definition keys. Must supply equal number. i.e. len(float_convert) must be equal to len(include_defn_keys)')
+	        
+	    if how=='lump_mean':
+	        how=lump_mean
+	        
+	    data_keys = self.data_keys
+
+	    out = pd.DataFrame()
+
+	    for key in data_keys:
+	        _dict_for_key = self[key]
+	        out[key] = [how(_dict_for_key[i], key) for i in _dict_for_key]
+	        
+	    for key, converter in zip(include_defn_keys, float_converter):
+	        defn = self.definition
+	        out[key] = [
+	            converter(_get_unique_definition_value_for_key(defn[i], key)) for i in defn
+	        ]
+	        
+	    return out
+
 	def plot(self, x=None, y=None, ax=None, color = None, cmap = 'viridis', labelby = None, **kwargs):
 		"""
 		Plot the data. If ax is provided returns ax, otherwise returns fig, ax.
@@ -1503,3 +1611,27 @@ class _data_sorter():
 		self.mapper = {i:old_index for i, old_index in enumerate(argsort)}
 			
 		return self
+
+
+def _get_unique_definition_value_for_key(definition_dict, key):
+    """docstring"""
+    _set = definition_dict[key]
+    if len(_set)!=1:
+        raise ValueError('Values corresponding to key "{}" are not singular and unique. Instead recieved "{}"'.format(key, _set))
+    
+    try:
+        return float(list(_set)[0])
+    except:
+        return list(_set)[0]
+
+
+def lump_mean(ndarray, dropna=True, *args, **kwargs):
+    """docstring"""
+    ndarray = np.array(ndarray).flatten()
+    if dropna:
+        bad_indexer = np.isnan(ndarray)
+        good_indexer = [False if x else True for x in bad_indexer]
+    else:
+        good_indexer = [True for x in ndarray]
+        
+    return np.mean(ndarray[good_indexer])
