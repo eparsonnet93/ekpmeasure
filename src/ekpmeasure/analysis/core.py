@@ -1187,7 +1187,7 @@ class Data():
 
 
 	def to_DataFrame(self, how='lump_mean', include_defn_keys=[], defn_converter=None):
-		"""Convert `Data` to pandas.DataFrame. 
+		"""Convert `Data` to pandas.DataFrame. Each index in `Data` will correspond to a single row in the resulting DataFrame. 
 		
 		args:
 			how (function): Method for converting data. f(ndarray, key) -> value. Default 'lump_mean' averages all data for each index in `Data` corresponding to each data key. ndarray is data array corresponding to data key `key`. `how` should operate on data corresponding to a single `Data` index. 

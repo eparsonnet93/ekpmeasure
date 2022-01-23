@@ -386,6 +386,12 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 # Change log
 
+#### Version 0.1.6
+
+**1/23/22
+- added `Data.to_DataFrame()` which allows one to convert `Data` to `pandas.DataFrame`. Each index of `Data` will be a single row in the resulting DataFrame. 
+
+
 #### Version 0.1.5
 
 **1/12/22**
