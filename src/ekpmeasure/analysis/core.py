@@ -1286,15 +1286,16 @@ class Data():
 
 		for key in data_keys:
 			_dict_for_key = self[key]
-			if _dict_for_key is not dict:
+			if type(_dict_for_key) is not dict:
 				out[key] = [how(_dict_for_key, key)] # the case when we have only one index in Data
 			else:
+				# import pdb; pdb.set_trace()
 				out[key] = [how(_dict_for_key[i], key) for i in _dict_for_key]
 
 			
 		for key, converter in zip(include_defn_keys, float_converter):
 			defn = self.definition
-			if defn is not dict:
+			if type(defn) is not dict:
 				out[key] = [
 					converter(_get_unique_definition_value_for_key(defn, key))
 				]
@@ -1641,8 +1642,11 @@ def _lump_mean(ndarray, dropna=True, *args, **kwargs):
 	"""docstring"""
 	ndarray = np.array(ndarray).flatten()
 	if dropna:
-		bad_indexer = np.isnan(ndarray)
-		good_indexer = [False if x else True for x in bad_indexer]
+		try:
+			bad_indexer = np.isnan(ndarray)
+			good_indexer = [False if x else True for x in bad_indexer]
+		except:
+			import pdb; pdb.set_trace()
 	else:
 		good_indexer = [True for x in ndarray]
 		
