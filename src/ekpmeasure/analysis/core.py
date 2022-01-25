@@ -1286,13 +1286,22 @@ class Data():
 
 		for key in data_keys:
 			_dict_for_key = self[key]
-			out[key] = [how(_dict_for_key[i], key) for i in _dict_for_key]
+			if _dict_for_key is not dict:
+				out[key] = [how(_dict_for_key, key)] # the case when we have only one index in Data
+			else:
+				out[key] = [how(_dict_for_key[i], key) for i in _dict_for_key]
+
 			
 		for key, converter in zip(include_defn_keys, float_converter):
 			defn = self.definition
-			out[key] = [
-				converter(_get_unique_definition_value_for_key(defn[i], key)) for i in defn
-			]
+			if defn is not dict:
+				out[key] = [
+					converter(_get_unique_definition_value_for_key(defn, key))
+				]
+			else:
+				out[key] = [
+					converter(_get_unique_definition_value_for_key(defn[i], key)) for i in defn
+				]
 			
 		return out
 

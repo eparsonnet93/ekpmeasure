@@ -4,9 +4,9 @@ from scipy.integrate import cumtrapz
 import warnings
 from scipy import signal
 
-from ..functions_on_data import _fod_dimensionality_fixer
-from ..functions_on_data import iterable_data_array
-from ..functions_on_data import data_array_builder
+from ..data_funcs import _fod_dimensionality_fixer
+from ..data_funcs import iterable_data_array
+from ..data_funcs import data_array_builder
 
 __all__ = (
 	'get_dps',
