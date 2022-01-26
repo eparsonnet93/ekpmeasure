@@ -1036,33 +1036,51 @@ class Data():
 		return Data(out)
 
 
-	def mean(self, inplace=False):
+	def mean(self,):
 		"""
 		Return data class where data is averaged across 0th axis. This is best used for averaging across trials or similar.
-
-		args:
-			inplace (bool): Do operation inplace
 
 		returns:
 			(Data): averaged data across 0th axis.
 		"""
-
-		if not inplace:
-			tmp_out = {}
-			for key in self._dict:
-				tmp_out.update({key:self._dict[key].copy()})
-				data = self._dict[key]['data']
-				mean_data = {}
-				for k in data:
-					if len(data[k].shape) == 1: #1d data
+		tmp_out = {}
+		for key in self._dict:
+			tmp_out.update({key:self._dict[key].copy()})
+			data = self._dict[key]['data']
+			mean_data = {}
+			for k in data:
+				if len(data[k].shape) == 1: #1d data
+					mean_data.update({k:data[k]})
+				else:
+					try:
+						mean_data.update({k:np.mean(data[k], axis = 0)})
+					except AxisError:
 						mean_data.update({k:data[k]})
-					else:
-						try:
-							mean_data.update({k:np.mean(data[k], axis = 0)})
-						except AxisError:
-							mean_data.update({k:data[k]})
-				tmp_out[key].update({'data':mean_data})
-			return Data(tmp_out)
+			tmp_out[key].update({'data':mean_data})
+		return Data(tmp_out)
+
+	def std(self):
+		"""
+		Return Data class where Data is calculated STD across 0th axis. This is best used for STD across trials or similar.
+
+		returns:
+			(Data): STD of data across 0th axis.
+		"""
+		tmp_out = {}
+		for key in self._dict:
+			tmp_out.update({key:self._dict[key].copy()})
+			data = self._dict[key]['data']
+			std_data = {}
+			for k in data:
+				if len(data[k].shape) == 1: #1d data
+					std_data.update({k:data[k]})
+				else:
+					try:
+						std_data.update({k:np.std(data[k], axis = 0)})
+					except AxisError:
+						std_data.update({k:data[k]})
+			tmp_out[key].update({'data':std_data})
+		return Data(tmp_out)
 
 	def collapse(self, data_key):
 		"""

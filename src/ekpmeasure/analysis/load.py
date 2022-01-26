@@ -6,7 +6,7 @@ import warnings
 import pickle
 import ast
 
-from .core import Dataset
+from .core import Dataset, Data
 
 __all__ = ('load_Dataset', 'generate_meta_data', 'read_ekpds', 'read_ekpdat')
 
@@ -42,6 +42,10 @@ def read_ekpdat(filename):
 	returns:
 		(Data): Data
 	"""
+	with open(filename, 'rb') as f:
+		_dict = pickle.load(f)
+
+	return Data(_dict)
 
 def read_ekpds(filename):
 	"""Read a Dataset from `.ekpds` file.
