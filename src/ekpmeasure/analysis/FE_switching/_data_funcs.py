@@ -11,14 +11,58 @@ from ..data_funcs import data_array_builder
 __all__ = (
 	'get_dps',
 	'reset_time', 
-	'get_polarization_transients_from_dps', 
 	'get_saturation_and_switching_time',
 	'smooth', 
 	'subtract_median_of_lastN',
     'invert',
     'integrate',
-    'get_pol_trans_from_dps'
+    'get_pol_trans_from_dps',
+    'align_pulses'
 	)
+
+def align_pulses(data_dict, cutoff=0.1, grace=10, n=200, key1='p1', key2='p2'):
+    """Align pulses (specified by key1 and key2).
+
+    args:
+        data_dict (dict): Data Dict which is to be aligned
+        cutoff (float): Y-axis value to set to zero time
+        grace (int): Number of data points to include before time zero
+        n (int): Number of data points to include after time zero
+        key1 (str or key): Key for pulse 1
+        key2 (str or key): Key for pulse 2
+
+    returns:
+        (dict): Aligned Data
+    """
+    assert key1 in set(data_dict.keys()), "'{}' not in data_dict".format(key1)
+    assert key2 in set(data_dict.keys()), "'{}' not in data_dict".format(key2)
+    assert 'time' in set(data_dict.keys()), "'{}' not in data_dict".format('time')
+    p1_ida = iterable_data_array(data_dict, key1)   
+    p2_ida = iterable_data_array(data_dict, key2)   
+    time_ida = iterable_data_array(data_dict, 'time')   
+
+    out_time = data_array_builder()   
+    out_p1 = data_array_builder()   
+    out_p2 = data_array_builder()  
+
+    for p1, p2, time in zip(p1_ida, p2_ida, time_ida):   
+        try:   
+            p1_start = np.argwhere(p1>cutoff).flatten()[0]   
+            p2_start = np.argwhere(p2>cutoff).flatten()[0]   
+            dt = time[1] - time[0]   
+
+            if p1_start-grace <= 0 or p2_start-grace <= 0:
+                continue
+
+            out_time.append(np.array([np.round((i-10)*dt, 6) for i in range(n + grace)]))
+            out_p1.append(p1[p1_start-grace:p1_start + n])  
+            out_p2.append(p2[p2_start-grace:p2_start + n]) 
+        except:   
+             continue   
+
+    if len(out_p1) == 0 or len(out_p2) == 0:   
+        return 'None'   
+    return {'time':out_time.build(), 'p1':out_p1.build(), 'p2':out_p2.build()} 
 
 def _get_startarg_1d(p, cutoff = 0.01):
     """returns the index of where p (could be p1 or p2) is first greater than cutoff"""
@@ -366,7 +410,7 @@ def get_pol_trans_from_dps(data_dict, area='from diameter', diameter=None, time_
 
 def get_polarization_transients_from_dps(data_dict):
     """
-    Integrate dps.
+    DEPRECATED. Integrate dps.
 
     args:
         data_dict (dict): dict with keys 'time', 'dp'
@@ -377,20 +421,4 @@ def get_polarization_transients_from_dps(data_dict):
             scipy.integrate.cumtrapz(dp, x = 'time')
             ```
     """ 
-    warnings.showwarning('get_polarization_transients_from_dps is deprecated. See integrate() instead. Consider using get_pol_trans_from_dps()', DeprecationWarning, '', 0,)
-    assert 'dp' in set(data_dict.keys()), "data_dict must contain key 'dp'. It does not. Keys are {}".format(data_dict.keys())
-
-    dp_ida = iterable_data_array(data_dict, 'dp')
-    time_ida = iterable_data_array(data_dict, 'time')
-
-    out = {'time':data_array_builder(), 'intdp':data_array_builder()}
-
-    for dp, time in zip(dp_ida, time_ida):
-        dp = np.nan_to_num(dp, 0)
-        time = np.nan_to_num(time, 0)
-        intdp = cumtrapz(dp, x = time)
-        intdp = np.concatenate((np.array([0]), intdp))
-        out['time'].append(time)
-        out['intdp'].append(intdp)
-
-    return {key: out[key].build() for key in out}
+    raise ValueError('get_polarization_transients_from_dps is deprecated. See integrate() instead. Consider using get_pol_trans_from_dps()')
