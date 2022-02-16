@@ -10,13 +10,14 @@ from .core import Dataset, Data
 
 __all__ = ('load_Dataset', 'generate_meta_data', 'read_ekpds', 'read_ekpdat')
 
-def load_Dataset(path, meta_data=None):
+def load_Dataset(path, meta_data=None, readfileby=pd.read_csv):
 	"""
-	Load a dataset from path. Path must contain pickle file ``'meta_data'``. 
+	Load a dataset from path. Path must contain (pickle or .csv) file ``'meta_data'``. 
 
 	args:
 		path (str): Path to data
 		meta_data (pandas.DataFrame): meta_data if one wishes to provide different meta_data from that provided in path. 
+		readfileby (callable): Method for reading data. 
 
 	returns: 
 		(Dataset): Dataset 
@@ -30,7 +31,7 @@ def load_Dataset(path, meta_data=None):
 	if len(existing_ekpds) != 0:
 		warnings.showwarning('There exist .ekpds files ({}) in this directory. If you want to load those Datasets, be sure to use ``.read_ekpds``'.format(existing_ekpds), UserWarning, '', 0)
 
-	return Dataset(path, _build_df(path, meta_data))
+	return Dataset(path, _build_df(path, meta_data), readfileby=readfileby)
 
 
 def read_ekpdat(filename):
