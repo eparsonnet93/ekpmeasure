@@ -10,7 +10,7 @@ from .core import Dataset, Data
 
 __all__ = ('load_Dataset', 'generate_meta_data', 'read_ekpds', 'read_ekpdat')
 
-def load_Dataset(path, meta_data = None):
+def load_Dataset(path, meta_data=None):
 	"""
 	Load a dataset from path. Path must contain pickle file ``'meta_data'``. 
 
@@ -108,29 +108,58 @@ def _build_df(path, meta_data):
 	else:
 		return meta_data
 
-def generate_meta_data(path, mapper, pass_path = False, pointercolumn = 'filename', overwrite = False):
+def generate_meta_data(path, mapper, pass_path=False, pointercolumn='filename', overwrite=False):
 	"""
 	Generate meta_data from a path for a given mapper function. **Important** mapper must include pointercolumn which is `(key,value) = ('<pointer column name>', <filename>)`. Default is to call such a column `filename`, i.e. `{'filename':'a.csv'}`
 
 	args:
 		path (str): Specify the path to the directory
 		mapper ( function ) : filename (str) -> dict. A function which operates on a single file name in order to get the columns (dict key) and values (dict value) for meta_data of that file.
+		pass_path (bool) : Pass the pass of each file to `mapper`. This is used to parse meta data from **within** the file, as one can now open the file within mapper. If True, `mapper` must take argument `path`.
 		pointercolumn (str) : The name of the pointercolumn in the created meta_data
 		overwrite (bool) : True will overwrite any existing meta_data in path. 
 
 
 	examples:
 
+		Basic usage where mapper operates only on filename:
+
 		.. code-block:: python
 
-			def mapper(file, path):
-				path_to_file = path + file
+			def mapper(file,):
+				spl = file.split('_')
 
-				meta_data = {'filename':file} # not full path to file, just file in path dir
+				meta_data = {
+						'param1':spl[0] # the first parameter of interest is located at the first split location.
+						'filename':file # must include the filename (or other `pointercolumn`)
+					} 
 
 				return meta_data
 
-			generate_meta_data(path, mapper, pointercolumn = 'filename')
+			generate_meta_data(path, mapper, pointercolumn='filename')
+
+
+		Parse the data file itself for metadata:
+
+		.. code-block:: python
+
+			def mapper(file, path): # must contain kwarg path!
+				full_path = path+file
+
+				with open(full_path, 'r') as f:
+					lines = f.readlines()
+
+				### extract metadata from lines ###
+				param1 = lines[0].replace('\n','')
+
+				meta_data = {
+					'param1':param1,
+					'filename':'file'
+				}
+				return meta_data
+
+			generate_meta_data(path, mapper, pass_path=True)
+
 	"""
 	if 'meta_data' in set(os.listdir(path)):
 		if not overwrite:
@@ -144,14 +173,14 @@ def generate_meta_data(path, mapper, pass_path = False, pointercolumn = 'filenam
 	for file in os.listdir(path):
 		try:
 			if pass_path:
-				meta_data = pd.DataFrame(mapper(file, path = path), index = [0])
+				meta_data = pd.DataFrame(mapper(file, path=path), index=[0])
 			else:
-				meta_data = pd.DataFrame(mapper(file), index = [0])
+				meta_data = pd.DataFrame(mapper(file), index=[0])
 		except Exception as e:
 			print('unable to process file: {} \nError: {}'.format(file, e))
 			continue
 		try:
-			existing_meta_data = pd.concat([existing_meta_data, meta_data], ignore_index = True)
+			existing_meta_data = pd.concat([existing_meta_data, meta_data], ignore_index=True)
 		except NameError:
 			existing_meta_data = meta_data.copy()
 
