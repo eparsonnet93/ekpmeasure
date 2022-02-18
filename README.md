@@ -1,10 +1,11 @@
-# Welcome to ekpmeasure 
+# Welcome to EKPy 
 
 
 [![Documentation Status](https://readthedocs.org/projects/ekpmeasure/badge/?version=latest)](http://ekpmeasure.readthedocs.io/?badge=latest)
 [![PyPI version fury.io](https://badge.fury.io/py/ekpmeasure.svg)](https://pypi.org/project/ekpmeasure/)
 [![PyPI license](https://img.shields.io/pypi/l/ekpmeasure.svg)](https://pypi.org/project/ekpmeasure/)
 [![PyPi Downloads](http://pepy.tech/badge/ekpmeasure)](http://pepy.tech/project/ekpmeasure)
+[![PyPi Downloads](http://pepy.tech/badge/ekpy)](http://pepy.tech/project/ekpy)
 
 [![N|Scheme](imgs/prl2.png)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.125.067601)
 
@@ -21,7 +22,7 @@ A repository of analysis and computer control code for various experiments. Imag
 
 # Overview
 
-ekpmeasure is a set of control and analysis code designed to help streamline experiments. The basic idea is that in experimental work we often take data from many different sources, store it in different places, have varying degrees meta data associated with the data (even for a single type of data) and somehow(!) we are supposed to make sense of it all. We like to compare across trials, days, experimental conditions, etc. and it is very difficult to keep track of what data is where, and quickly access it when we need it. Often I find that folks end up copying and pasting raw data between excel spreadsheets and if you're not careful you will quickly lose track of which data came from where. This package's goal is to make this all easier. 
+EKPy (formerly ekpmeasure) is a set of control and analysis code designed to help streamline experiments. The basic idea is that in experimental work we often take data from many different sources, store it in different places, have varying degrees meta data associated with the data (even for a single type of data) and somehow(!) we are supposed to make sense of it all. We like to compare across trials, days, experimental conditions, etc. and it is very difficult to keep track of what data is where, and quickly access it when we need it. Often I find that folks end up copying and pasting raw data between excel spreadsheets and if you're not careful you will quickly lose track of which data came from where. This package's goal is to make this all easier. 
 
 You may not find the experimental control code as helpful as it is relatively specific to my research in condensed matter physics (though electrical engineers or similar may find it very useful) but the analysis code is for everyone. 
 
@@ -31,7 +32,7 @@ I am always improving this repository and if you have suggestions, I appreciate 
 
 ## User Guide
 
-Here, we will walk through a brief example of how the analysis power of `ekpmeasure`. Scientists often have large amounts of data, stored in different locations and with varying degrees of available meta data. ekpmeasure makes it easier to access all of this data. Once created, you can easily load a [Dataset](https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.analysis.html#ekpmeasure.analysis.core.Dataset)
+Here, we will walk through a brief example of how the analysis power of `ekpy`. Scientists often have large amounts of data, stored in different locations and with varying degrees of available meta data. ekpy makes it easier to access all of this data. Once created, you can easily load a [Dataset](https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.analysis.html#ekpmeasure.analysis.core.Dataset)
 
 Say we have some data stored in `./path/to/data/` which is a bunch of `.csv` files. We can open one of them (called `filename.csv`) up using `pandas.read_csv` and see what's inside:
 
@@ -122,10 +123,10 @@ Now we are ready to return to our data and plot our **important metric** called 
 0    1.431387
 ```
 
-Great! Now this was for **one datafile** corresponding to an applied voltage of 10V and a pulsewidth of 100ms. What if I want to this for all of my data which corresponds to a pulsewidth of 100ms, but for all values of applied voltages? Now I need to track down the filenames associated with each of these types of data, sort them by applied voltage and then do the calculations I just did - then return that all in some sort of managable object. The problem is even worse if the meta data is stored *in the file* so you need to open each file in order to see what type it is. **And** what if you have data in multiple folders all over your computer - it gets very hard to manage all this. This is where `ekpmeasure` comes in. Let's assume you have already generated the meta data (this can be done, by using `ekpmeasure` to generate the data see [experiment Class](#https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.control.html#ekpmeasure.control.core.experiment), or by generating if from existing data see [generate_meta_data](https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.analysis.html#ekpmeasure.analysis.load.generate_meta_data)) and stored it in `./path/to/data`. We can load all of the associated meta data easily:
+Great! Now this was for **one datafile** corresponding to an applied voltage of 10V and a pulsewidth of 100ms. What if I want to this for all of my data which corresponds to a pulsewidth of 100ms, but for all values of applied voltages? Now I need to track down the filenames associated with each of these types of data, sort them by applied voltage and then do the calculations I just did - then return that all in some sort of managable object. The problem is even worse if the meta data is stored *in the file* so you need to open each file in order to see what type it is. **And** what if you have data in multiple folders all over your computer - it gets very hard to manage all this. This is where `ekpy` comes in. Let's assume you have already generated the meta data (this can be done, by using `ekpy` to generate the data see [experiment Class](#https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.control.html#ekpmeasure.control.core.experiment), or by generating if from existing data see [generate_meta_data](https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.analysis.html#ekpmeasure.analysis.load.generate_meta_data)) and stored it in `./path/to/data`. We can load all of the associated meta data easily:
 
 ```python
-from ekpmeasure import analysis
+from ekpy import analysis
 
 >>> dset = analysis.load_Dataset('./path/to/data/')
 >>> dset
@@ -176,10 +177,10 @@ and done, this is all of the data for 100ms where the color corresponds to the a
 
 ```python
 >>> type(data)
-> ekpmeasure.analysis.core.Data
+> ekpy.analysis.core.Data
 ```
 
-This [`ekpmeasure.analysis.core.Data`](#https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.analysis.html#ekpmeasure.analysis.core.Data) is integer indexed and holds the raw data as well as a definition (describing the meta data) for each index. Let's take a look:
+This [`ekpy.analysis.core.Data`](#https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.analysis.html#ekpmeasure.analysis.core.Data) is integer indexed and holds the raw data as well as a definition (describing the meta data) for each index. Let's take a look:
 
 ```python
 >>> tmpdset = dset.query('pump_amp == "10.0V" and pump_pw == "100ms"')
@@ -324,7 +325,7 @@ And there you have it, we now analyzed all of the data corresponding to 100ms! A
 
 ```python
 from matplotlib import cm
-from ekpmeasure.universal import get_number_and_suffix, time_suffix_to_scientic_str
+from ekpy.universal import get_number_and_suffix, time_suffix_to_scientic_str
 
 # sort the pulsewidths in the dataset
 def sorter(pw):
@@ -354,7 +355,7 @@ for tmpdata, color in zip(data, colors):
 
 ![finalplot2](imgs/finalplot2.PNG)
 
-Hopefully this has given you a brief introduction to how to use EKPMEASURE. Happy analyzing!
+Hopefully this has given you a brief introduction to how to use EKPy. Happy analyzing!
 
 For more see [here.](https://ekpmeasure.readthedocs.io/en/latest/start.html)
 
@@ -362,17 +363,17 @@ For more see [here.](https://ekpmeasure.readthedocs.io/en/latest/start.html)
 ---
 # Installation:
 
-Find the latest build [here](https://pypi.org/project/ekpmeasure/).
+Find the latest build [here](https://pypi.org/project/ekpy/).
 
 ```bash
-pip install ekpmeasure
+pip install ekpy
 ```
 
 You can also access `.whl` or `.tar.gz` files in the `dist/` directory directly for installation. 
 
 For installation issues, please see [Issue Tracker](https://github.com/eparsonnet93/ekpmeasure/issues)
 
-There are also specific [experiments](https://github.com/eparsonnet93/ekpmeasure/tree/main/src/ekpmeasure/experiments) that can be installed following installation of `ekpmeasure`. Please see the accompanying readme (*e.g.*, [here](https://github.com/eparsonnet93/ekpmeasure/blob/main/src/ekpmeasure/experiments/ferroelectric/_fastPUND/README.md)) for such cases. 
+There are also specific [experiments](https://github.com/eparsonnet93/ekpmeasure/tree/main/src/ekpmeasure/experiments) that can be installed following installation of `ekpy`. Please see the accompanying readme (*e.g.*, [here](https://github.com/eparsonnet93/ekpmeasure/blob/main/src/ekpmeasure/experiments/ferroelectric/_fastPUND/README.md)) for such cases. 
 
 ---
 # Development
@@ -385,6 +386,11 @@ We welcome new contributors of all experience levels. Please reach out directly 
 * Issue tracker: https://github.com/eparsonnet93/ekpmeasure/issues
 
 # Change log
+
+### Version 0.1.8
+
+**2/18/22**
+- bug fixes from 0.1.7 and changed install name to `ekpy`. 
 
 #### Version 0.1.6
 
@@ -403,7 +409,7 @@ We welcome new contributors of all experience levels. Please reach out directly 
 #### Version 0.1.4
 
 **12/2/21**
-- Added experiments module with `ferroelectric` experiments. This contains both relaxation (`_relaxation`) and switching (`_switching`) experiments. These consist of self contained jupyter notebooks that can be installed by `python -m ekpmeasure.experiments.ferroelectric.<experiment_name>`. For more see the experiment specific README for [relaxation](https://github.com/eparsonnet93/ekpmeasure/tree/main/src/ekpmeasure/experiments/ferroelectric/_relaxation) or [switching](https://github.com/eparsonnet93/ekpmeasure/tree/main/src/ekpmeasure/experiments/ferroelectric/_switching)
+- Added experiments module with `ferroelectric` experiments. This contains both relaxation (`_relaxation`) and switching (`_switching`) experiments. These consist of self contained jupyter notebooks that can be installed by `python -m ekpy.experiments.ferroelectric.<experiment_name>`. For more see the experiment specific README for [relaxation](https://github.com/eparsonnet93/ekpmeasure/tree/main/src/ekpmeasure/experiments/ferroelectric/_relaxation) or [switching](https://github.com/eparsonnet93/ekpmeasure/tree/main/src/ekpmeasure/experiments/ferroelectric/_switching)
 - Bug fix on `Data.sort`
 
 **11/16/21**
@@ -432,8 +438,8 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 - Updates to plotting during experimental control. Now one can simply override the `control.experiment` method `_plot` to define how plotting will take place. Here is a brief example of such an override:
 ```python
-from ekpmeasure.control import plotting
-from ekpmeasure.control import experiment
+from ekpy.control import plotting
+from ekpy.control import experiment
 import matplotlib.pyplot as plt
 
 class exp(experiment):
@@ -476,7 +482,7 @@ Maintainer: Eric Parsonnet
 Please cite this work as:
 
 ```shell
-ekpmeasure
+ekpy
 Eric Parsonnet, 2022
 https://github.com/eparsonnet93/ekpmeasure
 ```
