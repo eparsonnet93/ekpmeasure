@@ -1,4 +1,4 @@
-from ....universal import get_number_and_suffix, time_to_sci_mapper, voltage_amp_mapper
+from ....utils import get_number_and_suffix, time_to_sci_mapper, voltage_amp_mapper
 
 
 

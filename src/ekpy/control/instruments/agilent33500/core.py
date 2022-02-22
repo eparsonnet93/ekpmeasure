@@ -1,4 +1,4 @@
-from ....universal import get_number_and_suffix, current_suffix_to_scientific_str, frequency_suffix_to_scientific_str, voltage_suffix_to_scientic_str
+from ....utils import get_number_and_suffix, current_suffix_to_scientific_str, frequency_suffix_to_scientific_str, voltage_suffix_to_scientic_str
 
 __all__ = ('stop', 'start', 'apply', 'set_output_load')
 

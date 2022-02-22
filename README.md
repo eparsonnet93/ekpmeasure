@@ -5,7 +5,6 @@
 [![PyPI version fury.io](https://badge.fury.io/py/ekpmeasure.svg)](https://pypi.org/project/ekpmeasure/)
 [![PyPI license](https://img.shields.io/pypi/l/ekpmeasure.svg)](https://pypi.org/project/ekpmeasure/)
 [![PyPi Downloads](http://pepy.tech/badge/ekpmeasure)](http://pepy.tech/project/ekpmeasure)
-[![PyPi Downloads](http://pepy.tech/badge/ekpy)](http://pepy.tech/project/ekpy)
 
 [![N|Scheme](imgs/prl2.png)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.125.067601)
 
