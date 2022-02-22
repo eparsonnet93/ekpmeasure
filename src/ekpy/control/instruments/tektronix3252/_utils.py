@@ -1,4 +1,4 @@
-from ....universal import (_get_number_and_suffix,
+from ....utils import (_get_number_and_suffix,
     time_to_sci_mapper,
     )
 import numpy as np

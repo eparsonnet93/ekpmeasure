@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from ....universal import get_number_and_suffix, time_to_sci_mapper, voltage_amp_mapper
+from ....utils import get_number_and_suffix, time_to_sci_mapper, voltage_amp_mapper
 
 __all__ = ('initialize_scope','get_waveform', 'set_acquire_stopafter', 'set_triggerA_level',
     'set_triggerA_mode', 'set_acquire_state', 'set_horizontal_resolution','initialize_for_data_transfer',

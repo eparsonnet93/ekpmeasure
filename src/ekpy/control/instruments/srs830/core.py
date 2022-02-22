@@ -1,4 +1,4 @@
-from ....universal import (get_number_and_suffix, 
+from ....utils import (get_number_and_suffix, 
 	time_suffix_to_scientic_str, scientific_notation, 
 	frequency_suffix_to_scientific_str, 
 	scientific_str_to_time_suffix, 
