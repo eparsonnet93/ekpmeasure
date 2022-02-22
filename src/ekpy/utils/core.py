@@ -1,11 +1,7 @@
 import numpy as np
-import warnings
-
 
 __all__ = ('get_number_and_suffix', 'frequency_suffix_to_scientific_str', 'current_suffix_to_scientific_str', 
     'scientific_str_to_time_suffix', 'voltage_suffix_to_scientic_str', 'time_suffix_to_scientic_str', 'voltage_amp_mapper')
-
-warnings.showwarning("ekpy.universal is deprecated. Please use ekpy.utils instead.", DeprecationWarning, '', '')
 
 freq_mapper = {'Mhz':'e6','khz':'e3', 'hz':'e0', 'mhz':'e-3', 'MHz':'e6', 'kHz':'e3','Hz':'e0', 'mHz':'e-3'}
 current_amp_mapper = {'ma':'e-3', 'ua':'e-6', 'na':'e-9', 'mA':'e-3', 'uA':'e-6', 'nA':'e-9'}
@@ -22,7 +18,6 @@ def scientific_str_to_time_suffix(sci_str):
     returns:
         (str): Time suffix
     """
-    warnings.showwarning("ekpy.universal is deprecated. Please use ekpy.utils instead.", DeprecationWarning, '', '')
     assert sci_str in set(sci_to_time_mapper.keys()), "sci_str {} not in sci_to_time_mapper. Allowed keys are {}".format(sci_str, list(sci_to_time_mapper.keys()))
     return sci_to_time_mapper[sci_str]
 
@@ -35,7 +30,6 @@ def time_suffix_to_scientic_str(time_suffix):
     returns:
         (str): Scientific notation str
     """
-    warnings.showwarning("ekpy.universal is deprecated. Please use ekpy.utils instead.", DeprecationWarning, '', '')
     assert time_suffix in set(time_to_sci_mapper.keys()), "time_suffix {} not in time_to_sci_mapper. Allowed keys are {}".format(time_suffix, list(time_to_sci_mapper.keys()))
     return time_to_sci_mapper[time_suffix]
 
@@ -48,7 +42,6 @@ def voltage_suffix_to_scientic_str(volt_suffix):
     returns:
         (str): Scientific notation str
     """
-    warnings.showwarning("ekpy.universal is deprecated. Please use ekpy.utils instead.", DeprecationWarning, '', '')
     assert volt_suffix in set(voltage_amp_mapper.keys()), "volt_suffix '{}' not in voltage_amp_mapper. Allowed keys are {}".format(volt_suffix, list(voltage_amp_mapper.keys()))
     return voltage_amp_mapper[volt_suffix]
 
@@ -74,7 +67,6 @@ def current_suffix_to_scientific_str(current_suffix):
     returns:
         (str): Scientific notation str
     """
-    warnings.showwarning("ekpy.universal is deprecated. Please use ekpy.utils instead.", DeprecationWarning, '', '')
     assert current_suffix in set(current_amp_mapper.keys()), "Suffix '{}'' not in current_amp_mapper. Allowed keys are {}".format(current_suffix, list(current_amp_mapper.keys()))
     return current_amp_mapper[current_suffix]
 
@@ -108,7 +100,6 @@ def _get_number_and_suffix(string):
 
 
     """
-    warnings.showwarning("ekpy.universal is deprecated. Please use ekpy.utils instead.", DeprecationWarning, '', '')
     iteration = 0
     number = np.nan
     while np.isnan(number):
@@ -132,11 +123,9 @@ def scientific_notation(number):
 
 
     """
-    warnings.showwarning("ekpy.universal is deprecated. Please use ekpy.utils instead.", DeprecationWarning, '', '')
     return _scientific_notation(number)
 
 def _scientific_notation(number):
-    warnings.showwarning("ekpy.universal is deprecated. Please use ekpy.utils instead.", DeprecationWarning, '', '')
     number = float(number)
 
     if len(str(number).split('e'))>1:
