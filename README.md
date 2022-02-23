@@ -7,7 +7,7 @@
 [![PyPi Downloads](http://pepy.tech/badge/ekpmeasure)](http://pepy.tech/project/ekpmeasure)
 [![PyPi Downloads](http://pepy.tech/badge/ekpy)](http://pepy.tech/project/ekpy)
 
-[![N|Scheme](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/prl2.png)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.125.067601)
+[![N|Scheme](https://github.com/eparsonnet93/ekpmeasure/blob/main/https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/prl2.png)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.125.067601)
 
 A repository of analysis and computer control code for various experiments. Image above is an example of data **collected** and **analyzed** using this package.
 
@@ -47,7 +47,7 @@ filename = 'filename.csv'
 >>> df.head()
 ```
 
-![Raw DataFrame](imgs/raw_df.png)
+![Raw DataFrame](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/raw_df.png)
 
 This data file has some meta data associated with it. Let's assume for this example that `filename.csv` corresponds to the following meta data:
 
@@ -66,7 +66,7 @@ This data file has some meta data associated with it. Let's assume for this exam
 df.plot(x = 'DRIVEVoltage_x', y = ['Polarization(uC/cm2)_x','Polarization(uC/cm2)_y'])
 ```
 
-![Plot](imgs/raw_plot.png)
+![Plot](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/raw_plot.png)
 
 Clearly there is a difference between `'Polarization(uC/cm2)_x'` and `'Polarization(uC/cm2)_y'`, and for this particular case, we are interested in **quantifying that difference** between them. An easy way to do this is by looking at each of their values around `'DRIVEVoltage_x = 0'`, and finding the difference. We will do this in two steps, first find the average of each around zero
 
@@ -132,7 +132,7 @@ from ekpy import analysis
 >>> dset
 ```
 
-![Dataset](imgs/dset1.png)
+![Dataset](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/dset1.png)
 
 `dset` holds all of the meta data. If we want to look at our same file as the example above, we can access it by querying our dataset: (`'pump_amp'` is what we called `'voltage_applied'` and `'pump_pw'` is what we called `'pulsewidth`)
 
@@ -140,7 +140,7 @@ from ekpy import analysis
 >>> dset.query('pump_amp == "10.0V" and pump_pw == "100ms"')
 ```
 
-![queried](imgs/querydset1.png)
+![queried](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/querydset1.png)
 
 This makes it easy to get find data based on the meta data. For example, let's find all of the data associated with **just** the pulsewidth `'pump_pw'` of 100ms.
 
@@ -148,7 +148,7 @@ This makes it easy to get find data based on the meta data. For example, let's f
 >>> dset.query('pump_pw == "100ms"')
 ```
 
-![queried2](imgs/querydset2.PNG)
+![queried2](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/querydset2.PNG)
 
 You can see that for this one pulsewidth, we have *many* applied voltages (`'pump_amp'`). We will return to this in a moment. Let's stick with our query `'pump_amp == "10.0V" and pump_pw == "100ms"'` and see how we can retrieve the real data (see [get_data](#https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.analysis.html#ekpmeasure.analysis.core.Dataset.get_data)). Recall from above that the raw data has three important columns `'Polarization(uC/cm2)_x'`, `'Polarization(uC/cm2)_y'`,  and `'DRIVEVoltage_x'`
 
@@ -159,7 +159,7 @@ You can see that for this one pulsewidth, we have *many* applied voltages (`'pum
 >>> data.plot(x = 'DRIVEVoltage_x', y = ['Polarization(uC/cm2)_x', 'Polarization(uC/cm2)_y'])
 ```
 
-![dsetplot1](imgs/dsetplot1.png)
+![dsetplot1](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/dsetplot1.png)
 
 Same as before! But now, we can **plot all of the data** corresponding to a pulsewidth of 100ms, with just a very simple modification. 
 
@@ -170,7 +170,7 @@ Same as before! But now, we can **plot all of the data** corresponding to a puls
 >>> data.plot(x = 'DRIVEVoltage_x', y = ['Polarization(uC/cm2)_x', 'Polarization(uC/cm2)_y'])
 ```
 
-![dsetplot2](imgs/dsetplot2.PNG)
+![dsetplot2](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/dsetplot2.PNG)
 
 and done, this is all of the data for 100ms where the color corresponds to the applied voltage (`'pump_amp'`, ranging from 5V to 10V). No more sifting through csv's to find what you're looking for! Let's keep going. Remember, we are interested in the difference between averages around zero voltage for each datafile. We can create a workflow for this using [`Data.apply`](#https://ekpmeasure.readthedocs.io/en/latest/ekpmeasure.analysis.html#ekpmeasure.analysis.core.Data.apply). To understand how this works, let's take a deeper look at what our `data` object really is:
 
@@ -319,7 +319,7 @@ import matplotlib.pyplot as plt
 >>> plt.scatter(X, Y, color = 'blue')
 ```
 
-![finalplot1](imgs/finalplot1.png)
+![finalplot1](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/finalplot1.png)
 
 And there you have it, we now analyzed all of the data corresponding to 100ms! As a final example in this introduction, let's now plot all of the data. We want difference vs applied voltage colored by pulsewidth. The following code will create it: 
 
@@ -353,7 +353,7 @@ for tmpdata, color in zip(data, colors):
 	ax.scatter(X, Y, color = color)
 ```
 
-![finalplot2](imgs/finalplot2.PNG)
+![finalplot2](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/finalplot2.PNG)
 
 Hopefully this has given you a brief introduction to how to use EKPy. Happy analyzing!
 
