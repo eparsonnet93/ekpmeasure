@@ -1,7 +1,10 @@
 import numpy as np
+import warnings
 
 __all__ = ('get_number_and_suffix', 'frequency_suffix_to_scientific_str', 'current_suffix_to_scientific_str', 
-    'scientific_str_to_time_suffix', 'voltage_suffix_to_scientic_str', 'time_suffix_to_scientic_str', 'voltage_amp_mapper')
+    'scientific_str_to_time_suffix', 'voltage_suffix_to_scientic_str', 'time_suffix_to_scientic_str', 
+    'voltage_amp_mapper', 'freq_mapper', 'current_amp_mapper', 'time_to_sci_mapper','sci_to_time_mapper',
+    '_get_number_and_suffix', )
 
 freq_mapper = {'Mhz':'e6','khz':'e3', 'hz':'e0', 'mhz':'e-3', 'MHz':'e6', 'kHz':'e3','Hz':'e0', 'mHz':'e-3'}
 current_amp_mapper = {'ma':'e-3', 'ua':'e-6', 'na':'e-9', 'mA':'e-3', 'uA':'e-6', 'nA':'e-9'}
@@ -87,7 +90,30 @@ def get_number_and_suffix(string):
 
 
     """
-    return _get_number_and_suffix(string)
+    return _get_number_and_suffix2(string)
+
+def _get_number_and_suffix2(string):
+    """Return number and suffix of a string. e.g. 1khz will return (1.0, 'khz').
+
+    args:
+        string (str): String.
+
+    returns:
+        (tuple): number, suffix
+
+
+    """
+    iteration = 0
+    number = np.nan
+    while np.isnan(number):
+        if iteration >= len(string):
+            raise ValueError('unable to find a valid number in str: {}'.format(string))
+        try:
+            number = float(string[:-(1+iteration)])
+        except ValueError:
+            iteration+=1
+            
+    return number, string[-(iteration + 1):]
 
 def _get_number_and_suffix(string):
     """Return number and suffix of a string. e.g. 1khz will return (1.0, 'khz').
@@ -100,6 +126,7 @@ def _get_number_and_suffix(string):
 
 
     """
+    warnings.showwarning("_get_number_and_suffix is deprecated. Please use get_number_and_suffix instead.", DeprecationWarning, '', '')
     iteration = 0
     number = np.nan
     while np.isnan(number):

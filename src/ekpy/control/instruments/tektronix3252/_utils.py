@@ -1,4 +1,4 @@
-from ....utils import (_get_number_and_suffix,
+from ....utils import (get_number_and_suffix,
     time_to_sci_mapper,
     )
 import numpy as np
@@ -16,7 +16,7 @@ def frequency_from_delay(delay):
         frequency (float): Frequency in Hz.
 
     """
-    d_number, d_suffix = _get_number_and_suffix(delay)
+    d_number, d_suffix = get_number_and_suffix(delay)
     float_delay = float(str(d_number) + time_to_sci_mapper[d_suffix])
 
     frequency = np.round(1/float_delay, 0)

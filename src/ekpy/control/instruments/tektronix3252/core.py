@@ -1,4 +1,4 @@
-from ....utils import (_get_number_and_suffix,
+from ....utils import (get_number_and_suffix,
     time_to_sci_mapper,
     voltage_amp_mapper, 
     freq_mapper,
@@ -24,7 +24,7 @@ def set_pulse_delay(pulse_gen, delay:str, channel=1, both=False):
     """   
 
     f = delay.lower()
-    f_number, f_suffix = _get_number_and_suffix(f) 
+    f_number, f_suffix = get_number_and_suffix(f) 
     f = str(f_number) + time_to_sci_mapper[f_suffix]
 
     if both:
@@ -46,7 +46,7 @@ def set_amplitude(pulse_gen, amplitude:str, channel=1, both=False):
 
     """   
 
-    v_number, v_suffix = _get_number_and_suffix(amplitude)
+    v_number, v_suffix = get_number_and_suffix(amplitude)
     amp = str(v_number) + voltage_amp_mapper[v_suffix]
 
     if both:
@@ -131,7 +131,7 @@ def set_low_voltage(pulse_gen, low_v, channel = 1, both = False):
     stop_pulse_gen(pulse_gen, channel = channel, both = both)
 
     low_v = low_v.lower()
-    v_number, v_suffix = _get_number_and_suffix(low_v)
+    v_number, v_suffix = get_number_and_suffix(low_v)
     low_v = str(v_number) + voltage_amp_mapper[v_suffix]
 
     if both:
@@ -155,7 +155,7 @@ def set_high_voltage(pulse_gen, high_v, channel = 1, both = False):
     stop_pulse_gen(pulse_gen, channel = channel, both = both)
 
     high_v = high_v.lower()
-    v_number, v_suffix = _get_number_and_suffix(high_v)
+    v_number, v_suffix = get_number_and_suffix(high_v)
     high_v = str(v_number) + voltage_amp_mapper[v_suffix]
 
     if both:
@@ -178,7 +178,7 @@ def set_pulsewidth(pulse_gen, pw, channel = 1, both = False):
     """   
 
     pw = pw.lower()
-    pw_number, pw_suffix = _get_number_and_suffix(pw) 
+    pw_number, pw_suffix = get_number_and_suffix(pw) 
     pw = str(pw_number) + time_to_sci_mapper[pw_suffix]
 
     if both:
@@ -202,7 +202,7 @@ def set_frequency(pulse_gen, frequency, channel = 1, both = False):
 
     # f = frequency.lower()
     f = frequency
-    f_number, f_suffix = _get_number_and_suffix(f) 
+    f_number, f_suffix = get_number_and_suffix(f) 
     f = str(f_number) + freq_mapper[f_suffix]
 
     if both:
