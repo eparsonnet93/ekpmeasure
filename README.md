@@ -2,8 +2,8 @@
 
 
 [![Documentation Status](https://readthedocs.org/projects/ekpmeasure/badge/?version=latest)](http://ekpmeasure.readthedocs.io/?badge=latest)
-[![PyPI version fury.io](https://badge.fury.io/py/ekpmeasure.svg)](https://pypi.org/project/ekpmeasure/)
-[![PyPI license](https://img.shields.io/pypi/l/ekpmeasure.svg)](https://pypi.org/project/ekpmeasure/)
+[![PyPI version fury.io](https://badge.fury.io/py/ekpy.svg)](https://pypi.org/project/ekpy/)
+[![PyPI license](https://img.shields.io/pypi/l/ekpy.svg)](https://pypi.org/project/ekpy/)
 [![PyPi Downloads](http://pepy.tech/badge/ekpmeasure)](http://pepy.tech/project/ekpmeasure)
 [![PyPi Downloads](http://pepy.tech/badge/ekpy)](http://pepy.tech/project/ekpy)
 
