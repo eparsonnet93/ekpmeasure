@@ -7,7 +7,7 @@
 [![PyPi Downloads](http://pepy.tech/badge/ekpmeasure)](http://pepy.tech/project/ekpmeasure)
 [![PyPi Downloads](http://pepy.tech/badge/ekpy)](http://pepy.tech/project/ekpy)
 
-[![N|Scheme](https://github.com/eparsonnet93/ekpmeasure/blob/main/https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/prl2.png)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.125.067601)
+[![N|Scheme](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/prl2.png)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.125.067601)
 
 A repository of analysis and computer control code for various experiments. Image above is an example of data **collected** and **analyzed** using this package.
 
