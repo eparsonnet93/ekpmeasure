@@ -183,7 +183,7 @@ class data_array_builder(list):
                     if coerce_to_ndarray:
                     # case where we will have to coerce to ndarray anyway so we will force it to be 1D
                         if not ignore_coerce_warnings:
-                            warnings.showwarning("You are coercing data into a 1D ndarray. The data is of type {} and will be converted following numpy.array([{}]).flatten(). \nTO SURPRESS THIS WARNING use .build(..., ignore_coerce_warnings=False)".format(type(thing), thing), UserWarning, '', '')
+                            warnings.showwarning("You are coercing data into a 1D ndarray. The data is of type {} and will be converted following numpy.array([{}]).flatten(). \nTO SURPRESS THIS WARNING use .build(..., ignore_coerce_warnings=True)".format(type(thing), thing), UserWarning, '', '')
                         convert_to_ndarray = True
                         continue 
                     else:
