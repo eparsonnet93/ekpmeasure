@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 
 __all__ = ('_fod_dimensionality_fixer', 'iterable_data_array', 'data_array_builder', 'not_nan_indexer')
 
@@ -160,28 +161,48 @@ class data_array_builder(list):
     def __init__(self,):
         super().__init__()
     
-    def build(self,fix_lengths=True):
+    def build(self, fix_lengths=True, coerce_to_ndarray=True, ignore_coerce_warnings=False):
         """Build the final array (create a numpy.vstack).
 
         args:
-            fix_lengths (bool): Whether or not to append nans to make lengths match. Only works with 1D data. 
+            fix_lengths (bool): Whether or not to append nans to make lengths match. Only works with 1D data.
+            coerce_to_ndarray (bool): Whether or not to coerce data type into an ndarray.  
+            ignore_coerce_warnings (bool): Whether or not to surpress coercing to ndarray warnings. 
 
         returns:
             (numpy.vstack): VStacks all items in the data_array_builder.
 
         """
+
+        convert_to_ndarray = False
+
         if fix_lengths:
             for thing in self:
+                # import pdb; pdb.set_trace()
+                if not hasattr(thing, 'shape') or thing.shape == ():
+                    if coerce_to_ndarray:
+                    # case where we will have to coerce to ndarray anyway so we will force it to be 1D
+                        if not ignore_coerce_warnings:
+                            warnings.showwarning("You are coercing data into a 1D ndarray. The data is of type {} and will be converted following numpy.array([{}]).flatten(). \nTO SURPRESS THIS WARNING use .build(..., ignore_coerce_warnings=False)".format(type(thing), thing), UserWarning, '', '')
+                        convert_to_ndarray = True
+                        continue 
+                    else:
+                        raise ValueError('Data is not an ndarray. To coerce to ndarray use .build(..., coerce_to_ndarray=True)')
                 if len(thing.shape)!=1:
-                    raise ValueError('Data is not 1-dimensional. Cannot fix lengths. Try again with fix_lengths=False')
+                    raise ValueError('Data is not 1-dimensional. (Shape is {}). Cannot fix lengths. Try again with .build(..., fix_lengths=False)'.format(thing.shape))
         
         target_length = 0
         
         for thing in self:
+            if convert_to_ndarray:
+                thing = np.array([thing]).flatten()
+
             if len(thing)>target_length:
                 target_length = len(thing)
 
         for thing in self:
+            if convert_to_ndarray:
+                thing = np.array([thing]).flatten()
             # get thing into target shape
             while len(thing) != target_length:
                 thing = np.concatenate((thing, np.array([np.nan])))
