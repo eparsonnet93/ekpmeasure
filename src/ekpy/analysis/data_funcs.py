@@ -173,7 +173,7 @@ class data_array_builder(list):
         if fix_lengths:
             for thing in self:
                 if len(thing.shape)!=1:
-                    raise ValueError('Data is not 1-dimensional. (has shape {}). Cannot fix lengths. Try again with fix_lengths=False')
+                    raise ValueError('Data is not 1-dimensional. Cannot fix lengths. Try again with fix_lengths=False')
         
         target_length = 0
         
