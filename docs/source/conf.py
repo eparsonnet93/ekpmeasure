@@ -17,12 +17,12 @@ sys.path.insert(0, os.path.abspath('../../src/'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'ekpmeasure'
+project = 'ekpy'
 copyright = '2021, Eric Parsonnet'
 author = 'Eric Parsonnet'
 
 # The full version, including alpha/beta/rc tags
-release = 'v0.1.5'
+release = 'v0.1.10'
 
 
 # -- General configuration ---------------------------------------------------

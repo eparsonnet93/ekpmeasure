@@ -1,13 +1,13 @@
-ekpmeasure.control.instruments.keithley6221 package
+ekpy.control.instruments.keithley2400 package
 ===================================================
 
 Submodules
 ----------
 
-ekpmeasure.control.instruments.keithley6221.main module
+ekpy.control.instruments.keithley2400.core module
 -------------------------------------------------------
 
-.. automodule:: ekpmeasure.control.instruments.keithley6221.main
+.. automodule:: ekpy.control.instruments.keithley2400.core
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.control.instruments.keithley6221.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.control.instruments.keithley6221
+.. automodule:: ekpy.control.instruments.keithley2400
    :members:
    :undoc-members:
    :show-inheritance:

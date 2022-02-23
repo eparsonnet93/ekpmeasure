@@ -1,21 +1,21 @@
-ekpmeasure.analysis.FE\_switching package
+ekpy.analysis.FE\_switching package
 =========================================
 
 Submodules
 ----------
 
-ekpmeasure.analysis.FE\_switching.functions\_on\_data module
+ekpy.analysis.FE\_switching.functions\_on\_data module
 ------------------------------------------------------------
 
-.. automodule:: ekpmeasure.analysis.FE_switching.functions_on_data
+.. automodule:: ekpy.analysis.FE_switching.functions_on_data
    :members:
    :undoc-members:
    :show-inheritance:
 
-ekpmeasure.analysis.FE\_switching.main module
+ekpy.analysis.FE\_switching.main module
 ---------------------------------------------
 
-.. automodule:: ekpmeasure.analysis.FE_switching.main
+.. automodule:: ekpy.analysis.FE_switching.main
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ ekpmeasure.analysis.FE\_switching.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.analysis.FE_switching
+.. automodule:: ekpy.analysis.FE_switching
    :members:
    :undoc-members:
    :show-inheritance:

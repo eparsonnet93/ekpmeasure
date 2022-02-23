@@ -1,4 +1,4 @@
-ekpmeasure package
+ekpy package
 ==================
 
 Subpackages
@@ -7,13 +7,13 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   ekpmeasure.analysis
-   ekpmeasure.control
+   ekpy.analysis
+   ekpy.control
 
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure
+.. automodule:: ekpy
    :members:
    :undoc-members:
    :show-inheritance:

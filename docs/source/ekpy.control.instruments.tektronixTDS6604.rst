@@ -1,13 +1,13 @@
-ekpmeasure.control.instruments.tektronixTDS6604 package
+ekpy.control.instruments.tektronixTDS6604 package
 =======================================================
 
 Submodules
 ----------
 
-ekpmeasure.control.instruments.tektronixTDS6604.main module
+ekpy.control.instruments.tektronixTDS6604.core module
 -----------------------------------------------------------
 
-.. automodule:: ekpmeasure.control.instruments.tektronixTDS6604.main
+.. automodule:: ekpy.control.instruments.tektronixTDS6604.core
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.control.instruments.tektronixTDS6604.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.control.instruments.tektronixTDS6604
+.. automodule:: ekpy.control.instruments.tektronixTDS6604
    :members:
    :undoc-members:
    :show-inheritance:

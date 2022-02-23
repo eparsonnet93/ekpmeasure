@@ -1,13 +1,13 @@
-ekpmeasure.control.instruments.tektronixTDS620B package
+ekpy.control.instruments.tektronixTDS620B package
 =======================================================
 
 Submodules
 ----------
 
-ekpmeasure.control.instruments.tektronixTDS620B.main module
+ekpy.control.instruments.tektronixTDS620B.core module
 -----------------------------------------------------------
 
-.. automodule:: ekpmeasure.control.instruments.tektronixTDS620B.main
+.. automodule:: ekpy.control.instruments.tektronixTDS620B.core
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.control.instruments.tektronixTDS620B.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.control.instruments.tektronixTDS620B
+.. automodule:: ekpy.control.instruments.tektronixTDS620B
    :members:
    :undoc-members:
    :show-inheritance:

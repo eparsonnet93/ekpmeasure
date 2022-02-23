@@ -1,13 +1,13 @@
-ekpmeasure.control.instruments.misc package
+ekpy.control.instruments.misc package
 ===========================================
 
 Submodules
 ----------
 
-ekpmeasure.control.instruments.misc.main module
+ekpy.control.instruments.misc.main module
 -----------------------------------------------
 
-.. automodule:: ekpmeasure.control.instruments.misc.main
+.. automodule:: ekpy.control.instruments.misc.main
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.control.instruments.misc.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.control.instruments.misc
+.. automodule:: ekpy.control.instruments.misc
    :members:
    :undoc-members:
    :show-inheritance:

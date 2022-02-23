@@ -1,13 +1,13 @@
-ekpmeasure.control.egmr package
+ekpy.control.misc package
 ===============================
 
 Submodules
 ----------
 
-ekpmeasure.control.egmr.main module
+ekpy.control.misc.main module
 -----------------------------------
 
-.. automodule:: ekpmeasure.control.egmr.main
+.. automodule:: ekpy.control.misc.main
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.control.egmr.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.control.egmr
+.. automodule:: ekpy.control.misc
    :members:
    :undoc-members:
    :show-inheritance:

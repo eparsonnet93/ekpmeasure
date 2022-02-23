@@ -1,21 +1,21 @@
-ekpmeasure.analysis.ppms package
+ekpy.analysis.ppms package
 ================================
 
 Submodules
 ----------
 
-ekpmeasure.analysis.ppms.functions\_on\_data module
+ekpy.analysis.ppms.functions\_on\_data module
 ---------------------------------------------------
 
-.. automodule:: ekpmeasure.analysis.ppms.functions_on_data
+.. automodule:: ekpy.analysis.ppms.functions_on_data
    :members:
    :undoc-members:
    :show-inheritance:
 
-ekpmeasure.analysis.ppms.main module
+ekpy.analysis.ppms.main module
 ------------------------------------
 
-.. automodule:: ekpmeasure.analysis.ppms.main
+.. automodule:: ekpy.analysis.ppms.main
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ ekpmeasure.analysis.ppms.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.analysis.ppms
+.. automodule:: ekpy.analysis.ppms
    :members:
    :undoc-members:
    :show-inheritance:

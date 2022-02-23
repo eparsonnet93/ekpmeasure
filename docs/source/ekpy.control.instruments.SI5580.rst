@@ -1,13 +1,13 @@
-ekpmeasure.control.instruments.SI5580 package
+ekpy.control.instruments.SI5580 package
 =============================================
 
 Submodules
 ----------
 
-ekpmeasure.control.instruments.SI5580.main module
+ekpy.control.instruments.SI5580.core module
 -------------------------------------------------
 
-.. automodule:: ekpmeasure.control.instruments.SI5580.main
+.. automodule:: ekpy.control.instruments.SI5580.core
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.control.instruments.SI5580.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.control.instruments.SI5580
+.. automodule:: ekpy.control.instruments.SI5580
    :members:
    :undoc-members:
    :show-inheritance:

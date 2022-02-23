@@ -1,4 +1,4 @@
-ekpmeasure.analysis package
+ekpy.analysis package
 ===========================
 
 Subpackages
@@ -7,58 +7,58 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   ekpmeasure.analysis.FE_switching
-   ekpmeasure.analysis.asylum
-   ekpmeasure.analysis.ppms
-   ekpmeasure.analysis.radiant
+   ekpy.analysis.FE_switching
+   ekpy.analysis.asylum
+   ekpy.analysis.ppms
+   ekpy.analysis.radiant
 
 Submodules
 ----------
 
-ekpmeasure.analysis.core module
+ekpy.analysis.core module
 -------------------------------
 
-.. automodule:: ekpmeasure.analysis.core
+.. automodule:: ekpy.analysis.core
    :members:
    :undoc-members:
    :show-inheritance:
 
-ekpmeasure.analysis.data\_utils module
+ekpy.analysis.data\_utils module
 --------------------------------------
 
-.. automodule:: ekpmeasure.analysis.data_utils
+.. automodule:: ekpy.analysis.data_utils
    :members:
    :undoc-members:
    :show-inheritance:
 
-ekpmeasure.analysis.functions\_on\_data module
+ekpy.analysis.data\_funcs module
 ----------------------------------------------
 
-.. automodule:: ekpmeasure.analysis.functions_on_data
+.. automodule:: ekpy.analysis.data\_funcs
    :members:
    :undoc-members:
    :show-inheritance:
 
-ekpmeasure.analysis.load module
+ekpy.analysis.load module
 -------------------------------
 
-.. automodule:: ekpmeasure.analysis.load
+.. automodule:: ekpy.analysis.load
    :members:
    :undoc-members:
    :show-inheritance:
 
-ekpmeasure.analysis.plotting module
+ekpy.analysis.plotting module
 -----------------------------------
 
-.. automodule:: ekpmeasure.analysis.plotting
+.. automodule:: ekpy.analysis.plotting
    :members:
    :undoc-members:
    :show-inheritance:
 
-ekpmeasure.analysis.utils module
+ekpy.analysis.utils module
 --------------------------------
 
-.. automodule:: ekpmeasure.analysis.utils
+.. automodule:: ekpy.analysis.utils
    :members:
    :undoc-members:
    :show-inheritance:
@@ -66,7 +66,7 @@ ekpmeasure.analysis.utils module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.analysis
+.. automodule:: ekpy.analysis
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,13 +1,13 @@
-ekpmeasure.control.instruments.lakeshore647 package
+ekpy.control.instruments.keithley6221 package
 ===================================================
 
 Submodules
 ----------
 
-ekpmeasure.control.instruments.lakeshore647.main module
+ekpy.control.instruments.keithley6221.core module
 -------------------------------------------------------
 
-.. automodule:: ekpmeasure.control.instruments.lakeshore647.main
+.. automodule:: ekpy.control.instruments.keithley6221.core
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.control.instruments.lakeshore647.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.control.instruments.lakeshore647
+.. automodule:: ekpy.control.instruments.keithley6221
    :members:
    :undoc-members:
    :show-inheritance:

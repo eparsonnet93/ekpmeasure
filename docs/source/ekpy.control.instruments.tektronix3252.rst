@@ -1,13 +1,13 @@
-ekpmeasure.control.instruments.tektronix3252 package
+ekpy.control.instruments.tektronix3252 package
 ====================================================
 
 Submodules
 ----------
 
-ekpmeasure.control.instruments.tektronix3252.main module
+ekpy.control.instruments.tektronix3252.core module
 --------------------------------------------------------
 
-.. automodule:: ekpmeasure.control.instruments.tektronix3252.main
+.. automodule:: ekpy.control.instruments.tektronix3252.core
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.control.instruments.tektronix3252.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.control.instruments.tektronix3252
+.. automodule:: ekpy.control.instruments.tektronix3252
    :members:
    :undoc-members:
    :show-inheritance:

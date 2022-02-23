@@ -1,13 +1,13 @@
-ekpmeasure.analysis.asylum package
+ekpy.analysis.asylum package
 ==================================
 
 Submodules
 ----------
 
-ekpmeasure.analysis.asylum.main module
+ekpy.analysis.asylum.main module
 --------------------------------------
 
-.. automodule:: ekpmeasure.analysis.asylum.main
+.. automodule:: ekpy.analysis.asylum.main
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.analysis.asylum.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.analysis.asylum
+.. automodule:: ekpy.analysis.asylum
    :members:
    :undoc-members:
    :show-inheritance:

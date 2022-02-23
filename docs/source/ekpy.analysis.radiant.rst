@@ -1,13 +1,13 @@
-ekpmeasure.analysis.radiant package
+ekpy.analysis.radiant package
 ===================================
 
 Submodules
 ----------
 
-ekpmeasure.analysis.radiant.main module
+ekpy.analysis.radiant.main module
 ---------------------------------------
 
-.. automodule:: ekpmeasure.analysis.radiant.main
+.. automodule:: ekpy.analysis.radiant.main
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.analysis.radiant.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.analysis.radiant
+.. automodule:: ekpy.analysis.radiant
    :members:
    :undoc-members:
    :show-inheritance:

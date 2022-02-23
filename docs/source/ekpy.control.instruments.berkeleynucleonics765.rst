@@ -1,13 +1,13 @@
-ekpmeasure.control.instruments.berkeleynucleonics765 package
+ekpy.control.instruments.berkeleynucleonics765 package
 ============================================================
 
 Submodules
 ----------
 
-ekpmeasure.control.instruments.berkeleynucleonics765.main module
+ekpy.control.instruments.berkeleynucleonics765.core module
 ----------------------------------------------------------------
 
-.. automodule:: ekpmeasure.control.instruments.berkeleynucleonics765.main
+.. automodule:: ekpy.control.instruments.berkeleynucleonics765.core
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.control.instruments.berkeleynucleonics765.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.control.instruments.berkeleynucleonics765
+.. automodule:: ekpy.control.instruments.berkeleynucleonics765
    :members:
    :undoc-members:
    :show-inheritance:

@@ -59,17 +59,17 @@ Dataset aims to simplify this process. Dataset is a subclass of `pandas.DataFram
 	)
 	dset = Dataset(path, meta_data)
 
-to assist in generating such meta data you may wish to use :func:`load_Dataset <ekpmeasure.analysis.load.load_Dataset>` method which searches a folder for you and allows you to automatically create meta data. Once a Dataset is created, you can retrieve the data easily:
+to assist in generating such meta data you may wish to use :func:`load_Dataset <ekpy.analysis.load.load_Dataset>` method which searches a folder for you and allows you to automatically create meta data. Once a Dataset is created, you can retrieve the data easily:
 
 .. code-block:: python
 
 	dset.get_data()
 
-This returns a :func:`Data <ekpmeasure.analysis.core.Data>` class. As a brief example of how to use the Dataset class, consider one the problems stated above of wanting to compare all data that corresponds to 10V as the first parameter and 1mv as the second parameter with the second parameter. This is done in a straightforward way using Datasets.
+This returns a :func:`Data <ekpy.analysis.core.Data>` class. As a brief example of how to use the Dataset class, consider one the problems stated above of wanting to compare all data that corresponds to 10V as the first parameter and 1mv as the second parameter with the second parameter. This is done in a straightforward way using Datasets.
 
 .. code-block:: python
 	
-	>>> from ekpmeasure import analysis
+	>>> from ekpy import analysis
 
 	>>> path1 = './data/folder1/'
 	>>> path2 = './data/folder2/'
@@ -99,7 +99,7 @@ This returns a :func:`Data <ekpmeasure.analysis.core.Data>` class. As a brief ex
 Load Dataset
 ************
 
-One can load a Dataset, using :func:`load_Dataset <ekpmeasure.analysis.load.load_Dataset>`,  from a path. This method earches a folder for a pickle file (.pkl) of name 'meta_data' or will inform the user that none exists. 
+One can load a Dataset, using :func:`load_Dataset <ekpy.analysis.load.load_Dataset>`,  from a path. This method earches a folder for a pickle file (.pkl) of name 'meta_data' or will inform the user that none exists. 
 
 .. code-block:: python
 
@@ -142,7 +142,7 @@ then one might use:
 Data
 ****
 
-:func:`Data <ekpmeasure.analysis.core.Data>`
+:func:`Data <ekpy.analysis.core.Data>`
 
 Data is a subclass of Dict. The Data class holds real data. It allows for operations to be done on all data simultaneously by 
 
@@ -195,10 +195,10 @@ Data is a subclass of Dict. The Data class holds real data. It allows for operat
 Control
 #######
 
-Control is a repository of instrument control code in addition to experimental control (often making use of one or more instruments). Experimental data obtained by using the :func:`experiment <ekpmeasure.control.core.experiment>` class will automatically generate meta_data for usage in analysis.
+Control is a repository of instrument control code in addition to experimental control (often making use of one or more instruments). Experimental data obtained by using the :func:`experiment <ekpy.control.core.experiment>` class will automatically generate meta_data for usage in analysis.
 
 experiment
-The experiment base class serves to manage scans over desired parameters via the :func:`n_param_scan <ekpmeasure.control.core.experiment.n_param_scan>` method and properly save + generate meta_data for usage in :func:`analysis <ekpmeasure.analysis>`
+The experiment base class serves to manage scans over desired parameters via the :func:`n_param_scan <ekpy.control.core.experiment.n_param_scan>` method and properly save + generate meta_data for usage in :func:`analysis <ekpy.analysis>`
 
 n_param_scan
 ************

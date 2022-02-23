@@ -1,13 +1,13 @@
-ekpmeasure.control.instruments.srs830 package
+ekpy.control.instruments.srs830 package
 =============================================
 
 Submodules
 ----------
 
-ekpmeasure.control.instruments.srs830.main module
+ekpy.control.instruments.srs830.core module
 -------------------------------------------------
 
-.. automodule:: ekpmeasure.control.instruments.srs830.main
+.. automodule:: ekpy.control.instruments.srs830.core
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.control.instruments.srs830.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.control.instruments.srs830
+.. automodule:: ekpy.control.instruments.srs830
    :members:
    :undoc-members:
    :show-inheritance:

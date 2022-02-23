@@ -1,13 +1,13 @@
-ekpmeasure.control.instruments.lakeshore475 package
+ekpy.control.instruments.lakeshore647 package
 ===================================================
 
 Submodules
 ----------
 
-ekpmeasure.control.instruments.lakeshore475.main module
+ekpy.control.instruments.lakeshore647.core module
 -------------------------------------------------------
 
-.. automodule:: ekpmeasure.control.instruments.lakeshore475.main
+.. automodule:: ekpy.control.instruments.lakeshore647.core
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ ekpmeasure.control.instruments.lakeshore475.main module
 Module contents
 ---------------
 
-.. automodule:: ekpmeasure.control.instruments.lakeshore475
+.. automodule:: ekpy.control.instruments.lakeshore647
    :members:
    :undoc-members:
    :show-inheritance:
