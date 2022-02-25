@@ -8,10 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import time
 
-__all__ = ('basic_run_function', 'BASIC', 'hysteresis_run_function', 'HYST', 'SWITCH', 'switching_run_function')
+__all__ = ('basic_run_function', 'BASIC', 'hysteresis_run_function', 'HYST', 'SWITCH', 'switching_run_function', 'BASIC_SINGLE_LI')
 
 def switching_run_function(LI1, LI2, current_source, k24, samplename, min_voltage:float=-10, max_voltage:float=10,
-	current_amplitude:str='800ua', current_frequency:str='7hz', current_compliance:float=4, ntimes:int=2,
+	current_amplitude:str='800ua', nplc:float=0.2, current_frequency:str='7hz', current_compliance:float=4, ntimes:int=2,
 	wait_time:float=.5,ignore:int=100,count:int=500,sleep_before_start:float=60,note:str='none', plot:bool=True, 
 	fig=None, axs=None):
 	meta_data = {
@@ -48,7 +48,7 @@ def switching_run_function(LI1, LI2, current_source, k24, samplename, min_voltag
 		if voltage != 0:
 			time.sleep(1)
 			#input('Connect')
-			k2400.config_voltage_pulse(k24, amplitude=voltage)
+			k2400.config_voltage_pulse(k24, amplitude=voltage, nplc=nplc)
 			k2400.enable_source(k24)
 			time.sleep(2)
 			k2400.read(k24)
@@ -199,6 +199,79 @@ def basic_run_function(LI1, LI2, current_source, FE_applied_voltage, samplename,
 		
 	return base_name, meta_data, pd.DataFrame(out)
 
+def basic_run_function_single_lockin(LI, current_source, FE_applied_voltage, samplename, 
+	current_amplitude, current_frequency='7hz', current_compliance=4, wait_time=.5, 
+	ignore=100, count=500, sleep_before_start=60, note='none',hysteresis=False):
+
+	if hysteresis:
+		input('Click enter after applied voltage ({}).'.format(FE_applied_voltage))
+	
+	meta_data = {
+		'FE_applied_voltage':FE_applied_voltage,
+		'samplename':samplename,
+		'wait_time':wait_time,
+		'count':count,
+		'current_amp_ua':float(current_amplitude.replace('ua','').replace('ma','1e3')),
+		'current_frequency':current_frequency,
+		'note':note,
+	}
+	
+	base_name = '{}v_'.format(str(FE_applied_voltage).replace('-', 'n').replace('.', 'x'))
+	
+	out = {'X':[],'Y':[]}
+
+	if not k6221.is_on(current_source):
+		k6221.set_output_sin(current_source, frequency=current_frequency, 
+			amplitude=current_amplitude, compliance=current_compliance)
+		k6221.set_wave_on(current_source)
+		time.sleep(sleep_before_start)
+	time.sleep(sleep_before_start/2)
+	
+	for i in range(count):
+		time.sleep(wait_time)
+		if i <= ignore:
+			continue
+		X, Y = srs.get_X_Y(LI)
+		out['X'].append(X)
+		out['Y'].append(Y)
+
+	if not hysteresis:
+		k6221.set_wave_off(current_source)
+		
+	return base_name, meta_data, pd.DataFrame(out)
+
+
+class BASIC_SINGLE_LI(core.experiment):
+	
+	def __init__(self, LI, current_source, run_function=basic_run_function_single_lockin):
+		super().__init__()
+		self.run_function = run_function
+		self.LI = LI
+		self.current_source = current_source
+	
+	def checks(self, params):
+		if self.LI != params['LI']:
+			raise ValueError('Lockin does not match self.')
+		if self.current_source != params['current_source']:
+			raise ValueError('current_source does not match self.')
+	
+	def terminate(self, *args, **kwargs):
+		k6221.set_wave_off(self.current_source)
+
+	def _plot(self, data, scan_params):
+		if hasattr(self, 'fig') and hasattr(self, 'ax'):
+			pass
+		else:
+			fig, axs = plt.subplots(nrows=2, figsize=(10,15))
+			self.fig = fig
+			self.axs = axs
+			
+		for ax, data_key in zip(self.axs, ['X', 'Y']):
+			dat = data[data_key]
+			ax.plot(dat, color = 'blue')
+			ax.set_title(data_key)
+			plotting.update_plot(self.fig)
+			plt.show(self.fig)
 
 class BASIC(core.experiment):
 	
