@@ -395,15 +395,15 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 # Change log
 
-### Version 0.1.10
+#### Version 0.1.10
 
 - minor bug fixes and documentation updates
 
-### Version 0.1.9
+#### Version 0.1.9
 
 - minor bug fixes
 
-### Version 0.1.8
+#### Version 0.1.8
 
 **2/18/22**
 - bug fixes from 0.1.7 and changed install name to `ekpy`. 
