@@ -363,10 +363,18 @@ For more see [here.](https://ekpmeasure.readthedocs.io/en/latest/start.html)
 ---
 # Installation:
 
+If you plan to use EKPy to control your experiments. You will need to install [NI-VISA](https://www.ni.com/en-us/support/downloads/drivers/download.ni-visa.html#442805) first. 
+
 Find the latest build [here](https://pypi.org/project/ekpy/).
 
 ```bash
 pip install ekpy
+```
+
+or to upgrade to the latest version
+
+```bash
+pip install -U ekpy
 ```
 
 You can also access `.whl` or `.tar.gz` files in the `dist/` directory directly for installation. 
@@ -386,6 +394,14 @@ We welcome new contributors of all experience levels. Please reach out directly 
 * Issue tracker: https://github.com/eparsonnet93/ekpmeasure/issues
 
 # Change log
+
+### Version 0.1.10
+
+- minor bug fixes and documentation updates
+
+### Version 0.1.9
+
+- minor bug fixes
 
 ### Version 0.1.8
 
