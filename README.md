@@ -395,6 +395,10 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 # Change log
 
+### Version 0.1.11
+
+- `experiment.print_run_function_args` is gone. It has been replaced with `experiment.show_run_function_help`
+
 #### Version 0.1.10
 
 - minor bug fixes and documentation updates

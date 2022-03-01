@@ -42,10 +42,14 @@ class experiment():
 	def __str__(self):
 		return self.__repr__()
 
-	def print_run_function_args(self):
-		"""print the run function arguments"""
-		print(self.run_function.__code__.co_varnames)
-		return
+	def show_run_function_help(self):
+		"""Return help (used to view docstring/call args etc.) for `self.run_function`.
+
+		returns:
+			(help): Help on `self.run_function`
+
+		"""
+		return help(self.run_function)
 
 	def config_path(self, path, directory_delimiter='/'):
 		"""Config the path to save data. If path does not exist, user will be prompted to create. 
@@ -95,6 +99,21 @@ class experiment():
 	def checks(self, params):
 		"""Method to perform a set of checks on params before starting a scan. Default is simple pass."""
 		pass
+
+	def terminate(self):
+		"""Placeholder method for termination. This method should be overriden. 
+
+		example:
+			Example of overriding the terminate method to perform a set of actions upon erroring/completion of `n_param_scan`.
+
+			.. code-block:: python
+
+				def terminate(self):
+					# set the internal amplitude of the lockin to its lowest value
+					srs.set_internal_amplitude(self.lockin, 0.0004)
+
+		"""
+		raise NotImplementedError('terminate() should be overridden in experiment subclass. It is not.')
 
 
 	def _plot(self, data, scan_params):
