@@ -1036,12 +1036,28 @@ class Data():
 		return Data(out)
 
 
-	def mean(self,):
+	def mean(self, axis=0):
 		"""
-		Return data class where data is averaged across 0th axis. This is best used for averaging across trials or similar.
+		Return mean of Data. If 1d data is supplied, mean will be performed over the trial, otherwise mean will be performed across trials.
 
 		returns:
-			(Data): averaged data across 0th axis.
+			(Data)
+
+		examples:
+
+			.. code-block:: python
+	
+				# mean over a trial
+				>>> X = np.array([1,2,3])
+				>>> data = Data({0:{'definition':{},'data':{'X':X}}})
+				>>> data.mean().X
+				> 2.0
+
+				# mean across trials
+				>>> X = np.array([[1,2,3], [3,4,5]])
+				>>> data = Data({0:{'definition':{},'data':{'X':X}}})
+				>>> data.mean().X
+				> array([2., 3., 4.])
 		"""
 		tmp_out = {}
 		for key in self._dict:
@@ -1049,8 +1065,8 @@ class Data():
 			data = self._dict[key]['data']
 			mean_data = {}
 			for k in data:
-				if len(data[k].shape) == 1: #1d data
-					mean_data.update({k:data[k]})
+				if len(data[k].shape) == 1: #1d data averages over the trial
+					mean_data.update({k:np.mean(data[k])})
 				else:
 					try:
 						mean_data.update({k:np.mean(data[k], axis = 0)})
@@ -1061,10 +1077,10 @@ class Data():
 
 	def std(self):
 		"""
-		Return Data class where Data is calculated STD across 0th axis. This is best used for STD across trials or similar.
+		Return standard deviation of Data. If 1d data is supplied, std will be performed over the trial, otherwise std will be performed across trials.
 
 		returns:
-			(Data): STD of data across 0th axis.
+			(Data)
 		"""
 		tmp_out = {}
 		for key in self._dict:
@@ -1073,7 +1089,7 @@ class Data():
 			std_data = {}
 			for k in data:
 				if len(data[k].shape) == 1: #1d data
-					std_data.update({k:data[k]})
+					std_data.update({k:np.std(data[k])})
 				else:
 					try:
 						std_data.update({k:np.std(data[k], axis = 0)})
