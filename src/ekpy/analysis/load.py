@@ -90,26 +90,18 @@ def read_ekpds(filename):
 
 def _build_df(path, meta_data):
 
-	# I have noticed I'm getting an attribute error when the pickle file is created by a different version of pandas... TODO find the origin of this error, for now, updating to store meta_data as a csv as well in control.experiment
 	if type(meta_data) == type(None):
 		try:
-			return pd.read_pickle(path + 'meta_data')
+			return pd.read_csv(path + 'meta_data.csv')
 		except FileNotFoundError:
 			try:
-				return pd.read_csv(path + 'meta_data.csv')
+				return pd.read_pickle(path + 'meta_data')
 			except FileNotFoundError:
-				print('No file named "meta_data" exists in path "{}", you may want to create one or both of these with `.generate_meta_data()`'.format(path, path))
-				return pd.DataFrame()
-		except AttributeError:
-			try:
-				return pd.read_csv(path + 'meta_data.csv')
-			except FileNotFoundError:
-				print('Pickle file "meta_data" exists in path "{}", but failed to load (likely do to incompatible pandas versions). Backup, "meta_data.csv" does not exist in "{}", you may want to create one or both of these with `.generate_meta_data()`'.format(path, path))
-				return pd.DataFrame()
+				raise FileNotFoundError('No file named "meta_data.csv" (or legacy pickle file "meta_data") exists in path "{}", you may want to create one or both of these with `.generate_meta_data()`'.format(path))
 	else:
 		return meta_data
 
-def generate_meta_data(path, mapper, pass_path=False, pointercolumn='filename', overwrite=False):
+def generate_meta_data(path, mapper, pass_path=False, pointercolumn='filename', overwrite=False, ignore_errors=True):
 	"""
 	Generate meta_data from a path for a given mapper function. **Important** mapper must include pointercolumn which is `(key,value) = ('<pointer column name>', <filename>)`. Default is to call such a column `filename`, i.e. `{'filename':'a.csv'}`
 
@@ -119,6 +111,7 @@ def generate_meta_data(path, mapper, pass_path=False, pointercolumn='filename', 
 		pass_path (bool) : Pass the pass of each file to `mapper`. This is used to parse meta data from **within** the file, as one can now open the file within mapper. If True, `mapper` must take argument `path`.
 		pointercolumn (str) : The name of the pointercolumn in the created meta_data
 		overwrite (bool) : True will overwrite any existing meta_data in path. 
+		ignore_errors (bool) : False will hault generation of meta data if a single file fails. Default is True (ignore)
 
 
 	examples:
@@ -162,9 +155,9 @@ def generate_meta_data(path, mapper, pass_path=False, pointercolumn='filename', 
 			generate_meta_data(path, mapper, pass_path=True)
 
 	"""
-	if 'meta_data' in set(os.listdir(path)):
+	if 'meta_data.csv' in set(os.listdir(path)):
 		if not overwrite:
-			yn = input('this path ({}) already has meta_data, do you wish to recreate it? (y/n)'.format(path))
+			yn = input('this path ({}) already has meta_data.csv, do you wish to recreate it? (y/n)'.format(path))
 			if yn.lower() != 'y':
 				print('skipping. NOT overwriting.')
 				return
@@ -174,12 +167,18 @@ def generate_meta_data(path, mapper, pass_path=False, pointercolumn='filename', 
 	for file in os.listdir(path):
 		try:
 			if pass_path:
+				# used to open the file to read meta data
 				meta_data = pd.DataFrame(mapper(file, path=path), index=[0])
 			else:
+				# does not open file
 				meta_data = pd.DataFrame(mapper(file), index=[0])
 		except Exception as e:
-			print('unable to process file: {} \nError: {}'.format(file, e))
-			continue
+			if ignore_errors:
+				# don't error if unable to process one file.
+				print('unable to process file: {} \nError: {}'.format(file, e))
+				continue
+			else:
+				raise e
 		try:
 			existing_meta_data = pd.concat([existing_meta_data, meta_data], ignore_index=True)
 		except NameError:
@@ -188,6 +187,7 @@ def generate_meta_data(path, mapper, pass_path=False, pointercolumn='filename', 
 	if pointercolumn not in set(existing_meta_data.columns): 
 		warnings.showwarning('there is no map to key "{}" in mapping function "{}" provided\nEnsure self.pointercolumn property has been set appropriately or else you will be unable to retrieve data'.format(pointercolumn, mapper.__name__), SyntaxWarning, '', 0,)
 
-	existing_meta_data.to_pickle(path+'meta_data')
-	print('meta_data saved to {}'.format(path))
+	# new 
+	existing_meta_data.to_csv(path+'meta_data.csv', index=False)
+	print('meta_data.csv saved to "{}"'.format(path))
 	return
