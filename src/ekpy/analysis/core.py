@@ -102,7 +102,7 @@ class Dataset():
 
 	"""
 
-	def __init__(self, path, initializer, readfileby=read_ekpy_data, pointercolumn = 'filename'):
+	def __init__(self, path, initializer, readfileby=read_ekpy_data, pointercolumn='filename'):
 		self.meta_data = pd.DataFrame(initializer)
 		self.attrs = dict()
 		self.attrs['path'] = path
@@ -448,6 +448,16 @@ class Dataset():
 
 		return
 
+	def _format_path_to_dict(self):
+	    _type = type(self.path)
+	    if _type is not dict:
+	        if _type is str:
+	            self.attrs['path'] = {self.path:np.array([x for x in self.meta_data.index])}
+	        else:
+	            raise TypeError('self.path is malformed. got type "{}", expected either str or dict').format(_type)
+	    else:
+	        pass
+
 	def to_ekpds(self, path):
 		"""Save Dataset to file (extension .ekpds).
 
@@ -463,6 +473,7 @@ class Dataset():
 		"""
 		self._set_index_to_path_absolute()
 		self._set_path_absolute()
+		self._format_path_to_dict()
 
 		#check if file exits:
 		dirname = os.path.dirname(path)

@@ -35,7 +35,7 @@ def read_ekpy_data(file:str, return_meta_data=False):
 		(pandas.DataFrame) : Data
 		(pandas.DataFrame, dict): (Data, Meta Data)
 	"""
-	with open(fname, 'r') as f:
+	with open(file, 'r') as f:
 		lines = f.readlines()
 	index=len(lines)+1
 	for i, line in enumerate(lines):

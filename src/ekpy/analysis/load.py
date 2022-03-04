@@ -7,10 +7,11 @@ import pickle
 import ast
 
 from .core import Dataset, Data
+from ..utils import read_ekpy_data
 
 __all__ = ('load_Dataset', 'generate_meta_data', 'read_ekpds', 'read_ekpdat')
 
-def load_Dataset(path, meta_data=None, readfileby=pd.read_csv):
+def load_Dataset(path, meta_data=None, readfileby=read_ekpy_data):
 	"""
 	Load a dataset from path. Path must contain (pickle or .csv) file ``'meta_data'``. 
 
