@@ -398,6 +398,7 @@ We welcome new contributors of all experience levels. Please reach out directly 
 ### Version 0.1.11
 
 - `experiment.print_run_function_args` is gone. It has been replaced with `experiment.show_run_function_help`
+- Added a header of meta data to the default save function for `control.experiment` and started the process of doing away with meta_data `.pkl` files in favor of `.csv` (why did I ever think that was a good idea?)
 
 #### Version 0.1.10
 
