@@ -11,6 +11,8 @@ from numpy import AxisError
 import pickle
 from pprint import pformat
 
+from ..utils import read_ekpy_data
+
 
 __all__ = ('Dataset', 'Data',)
 
@@ -74,7 +76,7 @@ class Dataset():
 	Args:
 		path (str or dict): Path to the real data. 
 		initializer (pandas.DataFrame or dict):  Initializer for a DataFrame. The meta data.
-		readfileby (function): How to read the data. Default is ``pandas.read_csv``
+		readfileby (function): How to read the data. Default is ``ekpy.utils.read_ekpy_data()``
 		pointercolumn (str or index): Column name which holds name of file. Default is ``'filename'``
 
 	Examples:
@@ -100,7 +102,7 @@ class Dataset():
 
 	"""
 
-	def __init__(self, path, initializer, readfileby=pd.read_csv, pointercolumn = 'filename'):
+	def __init__(self, path, initializer, readfileby=read_ekpy_data, pointercolumn = 'filename'):
 		self.meta_data = pd.DataFrame(initializer)
 		self.attrs = dict()
 		self.attrs['path'] = path

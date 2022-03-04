@@ -8,6 +8,7 @@ import os
 from IPython import display
 
 from .misc import get_save_name
+from ..utils import write_ekpy_data
 
 __all__ = ('trial','experiment')
 
@@ -245,7 +246,7 @@ class experiment():
 			print('done.')
 		
 
-def trial(run_function, run_function_args, path, return_df=False, save_meta_data_csv=True):
+def trial(run_function, run_function_args, path, return_df=False, save_meta_data_pickle=True):
 	"""
 	A trial for an experiment. This will save each trial (as csv) to path with a unique name (indexed by trial if an identical basename already exists). Also creates and saves meta data to path. The specified run_function must return ((str) base_name, (dict) meta_data, (pandas.dataframe) data).
 
@@ -257,7 +258,7 @@ def trial(run_function, run_function_args, path, return_df=False, save_meta_data
 		run_function_args (dict): Dict of arguments for the specified run_function
 		path (str): Save location.
 		return_df (bool): Return the resulting data (pandas.DataFrame)
-		save_meta_data_csv (bool): Save the meta_data as a .csv in addition to pickle. This can be used to bypass issues with incompatible pandas versions across multiple machines.
+		save_meta_data_csv (bool): Save the meta_data as a pickle file in addition to .csv. This is carry over from a legacy version.
 	
 
 
@@ -275,20 +276,24 @@ def trial(run_function, run_function_args, path, return_df=False, save_meta_data
 
 	assert type(df) == type(pd.DataFrame()), 'run_function {} does not return a pandas.DataFrame as its third return argument, it must'.format(run_function.__name__)
 
-	df.to_csv(path+save_name, index=False)
+	try:
+		write_ekpy_data(path+save_name, df, meta_data)
+	except:
+		# fall back to to_csv
+		df.to_csv(path+save_name, index=False)
 
 	#update the meta_data file in this directory
 	meta_data = pd.DataFrame(meta_data, index = [0])
 	try:
-		existing_meta_data = pd.read_pickle(path+'meta_data')
+		existing_meta_data = pd.read_csv(path+'meta_data.csv')
 		if set(meta_data.columns) != set(existing_meta_data.columns):
 			raise ValueError('the columns of meta_data do not match the existing columns of the data in this path ({}). Please ensure you are producing data of the same type, or move to a new path. Please note, your data was saved with file complete filename: {}, but it was not added to meta_data'.format(path, path+save_name))
 		out = pd.concat([existing_meta_data, meta_data], ignore_index = True)
 	except FileNotFoundError:
 		out = meta_data.copy()
 
-	out.to_pickle(path + 'meta_data')
-	if save_meta_data_csv:
-		out.to_csv(path + 'meta_data.csv', index = False)
+	out.to_csv(path + 'meta_data.csv', index = False)
+	if save_meta_data_pickle:
+		out.to_pickle(path + 'meta_data')
 	if return_df:
 		return df
