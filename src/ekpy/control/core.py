@@ -14,13 +14,75 @@ __all__ = ('trial','experiment')
 
 class experiment():
 	
-	def __init__(self):
+	def __init__(self, run_function):
 		"""
-		Experiment class. Used to run experiments (see n_param_scan), generate data files files, and generate meta data. One must specify a run function and a terminate function. It is suggested that one overwrites the checks() method as well. The specified run_function must return 
-			```
-			((str) base_name, (dict) meta_data, (pandas.dataframe) data).
-			```
+		Experiment class. Used to run experiments (see n_param_scan), generate data files, and generate meta data. One must specify a run function that returns `((str) base_name, (dict) meta_data, (pandas.dataframe) data)`. One must also supply a terminate function. It is suggested that one overwrites the checks() method as well.
+
+		args:
+			run_function (callable): A function that returns ((str) base_name, (dict) meta_data, (pandas.dataframe) data)
+
+		examples:
+
+			Create an experiment that uses a lockin (SRS830) to measure X and Y.
+
+			.. code-block:: python
+
+				from ekpy.control.instruments import srs830
+				from ekpy.control import experiment
+
+				# allow for arbitrary meta data to be passed directly into run_function as kwargs
+				def run_function(lockin:'pyvisa.resources.gpib.GPIBInstrument', **meta_data):
+				    base_name = 'trial'# a base name that will be saved. File names will be saved according to base_name_TRIALCOUNT, where TRIALCOUNT counts from 0 automatically
+				    X, Y = srs830.get_X_Y(lockin) # get the data
+				    data = pd.DataFrame({'X':[X],'Y':[Y]}) # put data in dataframe
+				    return base_name, meta_data, data
+
+				# subclass experiment for our use case
+				class EXP(experiment):
+				    
+				    def __init__(self, run_function=run_function):
+				        super().__init__(run_function)
+				        
+				    def terminate(self,):
+				        pass
+				    
+				    
+				exp = EXP()
+				exp.config_path('./')
+
+				### The following is how we pass arguments to run_function
+				# parameters we wish to scan over, in this case, NONE
+				scan_params = {}
+				fixed_params = {'lockin':lockin, 'param1':1} # need to pass the lockin to run_function and any additional meta data, here I'm making up a parameter 'param1'
+				order = [] #if we were scanning over parameters, we would need to specify the order here, which one to scan over first etc.
+
+				# do a scan
+				exp.n_param_scan(scan_params, fixed_params, order)
+
+				# this will create a file called trial_0.csv
+
+
+			Working with checks, and terminate functions. To access instruments in terminate, you will want to pass the instrument to the class (not just the run function):
+
+			.. code-block:: python
+
+				class EXP(experiment):
+				    
+				    def __init__(self, lockin, run_function=run_function):
+				        super().__init__(run_function)
+				        self.lockin=lockin # initialize here so we have access to it in terminate and or other internal functions
+
+					def checks(self, params):
+						if params['lockin']!=self.lockin:
+							# make sure the lockin passed to the run_function (through n_param_scan) is the same as that which is initialized here 
+							raise ValueError('lockin specified in run_function argument is not the same as when initializing the experiment')
+				        
+				    def terminate(self,):
+				    	# set the internal amplitude to minimum
+				        srs830.set_internal_amplitude(self.lockin, 0.004)
+
 		"""
+		self.run_function = run_function
 		return
 
 	def __repr__(self):
