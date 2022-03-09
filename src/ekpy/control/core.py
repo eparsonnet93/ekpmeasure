@@ -14,7 +14,7 @@ __all__ = ('trial','experiment')
 
 class experiment():
 	
-	def __init__(self, run_function):
+	def __init__(self, run_function=None):
 		"""
 		Experiment class. Used to run experiments (see n_param_scan), generate data files, and generate meta data. One must specify a run function that returns `((str) base_name, (dict) meta_data, (pandas.dataframe) data)`. One must also supply a terminate function. It is suggested that one overwrites the checks() method as well.
 
@@ -32,29 +32,33 @@ class experiment():
 
 				# allow for arbitrary meta data to be passed directly into run_function as kwargs
 				def run_function(lockin:'pyvisa.resources.gpib.GPIBInstrument', **meta_data):
-				    base_name = 'trial'# a base name that will be saved. File names will be saved according to base_name_TRIALCOUNT, where TRIALCOUNT counts from 0 automatically
-				    X, Y = srs830.get_X_Y(lockin) # get the data
-				    data = pd.DataFrame({'X':[X],'Y':[Y]}) # put data in dataframe
-				    return base_name, meta_data, data
+					# a base name that will be saved. File names will be saved according to base_name_TRIALCOUNT, 
+					# where TRIALCOUNT counts from 0 automatically
+					base_name = 'trial'
+					X, Y = srs830.get_X_Y(lockin) # get the data
+					data = pd.DataFrame({'X':[X],'Y':[Y]}) # put data in dataframe
+					return base_name, meta_data, data
 
 				# subclass experiment for our use case
 				class EXP(experiment):
-				    
-				    def __init__(self, run_function=run_function):
-				        super().__init__(run_function)
-				        
-				    def terminate(self,):
-				        pass
-				    
-				    
+					
+					def __init__(self, run_function=run_function):
+						super().__init__(run_function)
+						
+					def terminate(self,):
+						pass
+					
+					
 				exp = EXP()
 				exp.config_path('./')
 
 				### The following is how we pass arguments to run_function
 				# parameters we wish to scan over, in this case, NONE
 				scan_params = {}
-				fixed_params = {'lockin':lockin, 'param1':1} # need to pass the lockin to run_function and any additional meta data, here I'm making up a parameter 'param1'
-				order = [] #if we were scanning over parameters, we would need to specify the order here, which one to scan over first etc.
+				# need to pass the lockin to run_function and any additional meta data, here I'm making up a parameter 'param1'
+				fixed_params = {'lockin':lockin, 'param1':1} 
+				#if we were scanning over parameters, we would need to specify the order here, which one to scan over first etc.
+				order = [] 
 
 				# do a scan
 				exp.n_param_scan(scan_params, fixed_params, order)
@@ -67,22 +71,167 @@ class experiment():
 			.. code-block:: python
 
 				class EXP(experiment):
-				    
-				    def __init__(self, lockin, run_function=run_function):
-				        super().__init__(run_function)
-				        self.lockin=lockin # initialize here so we have access to it in terminate and or other internal functions
+					
+					def __init__(self, lockin, run_function=run_function):
+						super().__init__(run_function)
+						self.lockin=lockin # initialize here so we have access to it in terminate and or other internal functions
 
 					def checks(self, params):
 						if params['lockin']!=self.lockin:
 							# make sure the lockin passed to the run_function (through n_param_scan) is the same as that which is initialized here 
 							raise ValueError('lockin specified in run_function argument is not the same as when initializing the experiment')
-				        
-				    def terminate(self,):
-				    	# set the internal amplitude to minimum
-				        srs830.set_internal_amplitude(self.lockin, 0.004)
+						
+					def terminate(self,):
+						# set the internal amplitude to minimum
+						srs830.set_internal_amplitude(self.lockin, 0.004)
+
+			Full worked example for Rayleigh measurements (as in https://aip.scitation.org/doi/10.1063/5.0035859)
+
+			.. code-block:: python
+				
+				from ekpy import control, utils
+
+				import numpy as np
+				import pandas as pd
+				import matplotlib.pyplot as plt
+
+				from ekpy.control.instruments import srs830 as srs
+				from ekpy.control import plotting
+
+				import time
+
+
+				def run_function(lockin, amplitude:str, frequency:str, harmonic:int, 
+					additional_meta_data=dict, count:float=10, wait_time:float=0.5, 
+					sensitivity:str='auto', time_constant:str='auto'):
+			
+					# initialize meta data (dict)
+
+					meta_data = {
+						'amplitude':amplitude,
+						'frequency':frequency,
+						'harmonic':harmonic,
+						'count':count,
+						'wait_time':wait_time,
+					}
+
+					meta_data.update(additional_meta_data)
+
+					# base name    
+					base_name = '{}_{}_{}'.format(amplitude, frequency, harmonic)
+
+					### Initialize measurement ###
+
+					# set drive amplitude
+					srs.set_internal_amplitude(lockin, amplitude)
+
+					# set frequency
+					srs.set_internal_frequency(lockin, frequency)
+
+					# set harmonic
+					srs.set_harmonic(lockin, harmonic)
+
+					# set time constant (must do before sensitivity in case of autogain)
+					if time_constant.lower() == 'auto':
+						time_constant = srs.get_time_constant_from_frequency(frequency, multiplier=10)
+					else:
+						pass
+
+					srs.set_time_constant(lockin, time_constant)
+					meta_data.update({'time_constant':time_constant})
+					number, suffix = utils.get_number_and_suffix(time_constant)
+					float_time_constant = float(str(number) + utils.time_suffix_to_scientic_str(suffix))
+					time.sleep(3*float_time_constant)
+
+					# set sensitivity
+					if sensitivity.lower() == 'auto':
+						srs.auto_gain(lockin)
+						# sleep a minimum of 5 s
+						sleep_time = max((5, 10*float_time_constant))
+						time.sleep(sleep_time)
+						sensitivity = srs.get_sensitivity(lockin)
+					else:
+						srs.set_sensitivity(lockin, sensitivity)
+
+					meta_data.update({'sensitivity':sensitivity})
+
+					### Collect data ###
+
+					# loop through to get real data
+					xs, ys = [], []
+
+					for i in range(count):
+						x, y = srs.get_X_Y(lockin)
+						time.sleep(wait_time)
+						xs.append(x)
+						ys.append(y)
+
+					data = pd.DataFrame({'X':xs, 'Y':ys})
+
+
+					return base_name, meta_data, data
+
+
+
+				class rayleigh(control.experiment):
+
+					def __init__(self, lockin, run_function=run_function):
+						super().__init__(run_function)
+						self.lockin = lockin
+						return
+
+					def checks(self, params):
+						if params['lockin'] != self.lockin:
+							raise ValueError('Lockin param in run_function does not match that initialized for the experiment class.')
+
+					def terminate(self,):
+						srs.set_internal_amplitude(self.lockin, 0.004)
+
+					def _get_plot_color(self, harmonic):
+						harmonic = int(harmonic)
+						_dict = {1:'blue', 2:'red', 3:'green', 4:'purple'}
+						if harmonic in set(_dict.keys()):
+							return _dict[harmonic]
+						else:
+							return 'black'
+
+					def _plot(self, data, scan_params):
+
+						
+						if 'X' in set(data.keys()):
+							plot_keys=['X', 'Y']
+						else:
+							plot_keys=['R', 'theta']
+						
+						if hasattr(self, 'fig') and hasattr(self, 'axs'):
+							pass
+						else:
+							fig = plt.figure(figsize=(10,4))
+							ax1 = fig.add_subplot(121)
+							ax2 = fig.add_subplot(122)
+							ax1.set_title(plot_keys[0])
+							ax2.set_title(plot_keys[1])
+							ax1.set_xlabel('Amplitude (V)')
+							ax2.set_xlabel('Amplitude (V)')
+							self.fig = fig
+							self.axs = (ax1, ax2)
+
+
+						number, suffix = utils.get_number_and_suffix(scan_params['amplitude'])
+						float_amp = float(str(number) + utils.voltage_suffix_to_scientic_str(suffix))
+						color = self._get_plot_color(scan_params['harmonic'])
+						self.axs[0].errorbar([float_amp], [np.mean(data[plot_keys[0]])], [np.std(data[plot_keys[0]])], color=color)
+						self.axs[1].errorbar([float_amp], [np.mean(data[plot_keys[1]])], [np.std(data[plot_keys[1]])], color=color)
+						self.axs[0].scatter([float_amp], [np.mean(data[plot_keys[0]])], color=color)
+						self.axs[1].scatter([float_amp], [np.mean(data[plot_keys[1]])], color=color)
+
+						plotting.update_plot(self.fig)
+						return
 
 		"""
 		self.run_function = run_function
+		if run_function is None:
+			warnings.showwarning("Returned from control.experiment.__init__ with run_function=None. Try using super().__init__(run_function)? or ensure you have initialized run_function in subclass __init__", UserWarning, '', '')
 		return
 
 	def __repr__(self):
@@ -260,6 +409,8 @@ class experiment():
 			raise NotImplementedError('no terminate function specified')
 		if not hasattr(self, 'run_function'):
 			raise AttributeError('run_function not yet defined.')
+		if self.run_function is None:
+			raise AttributeError('run_function not yet defined. run_function is currently None.')
 		if not hasattr(self, 'path'):
 			raise AttributeError('no save path defined.')
 			
