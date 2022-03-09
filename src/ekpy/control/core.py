@@ -231,7 +231,7 @@ class experiment():
 		"""
 		self.run_function = run_function
 		if run_function is None:
-			warnings.showwarning("Returned from control.experiment.__init__ with run_function=None. Try using super().__init__(run_function)? or ensure you have initialized run_function in subclass __init__", UserWarning, '', '')
+			warnings.showwarning("Returned from control.experiment.__init__ with run_function=None. Maybe, try using super().__init__(run_function) in __init__ definition? or ensure you have initialized run_function in subclass __init__", UserWarning, '', '')
 		return
 
 	def __repr__(self):
