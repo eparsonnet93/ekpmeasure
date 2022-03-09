@@ -76,7 +76,10 @@ def read_loop_txt(file, measured_value='Charge', return_meta_data=False, delimit
     out.drop(columns = ['Point'], inplace = True)
     
     if measured_value.lower() == 'charge':
-        out['MeasuredPolarization'] = out['MeasuredPolarization']*float(meta_data['SampleArea(cm2)'])*1e6 #to convert from uC to pC
+        try:
+            out['MeasuredPolarization'] = out['MeasuredPolarization']*float(meta_data['SampleArea(cm2)'])*1e6 #to convert from uC to pC
+        except KeyError:
+            raise KeyError('no key "MeasuredPolarization", is this a current loop? use measured_value="current"')
         out.rename(columns = {'MeasuredPolarization':'MeasuredCharge(pC)'}, inplace = True)
     elif measured_value.lower() == 'polarization':
         out.rename(columns = {'MeasuredPolarization':'MeasuredPolarization(uC/cm2)'}, inplace = True)
