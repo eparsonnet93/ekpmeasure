@@ -107,7 +107,7 @@ def generic_mapper(fname, path, delimiter='\t'):
 	"""
 	out = {'filename':fname}
 	_, meta_data = read_radiant_txt(path+fname, delimiter=delimiter, return_meta_data=True)
-	keys = ['type', 'SampleName', 'SampleArea(cm2)', 'SampleThickness(um)', 'Volts', 'Field', 'PulseWidth(ms)', 'PulseDelay(ms)']
+	keys = ['Type', 'SampleName', 'SampleArea(cm2)', 'SampleThickness(um)', 'Volts', 'Field', 'PulseWidth(ms)', 'PulseDelay(ms)']
 	for key in keys:
 		try:
 			out.update({key:float(meta_data[key])})
@@ -118,7 +118,7 @@ def generic_mapper(fname, path, delimiter='\t'):
 			
 	# period is a weird one
 	try:
-		out.update({'Period(ms)':float(meta_data['{}Period(ms)'.format(meta_data['type'].capitalize())])})
+		out.update({'Period(ms)':float(meta_data['{}Period(ms)'.format(meta_data['Type'].capitalize())])})
 	except:
 		pass
 	return out
@@ -164,7 +164,7 @@ def read_radiant_txt(file, measured_charge=True, return_meta_data=False, delimit
 		pass
 
 	# build the meta data
-	meta_data = {'type':data_file_type}
+	meta_data = {'Type':data_file_type}
 	for line in meta_datalines:
 		if ':{}{}'.format(delimiter, delimiter) in line: # as is the case sometimes, but not always!!
 			spl = line.split(':{}{}'.format(delimiter, delimiter))
