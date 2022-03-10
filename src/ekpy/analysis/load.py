@@ -102,7 +102,7 @@ def _build_df(path, meta_data):
 	else:
 		return meta_data
 
-def generate_meta_data(path, mapper, pass_path=False, pointercolumn='filename', overwrite=False, ignore_errors=True):
+def generate_meta_data(path, mapper:'f(str)->dict', pass_path=False, pointercolumn='filename', overwrite=False, ignore_errors=True):
 	"""
 	Generate meta_data from a path for a given mapper function. **Important** mapper must include pointercolumn which is `(key,value) = ('<pointer column name>', <filename>)`. Default is to call such a column `filename`, i.e. `{'filename':'a.csv'}`
 
