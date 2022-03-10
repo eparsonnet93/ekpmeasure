@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import warnings
 
-__all__ = ('load_radiant_loop_from_text_file','read_loop_txt', 'read_radiant_txt')
+__all__ = ('load_radiant_loop_from_text_file','read_loop_txt', 'read_radiant_txt', 'generic_mapper')
 
 def load_radiant_loop_from_text_file(file, measured_value='Charge', return_meta_data=False, delimiter=','):
 	raise NameError('"load_radiant_loop_from_text_file" is deprecated. Please use "read_loop_txt"')
@@ -91,7 +91,7 @@ def read_loop_txt(file, measured_value='Charge', return_meta_data=False, delimit
 		
 	return out
 
-def generic_mapper(fname, path, delimiter=','):
+def generic_mapper(fname, path, delimiter='\t'):
 	"""A basic mapper function for radiant datasets. Can include data of different types as well (e.g. hysteresis and current loops). Returns meta_data with keys ['filename', 'type', 'samplename', 'samplearea(cm2)', 'samplethickness(um)', 'volts', 'field']
 	
 	args:
@@ -106,23 +106,24 @@ def generic_mapper(fname, path, delimiter=','):
 			>>> analysis.generate_meta_data('./', generic_mapper, pass_path=True)
 	"""
 	out = {'filename':fname}
-	_, meta_data = read_radiant_txt(path+fname, return_meta_data=True)
-	keys = ['type', 'SampleName', 'SampleArea(cm2)', 'SampleThickness(um)', 'Volts', 'Field']
+	_, meta_data = read_radiant_txt(path+fname, delimiter=delimiter, return_meta_data=True)
+	keys = ['type', 'SampleName', 'SampleArea(cm2)', 'SampleThickness(um)', 'Volts', 'Field', 'PulseWidth(ms)', 'PulseDelay(ms)']
 	for key in keys:
 		try:
-			out.update({key.lower():float(meta_data[key])})
-		except:
-			out.update({key.lower():meta_data[key]})
-		finally:
-			continue
+			out.update({key:float(meta_data[key])})
+		except ValueError:
+			out.update({key:meta_data[key]})
+		except KeyError:
+			out.update({key:np.nan})
+			
 	# period is a weird one
 	try:
-		out.update({'period(ms)':float(meta_data['{}Period(ms)'.format(meta_data['type'].capitalize())])})
+		out.update({'Period(ms)':float(meta_data['{}Period(ms)'.format(meta_data['type'].capitalize())])})
 	except:
 		pass
 	return out
 
-def read_radiant_txt(file, measured_charge=True, return_meta_data=False, delimiter=','):
+def read_radiant_txt(file, measured_charge=True, return_meta_data=False, delimiter='\t'):
 	"""Load a radiant data file (typically as generated from quicklook functions). Supported data types are pund, hysteresis, simplepulse, currentloop. If retrieving a hysteresis file, one would typically use 'True' for measured_charge unless one accurately measured capacitor area and input correctly into the Radiant UI.
 
 	args:
@@ -194,7 +195,7 @@ def read_radiant_txt(file, measured_charge=True, return_meta_data=False, delimit
 	elif data_file_type == 'simplepulse':
 		data = _pund_parser(datalines, delimiter=delimiter)
 	else:
-		import pdb; pdb.set_trace()
+		raise ValueError('data file type "{}" not supported.'.format(data_file_type))
 		
 	if return_meta_data:
 		return data, meta_data
@@ -240,7 +241,7 @@ def _get_lines(file):
 	return lines
 
 
-def _hystersis_parser(datalines, delimiter=','):
+def _hystersis_parser(datalines, delimiter='\t'):
 	# get column headers
 	colnames = datalines.pop(0).split(delimiter) 
 
@@ -265,7 +266,7 @@ def _hystersis_parser(datalines, delimiter=','):
 	data = pd.DataFrame(data)
 	return data
 
-def _pund_parser(datalines, delimiter=','):
+def _pund_parser(datalines, delimiter='\t'):
 	data = {}
 	for ijk, line in enumerate(datalines):
 		try:
@@ -279,5 +280,3 @@ def _pund_parser(datalines, delimiter=','):
 			else: 
 				raise err
 	return pd.DataFrame(data)
-
-def 
