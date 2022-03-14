@@ -116,7 +116,6 @@ def generate_meta_data(path, mapper:'f(str)->dict', pass_path=False, pointercolu
 
 
 	examples:
-
 		Basic usage where mapper operates only on filename:
 
 		.. code-block:: python

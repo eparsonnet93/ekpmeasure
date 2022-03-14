@@ -4,13 +4,24 @@ import warnings
 __all__ = ('get_number_and_suffix', 'frequency_suffix_to_scientific_str', 'current_suffix_to_scientific_str', 
     'scientific_str_to_time_suffix', 'voltage_suffix_to_scientic_str', 'time_suffix_to_scientic_str', 
     'voltage_amp_mapper', 'freq_mapper', 'current_amp_mapper', 'time_to_sci_mapper','sci_to_time_mapper',
-    '_get_number_and_suffix', 'scientific_notation' )
+    '_get_number_and_suffix', 'scientific_notation', 'add_time_strings')
 
 freq_mapper = {'Mhz':'e6','khz':'e3', 'hz':'e0', 'mhz':'e-3', 'MHz':'e6', 'kHz':'e3','Hz':'e0', 'mHz':'e-3'}
 current_amp_mapper = {'ma':'e-3', 'ua':'e-6', 'na':'e-9', 'mA':'e-3', 'uA':'e-6', 'nA':'e-9'}
 sci_to_time_mapper = {'e0':'s', 'e3':'ks', 'e-3':'ms', 'e-6':'us', 'e-9':'ns'}
 voltage_amp_mapper = {'mv':'e-3', 'v':'e0', 'mV':'e-3','V':'e0','kV':'e3','kv':'e3'}
 time_to_sci_mapper = {'ms':'e-3', 'us':'e-6', 'ns':'e-9', 'ps':'e-12', 's':'e0', 'ks':'e3'}
+
+def add_time_strings(str1, str2):
+    """Returns a string in units of str1"""
+    n1, s1 = get_number_and_suffix(str1)
+    n2, s2 = get_number_and_suffix(str2)
+    unit_multiplier = 1/float('1'+time_suffix_to_scientic_str(s1))
+    
+    float_total = (n1*float('1'+time_suffix_to_scientic_str(s1)) + 
+                  n2*float('1'+time_suffix_to_scientic_str(s2)))
+    
+    return str(np.round(float_total*unit_multiplier, 5)) + s1
 
 def scientific_str_to_time_suffix(sci_str):
     """Convert scientific notation string to suffix for time. *i.e.* 'e-9' -> 'ns'

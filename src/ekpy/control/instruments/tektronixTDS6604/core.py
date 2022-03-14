@@ -97,7 +97,7 @@ def set_horizontal_resolution(inst, number_pts: int = 5000):
 def set_data_source(inst, channel: str = 'Ch3'):
     """Set the channel for recording waveform"""
     if channel not in channels:
-        raise ValueError('Channel "{}" not allowed, must be in {}'.format(channels))
+        raise ValueError('Channel "{}" not allowed, must be in {}'.format(channel, channels))
     inst.write('dat:sou ' + channel)
     return
 
