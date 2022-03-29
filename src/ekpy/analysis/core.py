@@ -109,6 +109,7 @@ class Dataset():
 		self.attrs['index_to_path'] = self._construct_index_to_path(path, initializer)
 		self.pointercolumn = pointercolumn
 		self.readfileby = readfileby
+		self.skiprows = None
 
 	def __str__(self):
 		return self.meta_data.__str__()
@@ -635,7 +636,17 @@ class Dataset():
 			filename_index_to_path_dict = data_to_retrieve.at[i, self.pointercolumn]
 			for k, index_of_original in enumerate(filename_index_to_path_dict):
 				try:
-					tdf = readfileby(self.index_to_path[index_of_original] + filename_index_to_path_dict[index_of_original])
+					if readfileby.__name__ == 'read_ekpy_data':
+						if self.skiprows is None:
+							tdf, skiprows = readfileby(self.index_to_path[index_of_original] 
+								+ filename_index_to_path_dict[index_of_original], return_skiprows=True)
+							self.skiprows = skiprows
+						else:
+							tdf = readfileby(self.index_to_path[index_of_original] 
+								+ filename_index_to_path_dict[index_of_original], skiprows=self.skiprows)
+
+					else:
+						tdf = readfileby(self.index_to_path[index_of_original] + filename_index_to_path_dict[index_of_original])
 				except Exception as e:
 					raise Exception('error reading data. ensure self.readfileby is correct and that readfileby returns a pandas dataframe. self.readfileby is currently set to {}.\nError was: {}'.format(self.readfileby.__name__, e))
 

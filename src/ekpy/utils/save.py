@@ -24,17 +24,31 @@ def write_ekpy_data(fname:str, data:'pandas.DataFrame', meta_data:dict):
 		f.write(to_write)
 	return
 
-def read_ekpy_data(file:str, return_meta_data=False):
+def read_ekpy_data(file:str, skiprows:'int or None'=None, return_meta_data=False, return_skiprows=False):
 	"""Read ekpy data file. If no ekpy heading exists ('ekpy_heading') defaults to `pandas.read_csv'
 
 	args:
 		file (str): File name
+		skiprows (int or None): Number of rows to skip (use this when you wish to skip parsing header/meta data). Default behavior (None) will parse meta_data
 		return_meta_data (bool): Whether to return the associated meta data (heading) or just return the data
+		return_skiprows (bool): Whether to return the number of rows to skip when reading data (i.e., number of rows of meta data)
 
 	returns:
 		(pandas.DataFrame) : Data
-		(pandas.DataFrame, dict): (Data, Meta Data)
+		(pandas.DataFrame, [Optional] dict): (Data, meta_data)
+		(pandas.DataFrame, [Optional] int): (Data, n_skiprows)
+		(pandas.DataFrame, [Optional] dict, [Optional] int): (Data, meta_data, n_skiprows)
 	"""
+	if skiprows is not None:
+		if return_meta_data:
+			raise ValueError('If providing skiprows, you cannot return meta_data. Try again with either return_meta_data=False or skiprows=None')
+		else:
+			if return_skiprows:
+				return pd.read_csv(file, skip_blank_lines=True, skiprows=skiprows), skiprows
+			else:
+				return pd.read_csv(file, skip_blank_lines=True, skiprows=skiprows)
+
+	# if skiprows is None:
 	with open(file, 'r') as f:
 		lines = f.readlines()
 	index=len(lines)+1
@@ -50,13 +64,21 @@ def read_ekpy_data(file:str, return_meta_data=False):
 		if return_meta_data:
 			raise ValueError('Failed to find end of ekpy heading. Considering trying again with return_meta_data set to False?')
 		else:
-			return pd.read_csv(file)
+			if return_skiprows:
+				return pd.read_csv(file), 0 # skip no rows
+			else:
+				return pd.read_csv(file)
 		
 	if not return_meta_data:
-		return pd.read_csv(file, skip_blank_lines=True, skiprows=index+1)
-	
+		if return_skiprows:
+			return pd.read_csv(file, skip_blank_lines=True, skiprows=index+1), index+1
+		else:
+			return pd.read_csv(file, skip_blank_lines=True, skiprows=index+1)
 	else:
-		return pd.read_csv(file, skip_blank_lines=True, skiprows=index+1), _parse_ekpy_meta_data(lines)
+		if return_skiprows:
+			return pd.read_csv(file, skip_blank_lines=True, skiprows=index+1), _parse_ekpy_meta_data(lines), index+1
+		else:
+			return pd.read_csv(file, skip_blank_lines=True, skiprows=index+1), _parse_ekpy_meta_data(lines)
 
 def _parse_ekpy_meta_data(lines:list):
 	"""Parse ekpy_heading."""
