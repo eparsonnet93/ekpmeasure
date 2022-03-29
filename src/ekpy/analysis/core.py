@@ -625,6 +625,8 @@ class Dataset():
 		pointercolumn = self.pointercolumn
 		readfileby = self.readfileby
 
+		read_eky_data = self.readfileby.__name__ == 'read_ekpy_data'
+
 		if type(groupby) == type(None):
 			data_to_retrieve = self._group(by = None, level = 0) # gives us a unique col for each
 		else:
@@ -636,7 +638,7 @@ class Dataset():
 			filename_index_to_path_dict = data_to_retrieve.at[i, self.pointercolumn]
 			for k, index_of_original in enumerate(filename_index_to_path_dict):
 				try:
-					if readfileby.__name__ == 'read_ekpy_data':
+					if read_eky_data:
 						if self.skiprows is None:
 							tdf, skiprows = readfileby(self.index_to_path[index_of_original] 
 								+ filename_index_to_path_dict[index_of_original], return_skiprows=True)
