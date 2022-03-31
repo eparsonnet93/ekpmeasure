@@ -19,6 +19,7 @@ A repository of analysis and computer control code for various experiments. Imag
 - [Change Log](#change-log)
 - [Support](#support)
 - [Cite this code](#citation)
+- [Cited by](#cited-by)
 
 # Overview
 
@@ -507,3 +508,7 @@ ekpy
 Eric Parsonnet, 2022
 https://github.com/eparsonnet93/ekpmeasure
 ```
+
+# Cited By
+
+1. E. Parsonnet, L. Caretta, V. Nagarajan, H. Zhang, H. Taghinejad, P. Behera, X. Huang, P. Kavle, A. Fernandez, D. Nikonov, H. Li, I. Young, J. Analytis, and R. Ramesh, *Non-Volatile Electric Field Control of Thermal Magnons in the Absence of an Applied Magnetic Field*, Arxiv (2022).
