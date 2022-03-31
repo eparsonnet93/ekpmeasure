@@ -501,13 +501,7 @@ Maintainer: Eric Parsonnet
 
 # Citation 
 
-Please cite this work as:
-
-```shell
-ekpy
-Eric Parsonnet, 2022
-https://github.com/eparsonnet93/ekpmeasure
-```
+Please cite this work following the [CITATION.cff](https://github.com/eparsonnet93/ekpmeasure/blob/main/CITATION.cff) (see [here](https://academia.stackexchange.com/questions/14010/how-do-you-cite-a-github-repository) for more details on how to cite.)
 
 # Cited By
 
