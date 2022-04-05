@@ -1,44 +1,55 @@
 __all__ = ('config_measure_voltage', 'config_measure_resistance', 'enable_source', 
 	'disable_source', 'read', 'config_voltage_pulse', 'set_resistance_mode_manual',
-	'set_voltage_compliance', 'set_source_current_amplitude',
+	'set_voltage_compliance', 'set_source_current_amplitude', 'set_current_compliance',
+	'config_measure_current',
 	)
 
 
 def set_resistance_mode_manual(k2400):
-    """Set the mode to manual resistance OHMs
-    
-    args:
-        k2400 (pyvisa.instrument): Keithley 2400
-    """
-    k2400.write(":SENS:RES:MODe MAN")
-    return
+	"""Set the mode to manual resistance OHMs
+	
+	args:
+		k2400 (pyvisa.instrument): Keithley 2400
+	"""
+	k2400.write(":SENS:RES:MODe MAN")
+	return
 
 def set_source_current_amplitude(k2400, amplitude:float=0.0001):
-    """Set the current source amplitude.
-    
-    args:
-        k2400 (pyvisa.instrument): Keithley 2400
-        amplitude (float): Current amplitude in Amps
-    """
-    k2400.write(':SOUR:CURR:LEV:IMM:AMPL {}'.format(amplitude))
-    return
+	"""Set the current source amplitude.
+	
+	args:
+		k2400 (pyvisa.instrument): Keithley 2400
+		amplitude (float): Current amplitude in Amps
+	"""
+	k2400.write(':SOUR:CURR:LEV:IMM:AMPL {}'.format(amplitude))
+	return
+
+def set_current_compliance(k2400, compliance:float=.01):
+	"""Set the Voltage compliance.
+	
+	args:
+		k2400 (pyvisa.instrument): Keithley 2400
+		compliance (float): Current compliance in Amps
+	"""
+	k2400.write(':SENS:CURR:DC:PROT:LEV {}'.format(compliance))
+	return
 
 def set_voltage_compliance(k2400, compliance:float=2.1):
-    """Set the Voltage compliance.
-    
-    args:
-        k2400 (pyvisa.instrument): Keithley 2400
-        compliance (float): Voltage compliance in Volts
-    """
-    k2400.write(':SENS:VOLT:DC:PROT:LEV {}'.format(compliance))
-    return
+	"""Set the Voltage compliance.
+	
+	args:
+		k2400 (pyvisa.instrument): Keithley 2400
+		compliance (float): Voltage compliance in Volts
+	"""
+	k2400.write(':SENS:VOLT:DC:PROT:LEV {}'.format(compliance))
+	return
 
 def config_measure_voltage(k2400, nplc=1, voltage=21.0, auto_range=True):
 	""" Configures the measurement of voltage. (Courtesy of pymeasure, see link below)
 	args:
 		k2400 (pyvisa.instrument): Keithley 2400
 		nplc (float or int): Number of power line cycles (NPLC) from 0.01 to 10
-		voltage (float): Upper limit of voltage in Volts, from -210 V to 210 V
+		voltage (float): Range. Upper limit of voltage in Volts, from -210 V to 210 V
 		auto_range (bool): Enables auto_range if True, else uses the set voltage
 	
 	https://github.com/pymeasure/pymeasure/blob/4249c3a06457d5e4c8a2ba595aea867e99f9e5b6/pymeasure/instruments/keithley/keithley2400.py
@@ -49,6 +60,25 @@ def config_measure_voltage(k2400, nplc=1, voltage=21.0, auto_range=True):
 		k2400.write(":SENS:VOLT:RANG:AUTO 1;")
 	else:
 		k2400.write(":SENS:VOLT:RANG %g" % voltage)
+		
+	return
+
+def config_measure_current(k2400, nplc=1, current=.01, auto_range=True):
+	""" Configures the measurement of current. (Courtesy of pymeasure, see link below)
+	args:
+		k2400 (pyvisa.instrument): Keithley 2400
+		nplc (float or int): Number of power line cycles (NPLC) from 0.01 to 10
+		current (float): Range. Upper limit of current in amps
+		auto_range (bool): Enables auto_range if True, else uses the set current
+	
+	https://github.com/pymeasure/pymeasure/blob/4249c3a06457d5e4c8a2ba595aea867e99f9e5b6/pymeasure/instruments/keithley/keithley2400.py
+	"""
+	k2400.write(":SENS:FUNC 'CURR';"
+			   ":SENS:CURR:NPLC %f;:FORM:ELEM CURR;" % nplc)
+	if auto_range:
+		k2400.write(":SENS:CURR:RANG:AUTO 1;")
+	else:
+		k2400.write(":SENS:CURR:RANG %g" % current)
 		
 	return
 
