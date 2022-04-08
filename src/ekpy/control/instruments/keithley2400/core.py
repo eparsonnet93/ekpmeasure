@@ -64,14 +64,13 @@ def config_measure_voltage(k2400, nplc=1, voltage=21.0, auto_range=True):
 	return
 
 def config_measure_current(k2400, nplc=1, current=.01, auto_range=True):
-	""" Configures the measurement of current. (Courtesy of pymeasure, see link below)
+	""" Configures the measurement of current.
 	args:
 		k2400 (pyvisa.instrument): Keithley 2400
 		nplc (float or int): Number of power line cycles (NPLC) from 0.01 to 10
 		current (float): Range. Upper limit of current in amps
 		auto_range (bool): Enables auto_range if True, else uses the set current
 	
-	https://github.com/pymeasure/pymeasure/blob/4249c3a06457d5e4c8a2ba595aea867e99f9e5b6/pymeasure/instruments/keithley/keithley2400.py
 	"""
 	k2400.write(":SENS:FUNC 'CURR';"
 			   ":SENS:CURR:NPLC %f;:FORM:ELEM CURR;" % nplc)
