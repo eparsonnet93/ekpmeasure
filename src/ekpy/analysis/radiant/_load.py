@@ -21,7 +21,8 @@ def read_loop_txt(file, measured_value='Charge', return_meta_data=False, delimit
 
 
 	"""
-	warnings.showwarning("you may want to try using 'read_radiant_txt' instead. read_radiant_txt is ca+pabable of handling more than just loop data (i.e. PUND etc.)", UserWarning, '', '')
+	raise NotImplementedError("'read_loop_txt' has been deprecated. use 'read_radiant_txt' instead.")
+	warnings.showwarning("you may want to try using 'read_radiant_txt' instead. read_radiant_txt is capabable of handling more than just loop data (i.e. PUND etc.)", UserWarning, '', '')
 	if measured_value.lower() not in set({'charge', 'polarization', 'current'}):
 		raise ValueError('measured_value {} not supported. must be either "charge" or "polarization"'.format(measured_value))
 		
@@ -135,7 +136,7 @@ def read_radiant_txt(file, measured_charge=True, return_meta_data=False, delimit
 	returns:
 		(pandas.DataFrame, (dict)): Data, Optional: (meta data)
 	"""
-	supported_types = {'pund', 'hysteresis', 'simplepulse', 'currentloop'}
+	supported_types = {'pund', 'hysteresis', 'simplepulse', 'currentloop', 'advancedpiezo'}
 
 	lines = _get_lines(file)
 	# find where the data starts
@@ -189,6 +190,8 @@ def read_radiant_txt(file, measured_charge=True, return_meta_data=False, delimit
 		else:
 			data.rename(columns = {'MeasuredPolarization':'MeasuredPolarization(uC/cm2)'}, inplace = True)
 	elif data_file_type == 'currentloop':
+		data = _hystersis_parser(datalines, delimiter=delimiter)
+	elif data_file_type == 'advancedpiezo':
 		data = _hystersis_parser(datalines, delimiter=delimiter)
 	elif data_file_type == 'pund':
 		data = _pund_parser(datalines, delimiter=delimiter)
