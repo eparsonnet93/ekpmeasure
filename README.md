@@ -396,6 +396,12 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 # Change log
 
+### Version 0.1.12
+
+- Added functionality to `analysis.radiant`
+- Speed increase for `data.get_data()`
+- Minor bugs and other fixes
+
 ### Version 0.1.11
 
 - `experiment.print_run_function_args` is gone. It has been replaced with `experiment.show_run_function_help`
