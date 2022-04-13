@@ -10,10 +10,10 @@ import time
 
 __all__ = ('basic_run_function', 'BASIC', 'hysteresis_run_function', 'HYST', 'SWITCH', 'switching_run_function', 'BASIC_SINGLE_LI')
 
-def switching_run_function(LI1, LI2, current_source, k24, samplename, min_voltage:float=-10, max_voltage:float=10,
-	current_amplitude:str='800ua', nplc:float=0.2, current_frequency:str='7hz', current_compliance:float=4, ntimes:int=2,
-	wait_time:float=.5,ignore:int=100,count:int=500,sleep_before_start:float=60,note:str='none', plot:bool=True, 
-	fig=None, axs=None):
+def switching_run_function(LI1, current_source, k24, samplename, LI2:'pyvisa.resources.gpib.GPIBInstrument'=None, min_voltage:float=-10, 
+	max_voltage:float=10, current_amplitude:str='800ua', nplc:float=0.2, current_frequency:str='7hz', current_compliance:float=4, 
+	ntimes:int=2, wait_time:float=.5,ignore:int=100,count:int=500,sleep_before_start:float=60,note:str='none', plot:bool=True, 
+	fig=None, axs=None, harmonic:int=2):
 	meta_data = {
 		'min_voltage':min_voltage,
 		'max_voltage':max_voltage,
@@ -27,6 +27,21 @@ def switching_run_function(LI1, LI2, current_source, k24, samplename, min_voltag
 		'sleep_before_start':sleep_before_start,
 		'note':note
 	}
+	if LI1 is None and LI2 is None:
+		raise ValueError('Must provide a lockin')
+
+	single_lockin = False
+
+	if LI2 is None:
+		single_lockin = True
+		meta_data.update({'harmonic':harmonic})
+	else:
+		meta_data.update({'harmonic':12})
+
+	meta_data.update({'single_lockin':single_lockin})
+
+	if LI1 is None:
+		raise ValueError('If using a single lockin, it must be LI1, not NoneType.')
 
 	base_name = 'switching{}_{}'.format(str(min_voltage).replace('-','n').replace('+',''), str(max_voltage).replace('-','n').replace('+',''))
 
@@ -34,6 +49,12 @@ def switching_run_function(LI1, LI2, current_source, k24, samplename, min_voltag
 
 	k6221.set_output_sin(current_source, frequency=current_frequency, 
 		amplitude=current_amplitude, compliance=current_compliance)
+
+	if not single_lockin:
+		srs.set_harmonic(LI1, 1)
+		srs.set_harmonic(LI2, 2)
+	else:
+		srs.set_harmonic(LI1, harmonic)
 
 	# get voltages:
 	voltages = []
@@ -61,13 +82,21 @@ def switching_run_function(LI1, LI2, current_source, k24, samplename, min_voltag
 			time.sleep(wait_time)
 			if i <= ignore:
 				continue
-			X1, Y1 = srs.get_X_Y(LI1)
-			X2, Y2 = srs.get_X_Y(LI2)
-			out['X1'].append(X1)
-			out['Y1'].append(Y1)
-			out['X2'].append(X2)
-			out['Y2'].append(Y2)
-			out['V'].append(voltage)
+			if single_lockin:
+				X, Y = srs.get_X_Y(LI1)
+				out['X1'].append(X)
+				out['Y1'].append(Y)
+				out['X2'].append(X)
+				out['Y2'].append(Y)
+				out['V'].append(voltage)
+			else:
+				X1, Y1 = srs.get_X_Y(LI1)
+				X2, Y2 = srs.get_X_Y(LI2)
+				out['X1'].append(X1)
+				out['Y1'].append(Y1)
+				out['X2'].append(X2)
+				out['Y2'].append(Y2)
+				out['V'].append(voltage)
 
 		if plot:
 			for key, ax in zip(['X1', 'Y1', 'X2', 'Y2'], axs):
@@ -228,6 +257,7 @@ def basic_run_function_single_lockin(LI, current_source, FE_applied_voltage, sam
 	time.sleep(sleep_before_start/2)
 	
 	for i in range(count):
+		# import pdb; pdb.set_trace()
 		time.sleep(wait_time)
 		if i <= ignore:
 			continue
@@ -244,8 +274,8 @@ def basic_run_function_single_lockin(LI, current_source, FE_applied_voltage, sam
 class BASIC_SINGLE_LI(core.experiment):
 	
 	def __init__(self, LI, current_source, run_function=basic_run_function_single_lockin):
-		super().__init__()
-		self.run_function = run_function
+		super().__init__(run_function)
+		# self.run_function = run_function
 		self.LI = LI
 		self.current_source = current_source
 	
@@ -335,13 +365,12 @@ class HYST(core.experiment):
 
 class SWITCH(core.experiment):
 
-	def __init__(self, LI1, LI2, current_source, k24, run_function = switching_run_function):
-		super().__init__()
-		self.run_function = run_function
+	def __init__(self, LI1, LI2, current_source, k24, run_function=switching_run_function):
+		super().__init__(run_function)
 		self.LI1 = LI1
 		self.LI2 = LI2
-		self.k24 = k24
 		self.current_source = current_source
+		self.k24 = k24
 	
 	def checks(self, params):
 		if self.LI1 != params['LI1']:
