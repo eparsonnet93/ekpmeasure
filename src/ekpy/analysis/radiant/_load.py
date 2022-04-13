@@ -90,10 +90,27 @@ def read_radiant_txt(file, measured_charge=True, return_meta_data=False, delimit
 			to_remove.append(index)
 
 	# now we have isolated the actual data
-	try:
-		datalines = datalines[max(to_remove)+1:]
-	except ValueError:
-		pass
+	data_index_blocks = [[]]
+
+	for j, index in enumerate(to_remove):
+	    if j == len(to_remove)-1:
+	        if len(data_index_blocks[-1]) == 1:
+	            data_index_blocks[-1].append(index)
+	            data_index_blocks.append([index+1])
+	        elif len(data_index_blocks[-1]) == 0:# case where only one data block
+	            data_index_blocks[-1].append(index+1) 
+	        continue
+	    if index+1 == to_remove[j+1]: #if both this index, and the next one include 'Data' then skip to the next
+	        continue
+	    if len(data_index_blocks[-1]) == 0: #the first case
+	        data_index_blocks[-1].append(index+1)
+	    elif len(data_index_blocks[-1]) == 1:
+	        data_index_blocks[-1].append(index)
+	        data_index_blocks.append([index+1])
+	    else:
+	        raise ValueError('Problem with data_index_blocks. Please raise issue on GitHub.')
+	        
+	data_index_blocks[-1].append(len(datalines))
 
 	# build the meta data
 	meta_data = {'Type':data_file_type}
@@ -110,26 +127,42 @@ def read_radiant_txt(file, measured_charge=True, return_meta_data=False, delimit
 
 
 	# build the data
-	if data_file_type == 'hysteresis':
-		data = _hystersis_parser(datalines, delimiter=delimiter)
-		if measured_charge:
-			try:
-				data['MeasuredPolarization'] = data['MeasuredPolarization']*float(meta_data['SampleArea(cm2)'])*1e6 #to convert from uC to pC
-			except KeyError:
-				raise KeyError('no key "MeasuredPolarization", is this a current loop? use measured_value="current"')
-			data.rename(columns = {'MeasuredPolarization':'MeasuredCharge(pC)'}, inplace = True)
+	for i, data_index_block in enumerate(data_index_blocks):
+		# import pdb; pdb.set_trace()
+
+		# parsers
+		if data_file_type == 'hysteresis':
+			tdf = _hystersis_parser(datalines[data_index_block[0]:data_index_block[1]], delimiter=delimiter)
+			if measured_charge:
+				try:
+					tdf['MeasuredPolarization'] = tdf['MeasuredPolarization']*float(meta_data['SampleArea(cm2)'])*1e6 #to convert from uC to pC
+				except KeyError:
+					tdf['MeasuredPolarization'] = tdf['MeasuredPolarization(uC/cm2)']*float(meta_data['SampleArea(cm2)'])*1e6 #to convert from uC to pC
+				except KeyError:
+					raise KeyError('no key "MeasuredPolarization", is this a current loop? use measured_value="current"')
+				tdf.rename(columns = {'MeasuredPolarization':'MeasuredCharge(pC)'}, inplace = True)
+			else:
+				tdf.rename(columns = {'MeasuredPolarization':'MeasuredPolarization(uC/cm2)'}, inplace = True)
+		elif data_file_type == 'currentloop':
+			tdf = _hystersis_parser(datalines[data_index_block[0]:data_index_block[1]], delimiter=delimiter)
+		elif data_file_type == 'advancedpiezo':
+			tdf = _hystersis_parser(datalines[data_index_block[0]:data_index_block[1]], delimiter=delimiter)
+		elif data_file_type == 'pund':
+			tdf = _pund_parser(datalines[data_index_block[0]:data_index_block[1]], delimiter=delimiter)
+		elif data_file_type == 'simplepulse':
+			tdf = _pund_parser(datalines[data_index_block[0]:data_index_block[1]], delimiter=delimiter)
 		else:
-			data.rename(columns = {'MeasuredPolarization':'MeasuredPolarization(uC/cm2)'}, inplace = True)
-	elif data_file_type == 'currentloop':
-		data = _hystersis_parser(datalines, delimiter=delimiter)
-	elif data_file_type == 'advancedpiezo':
-		data = _hystersis_parser(datalines, delimiter=delimiter)
-	elif data_file_type == 'pund':
-		data = _pund_parser(datalines, delimiter=delimiter)
-	elif data_file_type == 'simplepulse':
-		data = _pund_parser(datalines, delimiter=delimiter)
-	else:
-		raise ValueError('data file type "{}" not supported.'.format(data_file_type))
+			raise ValueError('data file type "{}" not supported.'.format(data_file_type))
+
+		if i == 0 and len(data_index_blocks) == 1:
+			data = tdf.copy()
+			break
+
+		tdf = tdf.rename(columns={col:col+'_{}'.format(i) for col in tdf.columns}) # rename by data block
+		if i == 0:
+			data = tdf.copy()
+		else:
+			data = pd.concat((data, tdf), axis=1)
 		
 	if return_meta_data:
 		return data, meta_data
