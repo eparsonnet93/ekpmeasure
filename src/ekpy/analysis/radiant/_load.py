@@ -5,7 +5,7 @@ import warnings
 __all__ = ('load_radiant_loop_from_text_file','read_loop_txt', 'read_radiant_txt', 'generic_mapper')
 
 def load_radiant_loop_from_text_file(file, measured_value='Charge', return_meta_data=False, delimiter=','):
-	raise NameError('"load_radiant_loop_from_text_file" is deprecated. Please use "read_loop_txt"')
+	raise NotImplementedError('"load_radiant_loop_from_text_file" is deprecated. Please use "read_radiant_txt"')
 
 def read_loop_txt(file, measured_value='Charge', return_meta_data=False, delimiter=','):
 	"""Load a radiant loop from a text file. Typically one would use 'Charge' for measured_value unless one accurately measured capacitor area and input correctly into the Radiant UI.
