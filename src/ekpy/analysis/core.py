@@ -913,6 +913,22 @@ class Data():
 		"""
 		return list(self._dict[list(self._dict.keys())[0]]['data'].keys())
 
+	def groupby(self, key:'str'):
+		"""Group data by key. Similar to Dataset.get_data(groupby=key).get_data(), though offers one to perform functions on individual data files before grouping.
+		
+		args:
+			data (ekpy.analysis.core.Data): The data to group
+			key (str): Key to group on
+			
+		returns:
+			(ekpy.analysis.core.Data)
+		"""
+		return _group_data(self, key)
+
+	def dropna(self):
+		"""Drop nans from data"""
+		return _drop_data_nans(self) 
+
 	def to_ekpdat(self, file):
 		"""Save file as `.ekpdat` file.
 
@@ -1711,3 +1727,169 @@ def _lump_mean(ndarray, dropna=True, *args, **kwargs):
 		good_indexer = [True for x in ndarray]
 		
 	return np.mean(ndarray[good_indexer])
+
+
+def _update_definition_dict(current:'dict <key:set>', updater:'dict <key:set>'):
+	"""Update `current` definition dict, by union on keys with updater.
+	
+	args:
+		current (dict): Dict of current definition, where value for each key is type=set
+		updater (dict): Dict of updater
+		
+	returns:
+		(dict)
+		
+	examples:
+		
+		.. code-block:: python 
+		
+			>>> current = {'param1':{'a'}, 'param2':{'a'}}
+			>>> updater = {'param1':{'a'}, 'param2':{'b'}}
+			>>> _update_definition_dict(current, updater)
+			> {'param1':{'a'}, 'param2':{'a', 'b'}}
+	"""
+	
+	for key in updater:
+		try:
+			current[key] = current[key].union(updater[key])
+		except KeyError:
+			current.update({key: updater[key]})
+			
+	return current
+
+def _update_data_dict(current:'dict <key,numpy.ndarray>', updater:'dict <key,numpy.ndarray>'):
+	"""Update `current` data dict, by union on keys with `updater`.
+	
+	args:
+		current (dict): Dict of current data, where value for each key is type=set
+		updater (dict): Dict of updater
+		
+	returns:
+		(dict)
+		
+	examples:
+		
+		.. code-block:: python 
+		
+			>>> current = {'time':array([0, 1, 2]), 'data':array([0, 0, 0])}
+			>>> updater = {'time':array([0, 1, 2]), 'data':array([1, 1, 1])}
+			>>> _update_data_dict(current, updater)
+			> {'time':array([[0, 1, 2],[0, 1, 2]]), 'data':array([[0, 0, 0], [1, 1, 1]])}
+	"""
+	
+	for key in updater:
+		try:
+			
+			data_stack = current[key]
+			shape = data_stack.shape
+			if len(shape) == 1: # 1d data, one array
+				data_stack_df = pd.DataFrame(data_stack)
+			else: # case when multiple arrays already vstacked
+				data_stack_df = pd.DataFrame(data_stack).transpose()
+			
+			# going to use pandas to append all necessary nans (when arrays might have different shapes)
+			updated_data_stack_df = pd.concat((data_stack_df, pd.DataFrame(updater[key])), axis=1)
+			
+			current[key] = updated_data_stack_df.transpose().to_numpy()
+		except KeyError:
+			current.update({key: updater[key]})
+			
+	return current
+
+def _group_data(data:'ekpy.analysis.core.Data', key:'str'):
+	"""Group data by key. Similar to Dataset.get_data(groupby=key).get_data(), though offers one to perform functions on individual data files before grouping.
+	
+	args:
+		data (ekpy.analysis.core.Data): The data to group
+		key (str): Key to group on
+		
+	returns:
+		(ekpy.analysis.core.Data)
+
+	"""
+	_dict = {}
+	assert key in set(data.summary.keys()), 'key "{}" is not in definition. Available keys are "{}"'.format(key, data.summary.keys())
+	
+	possible_values = data.summary[key]
+	for ijk, val in enumerate(possible_values):
+		tdata = data.contains({key:[val]})
+
+		# group definitions
+		_definition = {}
+		_data = {}
+		for index in tdata:
+			_updater_definition = tdata.iloc[index].definition
+			_updater_data = tdata.iloc[index].data
+			_definition = _update_definition_dict(_definition, _updater_definition)
+			_data = _update_data_dict(_data, _updater_data)
+			
+		_dict.update({ijk:{'definition':_definition, 'data':_data}})
+		
+	return Data(_dict)
+
+def _drop_data_dict_nans(data_dict):
+	"""Drop nans in data_dict
+	
+	args:
+		data_dict (dict)
+		
+	returns:
+		(dict)
+	
+	examples:
+		
+		.. code-block:: python
+		
+			>>> data_dict = {'R':np.array([0,1,1,np.nan])}
+			>>> _drop_data_dict_nans(data_dict)
+			> {'R':np.array([0,1,1])}
+	
+	"""
+	out = {}
+	for key in data_dict:
+		_data = data_dict[key]
+		if len(_data.shape) == 1:
+			df = pd.DataFrame(_data)
+		else:
+			df = pd.DataFrame(_data).transpose()
+		df = df.dropna()
+		out.update({key:df.transpose().to_numpy()})
+		
+	return out
+
+def _drop_data_nans(data):
+	"""Drop nans in data.
+	
+	args:
+		data (ekpy.analysis.core.Data): Data to drop nans
+	
+	returns:
+		(ekpy.analysis.core.Data): Data with all nans dropped.
+	"""
+	out = {}
+	for i in data:
+		_definition = data.iloc[i].definition
+		_data = data.iloc[i].data
+		out.update({i:{'definition':_definition, 'data':_drop_data_dict_nans(_data)}})
+		
+	return Data(out)
+
+def _merge_datadefinition_dicts(tpl, by:str):
+	"""Merge data_dict or definition dict.
+	
+	args:
+		tpl (array-like): Array-like of dicts
+		by (str): Key to merge on. 
+	
+	"""
+	try:
+		out = {'{}'.format(by): tpl[0][by]}
+	except KeyError:
+		out = dict()
+	for i, _dict in enumerate(tpl):
+		for key in _dict:
+			if key == by:
+				continue
+			out.update({'{}_{}'.format(key, i):_dict[key]})
+			
+	return out
