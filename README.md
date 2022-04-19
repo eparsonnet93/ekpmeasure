@@ -396,6 +396,11 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 # Change log
 
+### Version 0.1.13
+
+- Can now group Data. `data.groupby`
+- Can now remove nans from data. `data.dropna`
+
 ### Version 0.1.12
 
 - Added functionality to `analysis.radiant`

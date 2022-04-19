@@ -32,7 +32,7 @@ def load_Dataset(path, meta_data=None, readfileby=read_ekpy_data):
 	if len(existing_ekpds) != 0:
 		warnings.showwarning('There exist .ekpds files ({}) in this directory. If you want to load those Datasets, be sure to use ``.read_ekpds``'.format(existing_ekpds), UserWarning, '', 0)
 
-	return Dataset(path, _build_df(path, meta_data), readfileby=readfileby)
+	return Dataset(path, _build_df(path, meta_data), readfileby=readfileby).remove_nonexistent_files_from_metadata()
 
 
 def read_ekpdat(filename):
