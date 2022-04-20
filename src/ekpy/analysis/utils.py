@@ -146,24 +146,3 @@ def concat_Datasets(datasets):
 	path = _convert_ITP_to_path_to_index(new_path)
 	
 	return Dataset(path,new_df,readfileby=readfileby)
-
-
-def _merge_datadefinition_dicts(tpl, by:str):
-	"""Merge data_dict or definition dict.
-	
-	args:
-		tpl (array-like): Array-like of dicts
-		by (str): Key to merge on. 
-	
-	"""
-	try:
-		out = {'{}'.format(by): tpl[0][by]}
-	except KeyError:
-		out = dict()
-	for i, _dict in enumerate(tpl):
-		for key in _dict:
-			if key == by:
-				continue
-			out.update({'{}_{}'.format(key, i):_dict[key]})
-			
-	return out

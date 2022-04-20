@@ -1,6 +1,6 @@
 import numpy as np
 
-__all__ = ('get_vals_by_definition', 'vals_by_definition_to_2darray',)
+__all__ = ('get_vals_by_definition', 'vals_by_definition_to_2darray')
 
 def get_vals_by_definition(data, definition_key, data_key):
 	"""Returns a dict where key is definition_key value is data from each Data index.
@@ -28,7 +28,7 @@ def get_vals_by_definition(data, definition_key, data_key):
 			   'trial': {0}},
 			  'data': {'p1': array([-0.003, -0.003, -0.001, ..., -0.003, -0.003, -0.001]),
 			   'time': array([0.0000e+00, 4.0000e-02, 8.0000e-02, ..., 1.9988e+02, 1.9992e+02,
-			          1.9996e+02]),
+					  1.9996e+02]),
 			   'p2': array([-0.001, -0.003, -0.005, ..., -0.003,  0.001,  0.003])}},
 			 1: {'definition': {'type': {'preset2pulse'},
 			   'identifier': {'125um2'},
@@ -42,7 +42,7 @@ def get_vals_by_definition(data, definition_key, data_key):
 			   'trial': {0}},
 			  'data': {'p1': array([0.0004, 0.0012, 0.0004, ..., 0.002 , 0.002 , 0.0004]),
 			   'time': array([0.0000e+00, 4.0000e-02, 8.0000e-02, ..., 1.9988e+02, 1.9992e+02,
-			          1.9996e+02]),
+					  1.9996e+02]),
 			   'p2': array([-0.0004, -0.0004,  0.0004, ...,  0.0012,  0.0012,  0.0004])}},}
 
 			#retrieve 'p1' data keyed by high_voltage_v
