@@ -640,15 +640,21 @@ class Dataset():
 				try:
 					if read_eky_data:
 						if self.skiprows is None:
-							tdf, skiprows = readfileby(self.index_to_path[index_of_original] 
-								+ filename_index_to_path_dict[index_of_original], return_skiprows=True)
+							tdf, skiprows = readfileby(
+								os.path.join(self.index_to_path[index_of_original], filename_index_to_path_dict[index_of_original]), 
+								return_skiprows=True
+								)
 							self.skiprows = skiprows
 						else:
-							tdf = readfileby(self.index_to_path[index_of_original] 
-								+ filename_index_to_path_dict[index_of_original], skiprows=self.skiprows)
+							tdf = readfileby(
+								os.path.join(self.index_to_path[index_of_original], filename_index_to_path_dict[index_of_original]), 
+								skiprows=self.skiprows
+								)
 
 					else:
-						tdf = readfileby(self.index_to_path[index_of_original] + filename_index_to_path_dict[index_of_original])
+						tdf = readfileby(
+							os.path.join(self.index_to_path[index_of_original], filename_index_to_path_dict[index_of_original])
+							)
 				except Exception as e:
 					raise Exception('error reading data. ensure self.readfileby is correct and that readfileby returns a pandas dataframe. self.readfileby is currently set to {}.\nError was: {}'.format(self.readfileby.__name__, e))
 
