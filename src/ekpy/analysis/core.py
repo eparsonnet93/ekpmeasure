@@ -1382,7 +1382,7 @@ class Data():
 			
 		return out
 
-	def plot(self, x=None, y=None, ax=None, color = None, cmap = 'viridis', labelby = None, **kwargs):
+	def plot(self, x=None, y=None, ax=None, color=None, cmap='viridis', labelby=None, **kwargs):
 		"""
 		Plot the data. If ax is provided returns ax, otherwise returns fig, ax.
 
@@ -1423,6 +1423,8 @@ class Data():
 				label = None
 			else:
 				label = self._dict[index]['definition'][labelby]
+				if len(label) == 1:
+					label = label.pop()
 
 			if type(y) == type(None):
 				pass
