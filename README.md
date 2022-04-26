@@ -400,6 +400,7 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 - Can now group Data. `data.groupby`
 - Can now remove nans from data. `data.dropna`
+- Improvements to file management in control, saving, and more appropriate trial incrementing in `control.experiment`
 
 ### Version 0.1.12
 

@@ -87,3 +87,17 @@ def _parse_ekpy_meta_data(lines:list):
 		spl=line.replace('\n', '').replace('\r', '').split(':::')
 		meta_data.update({spl[0]:spl[1]})
 	return meta_data
+
+def _create_target_dir(target):
+	exists = os.path.exists(target)
+	while not exists:
+		_create_missing_dir(target)
+		exists = os.path.exists(target)
+
+def _create_missing_dir(target):
+	current = os.path.dirname(target)
+	if os.path.exists(current):
+		print('making dir {}'.format(os.path.join(current, os.path.basename(target))))
+		os.mkdir(os.path.join(current, os.path.basename(target)))
+	else:
+		return _create_target_dir(current)

@@ -9,6 +9,7 @@ from IPython import display
 
 from .misc import get_save_name
 from ..utils import write_ekpy_data
+from ..utils.save import _create_target_dir
 
 __all__ = ('trial','experiment')
 
@@ -263,16 +264,13 @@ class experiment():
 		"""
 		return help(self.run_function)
 
-	def config_path(self, path, directory_delimiter='/'):
+	def config_path(self, path):
 		"""Config the path to save data. If path does not exist, user will be prompted to create. 
 
 		args:
 			path (str): Path
-			directory_delimiter (str): Delimiter between directories in path. Sometimes it may be '\\' for Windows OS, for example.
 
 		"""
-		if path[-1] != directory_delimiter:
-			raise ValueError('must specify a directory. "{}" does not specify a directory'.format(path))
 
 		success = False
 		original_path = path
@@ -285,25 +283,7 @@ class experiment():
 			yn = yn.lower()
 
 		if yn == 'y':
-			to_create = []
-
-			while success == False:
-				try:
-					os.listdir(path)
-					success = True
-				except FileNotFoundError:
-					path_spl = path.split(directory_delimiter)
-					to_create.append(path_spl[-2])
-					path = ''
-					for spl in path_spl[:-2]:
-						path+=spl + '/'
-
-			to_create = to_create[::-1]
-			for directory in to_create:
-				os.mkdir(path + directory + directory_delimiter)
-				path += directory + directory_delimiter
-				print('creating dir "{}"'.format(path))
-				
+			_create_target_dir(path)
 		else:
 			pass
 		self.path = path
@@ -442,7 +422,7 @@ class experiment():
 					iteration += 1
 					print('Scan {} of {}. {}'.format(iteration, total_scans, current_scan_params))
 					
-					trial_df = trial(self.run_function, kwargs, self.path, return_df = True)
+					trial_df = trial(self.run_function, kwargs, self.path, return_df=True)
 					if plot:
 						self._plot(trial_df, kwargs)
 					else:
@@ -478,35 +458,67 @@ def trial(run_function, run_function_args, path, return_df=False, save_meta_data
 	"""
 	base_name, meta_data, df = run_function(**run_function_args)
 	try:
+		existing_meta_data = pd.read_csv(os.path.join(path, 'meta_data.csv'))
+	except FileNotFoundError:
+		existing_meta_data = None
+
+	try:
 		save_name = get_save_name(base_name, path)
-		trial = int(save_name.split('_')[-1].replace('.csv',''))
+		try: # attempt to get the trial number by looking at meta data, if any issues arise, increment the base_name by one and use that as trial number
+			query_str = _generate_meta_data_query_str(meta_data)
+			trial = _get_trial_number(existing_meta_data, query_str)
+
+		except: # revert to old way of doing
+			trial = int(save_name.split('_')[-1].replace('.csv',''))
 	except Exception as e:
 		save_name = input('there was an error generating a save name: {}\n please enter a unique name'.format(e))
 		trial = np.nan
-
 
 	meta_data.update({'trial':trial, 'filename':save_name})
 
 	assert type(df) == type(pd.DataFrame()), 'run_function {} does not return a pandas.DataFrame as its third return argument, it must'.format(run_function.__name__)
 
 	try:
-		write_ekpy_data(path+save_name, df, meta_data)
+		write_ekpy_data(os.path.join(path,save_name), df, meta_data)
 	except:
 		# fall back to to_csv
-		df.to_csv(path+save_name, index=False)
+		df.to_csv(os.path.join(path,save_name), index=False)
 
 	#update the meta_data file in this directory
 	meta_data = pd.DataFrame(meta_data, index = [0])
-	try:
-		existing_meta_data = pd.read_csv(path+'meta_data.csv')
+	if existing_meta_data is not None:
 		if set(meta_data.columns) != set(existing_meta_data.columns):
 			raise ValueError('the columns of meta_data do not match the existing columns of the data in this path ({}). Please ensure you are producing data of the same type, or move to a new path. Please note, your data was saved with file complete filename: {}, but it was not added to meta_data'.format(path, path+save_name))
 		out = pd.concat([existing_meta_data, meta_data], ignore_index = True)
-	except FileNotFoundError:
+	else:
 		out = meta_data.copy()
 
-	out.to_csv(path + 'meta_data.csv', index = False)
+	out.to_csv(os.path.join(path,'meta_data.csv'), index = False)
 	if save_meta_data_pickle:
-		out.to_pickle(path + 'meta_data')
+		out.to_pickle(os.path.join(path,'meta_data'))
 	if return_df:
 		return df
+
+
+def _generate_meta_data_query_str(meta_data):
+	query_str = ''
+	for key in meta_data:
+		value = meta_data[key]
+		try:
+			float(value)
+			query_str += '`{}`=={} and '.format(key, meta_data[key])
+		except ValueError:
+			try:
+				complex(value)
+				query_str += '`{}`=={} and '.format(key, meta_data[key])
+			except ValueError:
+				query_str += '`{}`=="{}" and '.format(key, meta_data[key])
+
+	query_str = query_str[:-5]
+	return query_str
+
+def _get_trial_number(existing_meta_data, query_str):
+	trials = existing_meta_data.query(query_str)['trial']
+	if len(trials) == 0:
+		return int(0)
+	return int(max(trials)+1)

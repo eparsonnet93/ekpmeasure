@@ -93,10 +93,10 @@ def _build_df(path, meta_data):
 
 	if type(meta_data) == type(None):
 		try:
-			return pd.read_csv(path + 'meta_data.csv')
+			return pd.read_csv(os.path.join(path,'meta_data.csv'))
 		except FileNotFoundError:
 			try:
-				return pd.read_pickle(path + 'meta_data')
+				return pd.read_pickle(os.path.join(path, 'meta_data'))
 			except FileNotFoundError:
 				raise FileNotFoundError('No file named "meta_data.csv" (or legacy pickle file "meta_data") exists in path "{}", you may want to create one or both of these with `.generate_meta_data()`'.format(path))
 	else:
