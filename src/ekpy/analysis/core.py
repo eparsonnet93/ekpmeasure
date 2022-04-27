@@ -151,6 +151,20 @@ class Dataset():
 		return self.attrs['index_to_path']
 
 	@property
+	def pretty_summary(self):
+		"""Print a summary of dataset in an easier to read fashion"""
+		_summary = self.summary
+		
+		for key in _summary:
+			val = _summary[key]
+			try:
+				sorted_val = sorted(val)
+			except:
+				sorted_val = val
+			print('{}:\t{}'.format(key, sorted_val))
+		return
+
+	@property
 	def summary(self):
 		"""Return a brief summary of the data in your Dataset. 
 
@@ -450,14 +464,14 @@ class Dataset():
 		return
 
 	def _format_path_to_dict(self):
-	    _type = type(self.path)
-	    if _type is not dict:
-	        if _type is str:
-	            self.attrs['path'] = {self.path:np.array([x for x in self.meta_data.index])}
-	        else:
-	            raise TypeError('self.path is malformed. got type "{}", expected either str or dict').format(_type)
-	    else:
-	        pass
+		_type = type(self.path)
+		if _type is not dict:
+			if _type is str:
+				self.attrs['path'] = {self.path:np.array([x for x in self.meta_data.index])}
+			else:
+				raise TypeError('self.path is malformed. got type "{}", expected either str or dict').format(_type)
+		else:
+			pass
 
 	def to_ekpds(self, path):
 		"""Save Dataset to file (extension .ekpds).
