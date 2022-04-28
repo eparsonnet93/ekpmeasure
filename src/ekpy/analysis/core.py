@@ -1444,7 +1444,7 @@ class Data():
 			else:
 				label = self._dict[index]['definition'][labelby]
 				if len(label) == 1:
-					label = label.pop()
+					label = list(label)[0]
 
 			if type(y) == type(None):
 				pass
