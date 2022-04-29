@@ -400,7 +400,8 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 - Can now group Data. `data.groupby`
 - Can now remove nans from data. `data.dropna`
-- Improvements to file management in control, saving, and more appropriate trial incrementing in `control.experiment`
+- Improvements to file management in control, saving, and more appropriate trial incrementing in `control.experiment`4
+- Functions used in `data.apply` should no longer require the use of iterable data arrays. Please raise an issue if one occurs.
 
 ### Version 0.1.12
 
