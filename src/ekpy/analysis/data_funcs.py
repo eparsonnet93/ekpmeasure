@@ -1,12 +1,11 @@
 import numpy as np
 import warnings
 
-__all__ = ('_fod_dimensionality_fixer', 'iterable_data_array', 
-	'iterable_data_dict','data_array_builder', 'not_nan_indexer')
+__all__ = ('iterable_data_array', 'iterable_data_dict','data_array_builder', 'not_nan_indexer')
 
 class iterable_data_dict():
 	
-	def __init__(self, data_dict):
+	def __init__(self, data_dict:'dict'):
 		self.data_dict = data_dict
 		self.max_iters = max([_determine_len(data_dict[key]) for key in data_dict])
 		
@@ -71,6 +70,7 @@ def not_nan_indexer(tpl:()):
 				a = a[indexer] # access not nan
 				r = r[indexer] # acces not nan
 	"""
+	warnings.showwarning("not_nan_indexer will be deprecated.", DeprecationWarning, '', 0)
 	l = len(tpl[0])
 	for t in tpl:
 		assert len(t) == l, 'Not all arrays in tpl have the same length.'
@@ -112,7 +112,7 @@ class iterable_data_array():
 			[1,2,3]
 		
 	"""
-	def __init__(self, data_dict, key, dropna_on_pass=True):
+	def __init__(self, data_dict, key):
 		
 		data_dict = self._data_dimensionality_fixer(data_dict)
 		array = data_dict[key]
