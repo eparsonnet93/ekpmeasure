@@ -10,6 +10,7 @@ from functools import wraps
 from numpy import AxisError
 import pickle
 from pprint import pformat
+from .data_funcs import iterable_data_dict, data_array_builder
 
 from ..utils import read_ekpy_data
 
@@ -1180,13 +1181,15 @@ class Data():
 
 		return out
 
-	def apply(self, function_on_data, pass_defn=False, ignore_errors=True,**kwargs):
+	def apply(self, func:'callable', pass_defn:'bool'=False, ignore_errors:'bool'=True, 
+		ignore_coerce_warnings:'bool'=True, **kwargs):
 		"""Apply data_function to the data in each index. ``**kwargs`` will be passed to data_function. If function_on_data returns 'None', that piece of data will be dropped. 
 
 		args:
 			function_on_data (function): f(dict) -> dict. Function is passed the data_dict for each index.
 			pass_defn (bool): Whether or not to pass the definition to function_on_data. If True, will be passed with other kwargs. 
 			ignore_errors (bool): If True, errors in function_on_data will be printed, but not raised. Resulting data will be original data. If False, errors will be raised.
+			ignore_coerce_warnings (bool): Whether or not to ignore coerce warnings in data_array_builder() class. Most likely want this false.
 
 		returns:
 				(Data): the new data after operating on it
@@ -1232,45 +1235,50 @@ class Data():
 						'data': {'raw_data': array([1, 4, 9], dtype=int64)}}}
 
 		"""
-
-		data_function = function_on_data
-		tmp_out = {}
+		_dict_out = {}
 		new_key = 0
-
-		for key in self._dict.keys():
+		
+		for index in self:
 			try:
+				data_dict = self.iloc[index].data
+				defn = self.iloc[index].definition
+				_idd = iterable_data_dict(data_dict)
+				
+				dabs = {}
+				
+				for _dict in _idd:
+					if pass_defn:
+						#ensure no overlap between passed arguments and definition arguments:
+						overlap = set(kwargs.keys()).intersection(set(defn.keys()))
+						if len(overlap) != 0:
+							raise ValueError('There are matching function arguments passed in both definition and as kwargs in .apply(). Overlapping keys are "{}"'.format(overlap))
 
-				if pass_defn:
-					#ensure no overlap between passed arguments and definition arguments:
-					overlap = set(kwargs.keys()).intersection(set(self._dict[key]['definition'].keys()))
-					if len(overlap) != 0:
-						raise ValueError('kwargs passed in both definition and as kwargs in .apply(). Overlapping keys are "{}"'.format(overlap))
-
-					to_pass = self._dict[key]['definition'].copy()
-					for key in kwargs:
-						to_pass.update({key:kwargs})
-					internal_out = {
-						'definition':self._dict[key]['definition'],
-						'data':data_function(self._dict[key]['data'].copy(), defn = self._dict[key]['definition'], **to_pass)
-					}
-				else:
-					internal_out = {
-						'definition':self._dict[key]['definition'],
-						'data':data_function(self._dict[key]['data'].copy(), **kwargs)
-					}
-				if internal_out['data'] == 'None':
-					continue
-
-				tmp_out.update({new_key:internal_out})
-				new_key += 1
+						to_pass = defn.copy()
+						to_pass.update(kwargs)
+						_func_out = func(_dict, **to_pass)
+					else:
+						_func_out = func(_dict, **kwargs)
+					for key in _func_out:
+						try:
+							dabs[key].append(_func_out[key])
+						except:
+							dabs.update({key:data_array_builder()})
+							dabs[key].append(_func_out[key])
+				out = {}
+				for key in dabs:
+					out.update({key:dabs[key].build(ignore_coerce_warnings=ignore_coerce_warnings)})
+			   
+				_dict_out.update({new_key:{'definition':defn, 'data':out}})
+				new_key+=1
 			except Exception as e:
 				if ignore_errors:
-					print('Error in data_function: {} \n{}'.format(data_function.__name__, e))
-					print('Skipping data key: {} with defintion: \n{}'.format(key, self._dict[key]['definition']))
+					print('Error in data_function: {} \n{}'.format(func.__name__, e))
+					print('Skipping data key: {} with defintion: \n{}'.format(key, defn))
 				else:
 					raise e
 
-		return Data(tmp_out)
+			
+		return Data(_dict_out)
 
 	def to_dict(self):
 		"""
