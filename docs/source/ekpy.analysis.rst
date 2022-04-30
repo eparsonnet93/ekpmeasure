@@ -1,17 +1,6 @@
 ekpy.analysis package
 ===========================
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   ekpy.analysis.FE_switching
-   ekpy.analysis.asylum
-   ekpy.analysis.ppms
-   ekpy.analysis.radiant
-
 Submodules
 ----------
 
@@ -27,14 +16,6 @@ ekpy.analysis.data\_utils module
 --------------------------------------
 
 .. automodule:: ekpy.analysis.data_utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ekpy.analysis.data\_funcs module
-----------------------------------------------
-
-.. automodule:: ekpy.analysis.data\_funcs
    :members:
    :undoc-members:
    :show-inheritance:
