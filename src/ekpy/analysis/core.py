@@ -1235,6 +1235,39 @@ class Data():
 					1: {'definition': {'param1': {'5V'}, 'param2': {'100ns'}, 'param3': {'1mv'}},
 						'data': {'raw_data': array([1, 4, 9], dtype=int64)}}}
 
+
+			Passing trials iteratively
+
+			.. code-block:: python
+
+				>>> _dict = {
+				    0: {
+				        'data':{'x':np.array([1])},
+				        'definition':{'param':{'a'}}
+				    },
+				    1: {
+				        'data':{'x':np.array([0])},
+				        'definition':{'param':{'a'}}
+				    }
+				}
+
+				>>> data = analysis.Data(_dict)
+				>>> def subtract_offset(data_dict):
+    			>>> ...	return {'x':data_dict['x']-np.mean(data_dict['x'])}
+
+    			>>> data.apply(subtract_offset)
+    			> {	0: {'data': {'x': array([0.])}, 'definition': {'param': {'a'}}},
+ 					1: {'data': {'x': array([0.])}, 'definition': {'param': {'a'}}}}
+
+ 				>>> data.groupby('param')
+ 				> {0:{'data': {'x': array([[1], [0]])}, 'definition': {'param': {'a'}}}}
+
+       			>>> data.groupby('param').apply(subtract_offset)
+       			> {0: {'data': {'x': array([[0.], [0.]])}, 'definition': {'param': {'a'}}}}
+
+       			>>> data.groupby('param').apply(subtract_offset, pass_trials_iteratively=False)
+       			> {0: {'data': {'x': array([[ 0.5], [-0.5]])},'definition': {'param': {'a'}}}}
+
 		"""
 		_dict_out = {}
 		new_key = 0

@@ -6,7 +6,7 @@ Analysis
 
 Dataset Class
 *************
-The Dataset class can be used broadly as a means to manipulate meta data and quickly retrieve true data. It is datatype agnostic and allows for merging of datasets from different locations on disk. 
+The :func:`Dataset <ekpy.analysis.core.Dataset>` class can be used broadly as a means to manipulate meta data and quickly retrieve true data. It is datatype agnostic and allows for merging of datasets from different locations on disk. 
 
 Often I find that I have large amounts of data in stored in different locations and it is difficult to group data and or compare across a set of experimental parameters by leveraging data from multiple locations. Often this ends up being a manual and arduous process. Take for example the following tree of data:
 
@@ -43,7 +43,7 @@ Each of the files (e.g. 5V_100ns_1mv.csv) is a data file, and the file name enco
 	folder1/10V_10ns_1mv.csv
 
 
-Dataset aims to simplify this process. Dataset is a subclass of `pandas.DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html>`_. Dataset takes as parameters a path (where the true data is stored) and an initializer (meta_data) for example in the example above we might define two Datasets (one for each of folder1 and folder2) as 
+Dataset aims to simplify this process. Dataset is built on `pandas.DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html>`_. Dataset takes as parameters a path (where the true data is stored) and an initializer (meta_data) for example in the example above we might define two Datasets (one for each of folder1 and folder2) as 
 
 
 .. code-block:: python
@@ -164,6 +164,9 @@ Data is a subclass of Dict. The Data class holds real data. It allows for operat
 	}
 
 
+Next let's define a function which will operate on the data. 
+
+
 .. code-block:: python
 
 	#some function will square the data
@@ -174,6 +177,8 @@ Data is a subclass of Dict. The Data class holds real data. It allows for operat
 	    for key in data_dict:
 	        out.update({key:data_dict[key]**2})
 	    return out
+
+Now we can apply that function on our data
 
 
 .. code-block:: python
