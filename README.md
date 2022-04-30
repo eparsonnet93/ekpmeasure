@@ -48,7 +48,8 @@ filename = 'filename.csv'
 >>> df.head()
 ```
 
-![Raw DataFrame](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/raw_df.png)
+
+<img src="https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/raw_df.png" width="500">
 
 This data file has some meta data associated with it. Let's assume for this example that `filename.csv` corresponds to the following meta data:
 
