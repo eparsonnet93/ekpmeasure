@@ -56,7 +56,7 @@ def generic_mapper(fname, path, delimiter='\t'):
 	return out
 
 def read_radiant_txt(file, measured_charge=True, return_meta_data=False, delimiter='\t'):
-	"""Load a radiant data file (typically as generated from quicklook functions). Supported data types are pund, hysteresis, simplepulse, currentloop. If retrieving a hysteresis file, one would typically use 'True' for measured_charge unless one accurately measured capacitor area and input correctly into the Radiant UI.
+	"""Load a radiant data file (typically as generated from quicklook functions). Supported data types are pund, hysteresis, simplepulse, currentloop, advancedpiezo. If retrieving a hysteresis file, one would typically use 'True' for measured_charge unless one accurately measured capacitor area and input correctly into the Radiant UI.
 
 	args:
 		file (str): Filename and path. 
