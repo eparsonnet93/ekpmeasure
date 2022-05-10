@@ -2,11 +2,11 @@
 
 The [user guide](#user-guide) below offers a general overview, though more up to date (and more succinct) examples can be found:
 
-- [Overview](https://github.com/eparsonnet93/ekpmeasure/blob/main/examples/Overview.ipynb)
+- [Overview](https://github.com/eparsonnet93/ekpmeasure/blob/main/examples/Overview.ipynb) 
 
 Videos:
 
-- [Overview]()
+- [Overview](https://youtu.be/LcwbgeVzw3I)
 
 ### User Guide
 
