@@ -3,6 +3,7 @@
 The [user guide](#user-guide) below offers a general overview, though more up to date (and more succinct) examples can be found:
 
 - [Overview](https://github.com/eparsonnet93/ekpmeasure/blob/main/examples/Overview.ipynb) 
+- [Data class](https://github.com/eparsonnet93/ekpmeasure/blob/main/examples/Data.ipynb)
 
 Videos:
 
