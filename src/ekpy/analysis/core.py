@@ -1099,9 +1099,12 @@ class Data():
 		return Data(out)
 
 
-	def mean(self, axis=0):
+	def mean(self, across_trials:'bool'=True):
 		"""
-		Return mean of Data. If 1d data is supplied, mean will be performed over the trial, otherwise mean will be performed across trials.
+		Return mean of Data. 
+
+		args:
+			across_trials (bool): Whether to average across trials (True) or within trials (False)
 
 		returns:
 			(Data)
@@ -1113,13 +1116,13 @@ class Data():
 				# mean over a trial
 				>>> X = np.array([1,2,3])
 				>>> data = Data({0:{'definition':{},'data':{'X':X}}})
-				>>> data.mean().X
+				>>> data.mean(across_trials=False).X
 				> 2.0
 
 				# mean across trials
 				>>> X = np.array([[1,2,3], [3,4,5]])
 				>>> data = Data({0:{'definition':{},'data':{'X':X}}})
-				>>> data.mean().X
+				>>> data.mean(across_trials=True).X
 				> array([2., 3., 4.])
 		"""
 		tmp_out = {}
@@ -1129,37 +1132,18 @@ class Data():
 			mean_data = {}
 			for k in data:
 				if len(data[k].shape) == 1: #1d data averages over the trial
-					mean_data.update({k:np.mean(data[k])})
-				else:
-					try:
-						mean_data.update({k:np.mean(data[k], axis = 0)})
-					except AxisError:
+					if across_trials:
 						mean_data.update({k:data[k]})
+					else:
+						mean_data.update({k:np.mean(data[k])})
+				else:
+					if across_trials:
+						mean_data.update({k:np.mean(data[k], axis=0)})
+					else:
+						mean_data.update({k:np.mean(data[k], axis=1).reshape(data[k].shape[0], 1)})
 			tmp_out[key].update({'data':mean_data})
 		return Data(tmp_out)
 
-	def std(self):
-		"""
-		Return standard deviation of Data. If 1d data is supplied, std will be performed over the trial, otherwise std will be performed across trials.
-
-		returns:
-			(Data)
-		"""
-		tmp_out = {}
-		for key in self._dict:
-			tmp_out.update({key:self._dict[key].copy()})
-			data = self._dict[key]['data']
-			std_data = {}
-			for k in data:
-				if len(data[k].shape) == 1: #1d data
-					std_data.update({k:np.std(data[k])})
-				else:
-					try:
-						std_data.update({k:np.std(data[k], axis = 0)})
-					except AxisError:
-						std_data.update({k:data[k]})
-			tmp_out[key].update({'data':std_data})
-		return Data(tmp_out)
 
 	def collapse(self, data_key):
 		"""
