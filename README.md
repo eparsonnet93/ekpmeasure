@@ -11,6 +11,8 @@
 
 A repository of analysis and computer control code for various experiments. Image above is an example of data **collected** and **analyzed** using this package.
 
+[**See here for introdution videos**](https://www.youtube.com/watch?v=LcwbgeVzw3I)
+
 - [Overview](#overview)
 - [Installation](#installation)
 - [Development](#development)
