@@ -6,6 +6,7 @@
 [![PyPI license](https://img.shields.io/pypi/l/ekpy.svg)](https://pypi.org/project/ekpy/)
 [![PyPi Downloads](http://pepy.tech/badge/ekpmeasure)](http://pepy.tech/project/ekpmeasure)
 [![PyPi Downloads](http://pepy.tech/badge/ekpy)](http://pepy.tech/project/ekpy)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?business=MJ5B7DLKMSHBG&no_recurring=0&currency_code=USD)
 
 [![N|Scheme](https://github.com/eparsonnet93/ekpmeasure/blob/main/imgs/prl2.png)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.125.067601)
 
