@@ -2,12 +2,6 @@ import numpy as np
 from .. import misc
 from ....utils import get_number_and_suffix
 
-
-
-
-#CALL SEND(7,“:sens:volt:rang:auto on”,status%) sets to auto on chnnl 1
-
-
 __all__ = ('restore', 'is_on', 'measure')
 
 def get_voltage(nano_voltmeter):
