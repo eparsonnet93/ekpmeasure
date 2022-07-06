@@ -2,7 +2,7 @@ import numpy as np
 from .. import misc
 from ....utils import get_number_and_suffix
 
-__all__ = ('restore', 'is_on', 'measure')
+__all__ = ('restore', 'is_on', 'get_voltage')
 
 def get_voltage(nano_voltmeter):
     """Measures the nanovoltmeter once by first resetting it to idle state
