@@ -10,7 +10,7 @@ from ....utils import get_number_and_suffix
 
 __all__ = ('restore', 'is_on', 'measure')
 
-def measure_voltage(nano_voltmeter):
+def get_voltage(nano_voltmeter):
     """Measures the nanovoltmeter once by first resetting it to idle state
     then setting the function to volts (instead of temp) and selecting chnnl 1
     and reading it with the auto range function
