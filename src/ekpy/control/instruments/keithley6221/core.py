@@ -3,7 +3,7 @@ import numpy as np
 from .. import misc
 from ....utils import get_number_and_suffix
 
-__all__ = ('restore', 'set_output_sin', 'set_wave_on', 'set_wave_off', 'is_on')
+__all__ = ('restore', 'set_output_waveform', 'set_wave_on', 'set_wave_off', 'is_on')
 
 def restore(current_source):
     """Restore settings on current source.
