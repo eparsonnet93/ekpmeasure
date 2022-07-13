@@ -1,6 +1,4 @@
 Temperature,trial,filename
-50,0,50K_0.csv
-75,0,75K_0.csv
 100,0,100K_0.csv
 125,0,125K_0.csv
 150,0,150K_0.csv
@@ -10,3 +8,5 @@ Temperature,trial,filename
 250,0,250K_0.csv
 275,0,275K_0.csv
 300,0,300K_0.csv
+50,0,50K_0.csv
+75,0,75K_0.csv
