@@ -2,7 +2,7 @@ import numpy as np
 import re
 import warnings
 
-__all__ = ('get_number_and_suffix', 'get_number_and_suffix_regex', 'period_str_to_freq_str', 'frequency_suffix_to_scientific_str', 'current_suffix_to_scientific_str', 
+__all__ = ('get_number_and_suffix', 'get_number_and_suffix_regex', 'time_str_to_freq_str', 'frequency_suffix_to_scientific_str', 'current_suffix_to_scientific_str', 
     'scientific_str_to_time_suffix', 'voltage_suffix_to_scientic_str', 'time_suffix_to_scientic_str', 
     'voltage_amp_mapper', 'freq_mapper','sci_to_freq_mapper', 'current_amp_mapper', 'time_to_sci_mapper','sci_to_time_mapper',
     '_get_number_and_suffix', 'scientific_notation', 'add_time_strings')
@@ -25,18 +25,18 @@ def add_time_strings(str1, str2):
     
     return str(np.round(float_total*unit_multiplier, 5)) + s1
 
-def period_str_to_freq_str(period_str):
-    """Converts a period string to a frequency string. *i.e* '10us' -> '100kHz'
+def time_str_to_freq_str(time_str):
+    """Converts a time string to its reciprocal frequency string. *i.e* '1ms' -> '1kHz'
     
     args:
-        period_str (str): Period string to convert
+        time_str (str): Time string to convert
 
     returns:
         (str): Frequency string.
     """
     
-    period_number, period_suffix = get_number_and_suffix(period_str)
-    assert period_suffix in set(time_to_sci_mapper.keys()), "period_str {} not in time_to_sci_mapper. Allowed keys are {}".format(period_str, list(time_to_sci_mapper.keys()))
+    period_number, period_suffix = get_number_and_suffix(time_str)
+    assert period_suffix in set(time_to_sci_mapper.keys()), "time_str {} not in time_to_sci_mapper. Allowed keys are {}".format(period_str, list(time_to_sci_mapper.keys()))
     period_suffix = time_to_sci_mapper[period_suffix]
     freq_number = 1/(float(str(period_number) + period_suffix))
     freq_str = "{:3e}".format(freq_number)
