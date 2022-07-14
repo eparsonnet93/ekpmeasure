@@ -39,7 +39,6 @@ def period_str_to_freq_str(period_str):
     assert period_suffix in set(time_to_sci_mapper.keys()), "period_str {} not in time_to_sci_mapper. Allowed keys are {}".format(period_str, list(time_to_sci_mapper.keys()))
     period_suffix = time_to_sci_mapper[period_suffix]
     freq_number = 1/(float(str(period_number) + period_suffix))
-    print(freq_number)
     freq_str = "{:3e}".format(freq_number)
     freq_num, freq_suffix = get_number_and_suffix_regex(freq_str)
     power = int(freq_suffix[1:])
@@ -51,7 +50,6 @@ def period_str_to_freq_str(period_str):
             power = power - 1
             freq_num = freq_num*10
         freq_suffix = 'e' + str(power)
-    print(power)
     assert freq_suffix in set(sci_to_freq_mapper.keys()), "freq_suffix {} not in sci_to_freq_mapper. Allowed keys are {}".format(freq_suffix, list(sci_to_freq_mapper.keys()))
     return str(round(freq_num)) + sci_to_freq_mapper[freq_suffix]
 
@@ -173,6 +171,8 @@ def get_number_and_suffix_regex(string):
     """
     string = string.lower()
     res = re.search(r'^[0-9.]+',string)
+    if res == None:
+        raise ValueError('unable to find a valud number in str: {}'.format(string))
     number = float(string[:res.end()])
     suffix = string[res.end():]
     res = re.search(r'[+-]', suffix)
