@@ -159,7 +159,8 @@ def _get_number_and_suffix2(string):
 
 def get_number_and_suffix_regex(string):
     """Return number and suffix of a string. e.g. 1khz will return (1.0, 'khz').
-    Formats python scientific notation to simplified form e.g. 3e+06 -> 3e6
+    Formats python scientific notation to simplified form e.g. (case insensitive)
+    3E+06 -> (3.0, e6), 3e+06 -> (3.0, e6), 1e12 -> (1.0, e12).
 
     args:
         string (str): String.
@@ -171,8 +172,8 @@ def get_number_and_suffix_regex(string):
     """
     string = string.lower()
     res = re.search(r'^[0-9.]+',string)
-    if res == None:
-        raise ValueError('unable to find a valud number in str: {}'.format(string))
+    if res is None:
+        raise ValueError('unable to find a valid number in str: {}'.format(string))
     number = float(string[:res.end()])
     suffix = string[res.end():]
     res = re.search(r'[+-]', suffix)
