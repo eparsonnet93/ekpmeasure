@@ -15,7 +15,8 @@ def restore(current_source):
     current_source.write("*rst")
     return
 
-def set_output_waveform(current_source, frequency, amplitude, waveform='sin', offset=0, compliance = 1.1):
+def set_output_waveform(current_source, frequency, amplitude, waveform='sin', offset=0,
+                        duty_cycles=50, duration='inf', num_cycles='inf', compliance=1.1):
     """Set the current source to output a specified waveform with specified amplitude and frequency.
     Does not start the current source. By default a sine wave with a 0mA DC offset.
 
@@ -25,6 +26,9 @@ def set_output_waveform(current_source, frequency, amplitude, waveform='sin', of
         frequency (str): Frequency. Allowed suffix 'khz', 'hz'.
         amplitude (str): Amplitude. Allowed suffix 'ua', 'ma'.
         offset (str): Offset. Allowed suffix 'ua', 'ma'.
+        duty_cycles (float): Range: 0-100, 100 is all positive, 0 is all negative.
+        duration (str): Duration in time. Allowed suffix 'ps', 'ns', 'us', 's', 'ks'.
+        num_cycles (float): Duration in cycles.
         compliance (float): Compliance in V. 
 
 
@@ -43,23 +47,33 @@ def set_output_waveform(current_source, frequency, amplitude, waveform='sin', of
     offs = str(offs_number) + misc.current_amp_mapper[offs_suffix]    
     freq = str(freq_number) + misc.freq_mapper[freq_suffix]
     amp = str(amp_number) + misc.current_amp_mapper[amp_suffix]
+    if dur is not 'inf':
+        dur_number, dur_suffix = get_number_and_suffix(duration)
+        if dur_suffix not in set(misc.time_to_sci_mapper.keys()):
+            raise KeyError('duration suffix {} is not allowed. (allowed are {})'.format(dur_suffix, set(misc.time_to_sci_mapper.keys())))
+        dur = str(dur_number) + misc.time_to_sci_mapper[dur_suffix]
+    ncyc = str(num_cycles)
+    dcyc = str(duty_cycles)
     waveform = waveform.lower()
-    if waveform == 'sine' or waveform == 'sin':
+    if waveform is 'sine' or waveform is 'sin':
         wf = 'SIN'
-    if waveform == 'square' or waveform == 'squ':
+    if waveform is 'square' or waveform is 'squ':
         wf = 'SQU'
-    if waveform == 'ramp':
+    if waveform is 'ramp':
         wf = "RAMP"
     command = """
     SOUR:WAVE:FUNC {}
     SOUR:WAVE:FREQ {}
     SOUR:WAVE:AMPL {}
     SOUR:WAVE:OFFS {}
+    SOUR:WAVE:DCYC {}
+    SOUR:WAVE:DUR:TIME {}
+    SOUR:WAVE:DUR:CYCL {}
     SOUR:WAVE:PMAR:STAT ON
     SOUR:WAVE:PMAR:OLIN 4
     SOUR:WAVE:RANG BEST
     SOUR:CURR:COMP {}
-    """.format(wf, freq, amp, offs, compliance)
+    """.format(wf, freq, amp, offs, dcyc, dur, ncyc, compliance)
     current_source.write(command)
     return
 
