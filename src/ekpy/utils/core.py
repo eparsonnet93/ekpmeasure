@@ -1,12 +1,14 @@
 import numpy as np
+import re
 import warnings
 
-__all__ = ('get_number_and_suffix', 'frequency_suffix_to_scientific_str', 'current_suffix_to_scientific_str', 
+__all__ = ('get_number_and_suffix', 'get_number_and_suffix_regex', 'period_str_to_freq_str', 'frequency_suffix_to_scientific_str', 'current_suffix_to_scientific_str', 
     'scientific_str_to_time_suffix', 'voltage_suffix_to_scientic_str', 'time_suffix_to_scientic_str', 
-    'voltage_amp_mapper', 'freq_mapper', 'current_amp_mapper', 'time_to_sci_mapper','sci_to_time_mapper',
+    'voltage_amp_mapper', 'freq_mapper','sci_to_freq_mapper', 'current_amp_mapper', 'time_to_sci_mapper','sci_to_time_mapper',
     '_get_number_and_suffix', 'scientific_notation', 'add_time_strings')
 
 freq_mapper = {'Mhz':'e6','khz':'e3', 'hz':'e0', 'mhz':'e-3', 'MHz':'e6', 'kHz':'e3','Hz':'e0', 'mHz':'e-3'}
+sci_to_freq_mapper = {'e6':'Mhz','e3':'kHz', 'e0':'Hz','e-3':'mHz'}
 current_amp_mapper = {'ma':'e-3', 'ua':'e-6', 'na':'e-9', 'mA':'e-3', 'uA':'e-6', 'nA':'e-9'}
 sci_to_time_mapper = {'e0':'s', 'e3':'ks', 'e-3':'ms', 'e-6':'us', 'e-9':'ns'}
 voltage_amp_mapper = {'mv':'e-3', 'v':'e0', 'mV':'e-3','V':'e0','kV':'e3','kv':'e3'}
@@ -22,6 +24,37 @@ def add_time_strings(str1, str2):
                   n2*float('1'+time_suffix_to_scientic_str(s2)))
     
     return str(np.round(float_total*unit_multiplier, 5)) + s1
+
+def period_str_to_freq_str(period_str):
+    """Converts a period string to a frequency string. *i.e* '10us' -> '100kHz'
+    
+    args:
+        period_str (str): Period string to convert
+
+    returns:
+        (str): Frequency string.
+    """
+    
+    period_number, period_suffix = get_number_and_suffix(period_str)
+    assert period_suffix in set(time_to_sci_mapper.keys()), "period_str {} not in time_to_sci_mapper. Allowed keys are {}".format(period_str, list(time_to_sci_mapper.keys()))
+    period_suffix = time_to_sci_mapper[period_suffix]
+    freq_number = 1/(float(str(period_number) + period_suffix))
+    print(freq_number)
+    freq_str = "{:3e}".format(freq_number)
+    freq_num, freq_suffix = get_number_and_suffix_regex(freq_str)
+    power = int(freq_suffix[1:])
+    if power % 3 != 0:
+        if power - 1 % 3 != 0:
+            power = power - 2
+            freq_num = freq_num*100
+        else:
+            power = power - 1
+            freq_num = freq_num*10
+        freq_suffix = 'e' + str(power)
+    print(power)
+    assert freq_suffix in set(sci_to_freq_mapper.keys()), "freq_suffix {} not in sci_to_freq_mapper. Allowed keys are {}".format(freq_suffix, list(sci_to_freq_mapper.keys()))
+    return str(round(freq_num)) + sci_to_freq_mapper[freq_suffix]
+
 
 def scientific_str_to_time_suffix(sci_str):
     """Convert scientific notation string to suffix for time. *i.e.* 'e-9' -> 'ns'
@@ -125,6 +158,32 @@ def _get_number_and_suffix2(string):
             iteration+=1
             
     return number, string[-(iteration + 1):]
+
+def get_number_and_suffix_regex(string):
+    """Return number and suffix of a string. e.g. 1khz will return (1.0, 'khz').
+    Formats python scientific notation to simplified form e.g. 3e+06 -> 3e6
+
+    args:
+        string (str): String.
+
+    returns:
+        (tuple): number, suffix
+
+
+    """
+    string = string.lower()
+    res = re.search(r'^[0-9.]+',string)
+    number = float(string[:res.end()])
+    suffix = string[res.end():]
+    res = re.search(r'[+-]', suffix)
+    if res != None:
+        index = res.start()
+        if suffix[index + 1] == '0':
+            suffix = suffix[:index + 1] + suffix[index + 2:]
+        if suffix[index] == '+':
+            suffix = suffix[:index] + suffix[index + 1:]
+    return number, suffix
+
 
 def _get_number_and_suffix(string):
     """Return number and suffix of a string. e.g. 1khz will return (1.0, 'khz').

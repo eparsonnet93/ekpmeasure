@@ -1,4 +1,3 @@
-import wave
 import numpy as np
 from .. import misc
 from ....utils import get_number_and_suffix
