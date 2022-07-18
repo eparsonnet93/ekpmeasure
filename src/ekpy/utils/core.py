@@ -171,7 +171,7 @@ def get_number_and_suffix_regex(string):
 
     """
     string = string.lower()
-    res = re.search(r'^[0-9.]+',string)
+    res = re.search(r'^[-0-9.]+',string)
     if res is None:
         raise ValueError('unable to find a valid number in str: {}'.format(string))
     number = float(string[:res.end()])
