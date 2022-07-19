@@ -43,7 +43,7 @@ def time_str_to_freq_str(time_str):
     freq_num, freq_suffix = get_number_and_suffix_regex(freq_str)
     power = int(freq_suffix[1:])
     if power % 3 != 0:
-        if power - 1 % 3 != 0:
+        if (power - 1) % 3 != 0:
             power = power - 2
             freq_num = freq_num*100
         else:
