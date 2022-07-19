@@ -1,6 +1,5 @@
 import numpy as np
-from .. import misc
-from ....utils import get_number_and_suffix
+from ....utils import get_number_and_suffix, freq_mapper, current_amp_mapper, time_to_sci_mapper
 
 __all__ = ('restore', 'set_output_waveform', 'set_wave_on', 'set_wave_off', 'is_on')
 
@@ -36,30 +35,31 @@ def set_output_waveform(current_source, frequency, amplitude, waveform='sin', of
     restore(current_source)
     
     freq_number, freq_suffix = get_number_and_suffix(frequency)
-    if freq_suffix not in set(misc.freq_mapper.keys()):
+    if freq_suffix not in set(freq_mapper.keys()):
         raise KeyError('frequency suffix {} is not allowed. (allowed are khz and hz)'.format(freq_suffix))
     amp_number, amp_suffix = get_number_and_suffix(amplitude)
-    if amp_suffix not in set(misc.current_amp_mapper.keys()):
+    if amp_suffix not in set(current_amp_mapper.keys()):
         raise KeyError('amplitude suffix {} is not allowed. (allowed are ma and ua)'.format(amp_suffix))
     offs_number, offs_suffix = get_number_and_suffix(offset)
-    if offs_suffix not in set(misc.current_amp_mapper.keys()):
-        raise KeyError('Offset suffix {} is not allowed. (allowed are {})'.format(offs_suffix,set(misc.current_amp_mapper.keys())))
-    offs = str(offs_number) + misc.current_amp_mapper[offs_suffix]    
-    freq = str(freq_number) + misc.freq_mapper[freq_suffix]
-    amp = str(amp_number) + misc.current_amp_mapper[amp_suffix]
-    if dur is not 'inf':
+    if offs_suffix not in set(current_amp_mapper.keys()):
+        raise KeyError('Offset suffix {} is not allowed. (allowed are {})'.format(offs_suffix,set(current_amp_mapper.keys())))
+    offs = str(offs_number) + current_amp_mapper[offs_suffix]    
+    freq = str(freq_number) + freq_mapper[freq_suffix]
+    amp = str(amp_number) + current_amp_mapper[amp_suffix]
+    dur = duration
+    if dur != 'inf':
         dur_number, dur_suffix = get_number_and_suffix(duration)
-        if dur_suffix not in set(misc.time_to_sci_mapper.keys()):
-            raise KeyError('duration suffix {} is not allowed. (allowed are {})'.format(dur_suffix, set(misc.time_to_sci_mapper.keys())))
-        dur = str(dur_number) + misc.time_to_sci_mapper[dur_suffix]
+        if dur_suffix not in set(time_to_sci_mapper.keys()):
+            raise KeyError('duration suffix {} is not allowed. (allowed are {})'.format(dur_suffix, set(time_to_sci_mapper.keys())))
+        dur = str(dur_number) + time_to_sci_mapper[dur_suffix]
     ncyc = str(num_cycles)
     dcyc = str(duty_cycles)
     waveform = waveform.lower()
-    if waveform is 'sine' or waveform is 'sin':
+    if waveform == 'sine' or waveform == 'sin':
         wf = 'SIN'
-    if waveform is 'square' or waveform is 'squ':
+    if waveform == 'square' or waveform == 'squ':
         wf = 'SQU'
-    if waveform is 'ramp':
+    if waveform == 'ramp':
         wf = "RAMP"
     command = """
     SOUR:WAVE:FUNC {}
