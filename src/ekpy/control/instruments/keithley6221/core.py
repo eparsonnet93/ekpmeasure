@@ -14,7 +14,7 @@ def restore(current_source):
     current_source.write("*rst")
     return
 
-def set_output_waveform(current_source, frequency, amplitude, waveform='sin', offset=0,
+def set_output_waveform(current_source, frequency, amplitude, waveform='sin', offset='0',
                         duty_cycles=50, duration='inf', num_cycles='inf', compliance=1.1):
     """Set the current source to output a specified waveform with specified amplitude and frequency.
     Does not start the current source. By default a sine wave with a 0mA DC offset.
