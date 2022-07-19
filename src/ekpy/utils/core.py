@@ -7,12 +7,12 @@ __all__ = ('get_number_and_suffix', 'get_number_and_suffix_regex', 'time_str_to_
     'voltage_amp_mapper', 'freq_mapper','sci_to_freq_mapper', 'current_amp_mapper', 'time_to_sci_mapper','sci_to_time_mapper',
     '_get_number_and_suffix', 'scientific_notation', 'add_time_strings')
 
-freq_mapper = {'Mhz':'e6','khz':'e3', 'hz':'e0', 'mhz':'e-3', 'MHz':'e6', 'kHz':'e3','Hz':'e0', 'mHz':'e-3'}
-sci_to_freq_mapper = {'e6':'Mhz','e3':'kHz', 'e0':'Hz','e-3':'mHz'}
-current_amp_mapper = {'ma':'e-3', 'ua':'e-6', 'na':'e-9', 'mA':'e-3', 'uA':'e-6', 'nA':'e-9'}
-sci_to_time_mapper = {'e0':'s', 'e3':'ks', 'e-3':'ms', 'e-6':'us', 'e-9':'ns'}
-voltage_amp_mapper = {'mv':'e-3', 'v':'e0', 'mV':'e-3','V':'e0','kV':'e3','kv':'e3'}
-time_to_sci_mapper = {'ms':'e-3', 'us':'e-6', 'ns':'e-9', 'ps':'e-12', 's':'e0', 'ks':'e3'}
+freq_mapper = {'Mhz':'e6','khz':'e3', 'hz':'e0', 'mhz':'e-3', 'MHz':'e6', 'kHz':'e3','Hz':'e0', 'mHz':'e-3', '':''}
+sci_to_freq_mapper = {'e6':'Mhz','e3':'kHz', 'e0':'Hz','e-3':'mHz', '':''}
+current_amp_mapper = {'ma':'e-3', 'ua':'e-6', 'na':'e-9', 'mA':'e-3', 'uA':'e-6', 'nA':'e-9', '':''}
+sci_to_time_mapper = {'e0':'s', 'e3':'ks', 'e-3':'ms', 'e-6':'us', 'e-9':'ns', '':''}
+voltage_amp_mapper = {'mv':'e-3', 'v':'e0', 'mV':'e-3','V':'e0','kV':'e3','kv':'e3', '':''}
+time_to_sci_mapper = {'ms':'e-3', 'us':'e-6', 'ns':'e-9', 'ps':'e-12', 's':'e0', 'ks':'e3', '':''}
 
 def add_time_strings(str1, str2):
     """Returns a string in units of str1"""
