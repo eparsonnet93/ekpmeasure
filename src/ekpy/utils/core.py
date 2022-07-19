@@ -132,7 +132,7 @@ def get_number_and_suffix(string):
 
 
     """
-    return _get_number_and_suffix2(string)
+    return get_number_and_suffix_regex(string)
 
 def _get_number_and_suffix2(string):
     """Return number and suffix of a string. e.g. 1khz will return (1.0, 'khz').

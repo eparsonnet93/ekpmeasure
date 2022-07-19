@@ -2,7 +2,7 @@ import numpy as np
 import warnings
 
 __all__ = ('get_number_and_suffix', '_get_number_and_suffix','freq_mapper', 'current_amp_mapper', 
-    'sci_to_time_mapper', 'time_to_sci_mapper' '_scientific_notation', 'voltage_amp_mapper')
+    'sci_to_time_mapper', 'time_to_sci_mapper', '_scientific_notation', 'voltage_amp_mapper')
 
 freq_mapper = {'Mhz':'e6','khz':'e3', 'hz':'e0'}
 current_amp_mapper = {'ma':'e-3', 'ua':'e-6'}
