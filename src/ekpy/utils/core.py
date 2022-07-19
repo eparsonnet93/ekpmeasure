@@ -36,7 +36,7 @@ def time_str_to_freq_str(time_str):
     """
     
     period_number, period_suffix = get_number_and_suffix(time_str)
-    assert period_suffix in set(time_to_sci_mapper.keys()), "time_str {} not in time_to_sci_mapper. Allowed keys are {}".format(period_str, list(time_to_sci_mapper.keys()))
+    assert period_suffix in set(time_to_sci_mapper.keys()), "time_str {} not in time_to_sci_mapper. Allowed keys are {}".format(time_str, list(time_to_sci_mapper.keys()))
     period_suffix = time_to_sci_mapper[period_suffix]
     freq_number = 1/(float(str(period_number) + period_suffix))
     freq_str = "{:3e}".format(freq_number)
