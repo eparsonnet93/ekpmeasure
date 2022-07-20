@@ -5,8 +5,6 @@ from ....utils import get_number_and_suffix
 __all__ = ('restore', 'is_on', 'get_voltage')
 
 
-#want to add a setup for voltage measurement command, and a setup for temperature measurement command
-
 
 def get_voltage(nano_voltmeter):
     """Measures the nanovoltmeter once by first resetting it to idle state
@@ -22,7 +20,6 @@ def get_voltage(nano_voltmeter):
     nano_voltmeter.write(":sens:chan 1")
     nano_voltmeter.write("sens:volt:chan1:rang:auto on")
 
-    #try using measure instead aka :MEASURE?
     return nano_voltmeter.query(":read?").replace('\n', '')
 
 
