@@ -2,7 +2,7 @@ import numpy as np
 from ....utils import get_number_and_suffix, freq_mapper, current_amp_mapper, time_to_sci_mapper
 import warnings
 
-__all__ = ('restore', 'set_output_waveform', 'set_wave_on', 'set_wave_off', 'is_on')
+__all__ = ('restore', 'set_output_waveform', 'set_output_sin', 'set_wave_on', 'set_wave_off', 'is_on')
 
 def restore(current_source):
     """Restore settings on current source.
@@ -16,7 +16,7 @@ def restore(current_source):
     return
 
 
-def set_output_sin(current_source, frequency, amplitude, compliance = 1.1):
+def set_output_sin(current_source, frequency, amplitude, compliance=1.1):
     """Set the current source to output a sin waveform with specified amplitude and frequency. Does not start the current source.
     args:
         current_source (pyvisa.resources.gpib.GPIBInstrument): Keithley 6221
@@ -24,7 +24,7 @@ def set_output_sin(current_source, frequency, amplitude, compliance = 1.1):
         amplitude (str): Amplitude. Allowed suffix 'ua', 'ma'.
         compliance (float): Compliance in V. 
     """
-    set_output_waveform(current_source, frequency, amplitude, waveform='sin', compliance=1.1)
+    set_output_waveform(current_source, frequency, amplitude, waveform='sin', compliance=compliance)
     warnings.showwarning("set_output_sin is deprecated. Use set_output_waveform instead.", DeprecationWarning, '', 0)
     return
 
