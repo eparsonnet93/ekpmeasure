@@ -72,11 +72,17 @@ We welcome new contributors of all experience levels. Please reach out directly 
 
 # Change log
 
+### Version 0.1.14
+
+With help form Geo!
+
+- Updates to utils to make to improve the function `get_number_and_suffix` + other updates to include additional instruments and fixes.
+
 ### Version 0.1.13
 
 - Can now group Data. `data.groupby`
 - Can now remove nans from data. `data.dropna`
-- Improvements to file management in control, saving, and more appropriate trial incrementing in `control.experiment`4
+- Improvements to file management in control, saving, and more appropriate trial incrementing in `control.experiment`
 - Functions used in `data.apply` should no longer require the use of iterable data arrays. Please raise an issue if one occurs.
 
 ### Version 0.1.12
