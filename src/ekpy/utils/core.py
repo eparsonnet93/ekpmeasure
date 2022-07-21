@@ -2,7 +2,7 @@ import numpy as np
 import re
 import warnings
 
-__all__ = ('get_number_and_suffix', 'get_number_and_suffix_regex', 'time_str_to_freq_str', 'frequency_suffix_to_scientific_str', 'current_suffix_to_scientific_str', 
+__all__ = ('get_number_and_suffix', 'time_str_to_freq_str', 'frequency_suffix_to_scientific_str', 'current_suffix_to_scientific_str', 
     'scientific_str_to_time_suffix', 'voltage_suffix_to_scientic_str', 'time_suffix_to_scientic_str', 
     'voltage_amp_mapper', 'freq_mapper','sci_to_freq_mapper', 'current_amp_mapper', 'time_to_sci_mapper','sci_to_time_mapper',
     '_get_number_and_suffix', 'scientific_notation', 'add_time_strings')
