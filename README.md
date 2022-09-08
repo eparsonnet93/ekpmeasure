@@ -200,4 +200,4 @@ Please cite this work following the [CITATION.cff](https://github.com/eparsonnet
 
 # Cited By
 
-1. E. Parsonnet, L. Caretta, V. Nagarajan, H. Zhang, H. Taghinejad, P. Behera, X. Huang, P. Kavle, A. Fernandez, D. Nikonov, H. Li, I. Young, J. Analytis, and R. Ramesh, *Non-Volatile Electric Field Control of Thermal Magnons in the Absence of an Applied Magnetic Field*, Arxiv (2022).
+1. E. Parsonnet *et. al.* NonVolatile Electric Field Control of Thermal Magnons in the Absence of an Applied Magnetic Field, *Phys. Rev. Lett* **129**, 087601 (2022).
